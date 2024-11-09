@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@nivo/calendar": "^0.87.0",
+    "@nivo/core": "^0.87.0",
+    "@nivo/heatmap": "^0.87.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-aspect-ratio": "^1.1.0",
@@ -61,6 +64,7 @@
     "react-hook-form": "^7.53.1",
     "react-resizable-panels": "^2.1.4",
     "recharts": "^2.13.3",
+    "regression": "^2.0.1",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
