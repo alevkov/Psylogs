@@ -1,0 +1,91 @@
+@import url('https://fonts.cdnfonts.com/css/jetbrains-mono-2');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-family: "JetBrains Mono", monospace;
+    --line-height: 1.20rem;
+    --border-thickness: 2px;
+
+    /* Preserve shadcn variables but update with our new technical aesthetic */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --border: 0 0% 0%;
+    --input: 0 0% 90%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 0 0% 0%;
+    --radius: 0;
+  }
+
+  * {
+    @apply border-border box-border;
+    font-family: var(--font-family);
+    line-height: var(--line-height);
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-style: normal;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-size: 16px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 800;
+    margin: calc(var(--line-height) * 2) 0 var(--line-height);
+    line-height: var(--line-height);
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: calc(2 * var(--line-height));
+    margin-bottom: calc(var(--line-height) * 2);
+    text-transform: uppercase;
+  }
+
+  h2 {
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  @media screen and (max-width: 480px) {
+    :root {
+      font-size: 14px;
+    }
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .card {
+    border: var(--border-thickness) solid hsl(var(--border));
+    padding: calc(var(--line-height) - var(--border-thickness)) 1ch;
+  }
+
+  .badge {
+    font-family: var(--font-family);
+    font-weight: 600;
+    border: var(--border-thickness) solid currentColor;
+  }
+
+  .button {
+    font-family: var(--font-family);
+    font-weight: 600;
+    border: var(--border-thickness) solid currentColor;
+    text-transform: uppercase;
+  }
+}

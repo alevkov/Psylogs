@@ -1,0 +1,59 @@
+modules = ["nodejs-20", "web"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+deploymentTarget = "cloudrun"
+build = ["npm", "run", "build"]
+run = ["sh", "-c", "NODE_ENV=development tsx watch server/index.ts"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 24678
+externalPort = 3000
+
+[packager]
+language = "nodejs"
+  [packager.features]
+  packageSearch = true
+  guessImports = true
+  enabledForHosting = false
+
+[languages]
+  [languages.javascript]
+  pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+    [languages.javascript.languageServer]
+    start = "typescript-language-server --stdio"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Development Server"
+
+[[workflows.workflow]]
+name = "Development Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "NODE_ENV=development tsx watch server/index.ts"
+waitForPort = 5000
