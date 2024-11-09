@@ -109,6 +109,11 @@ export function DoseStats() {
           return acc;
         }, {} as Record<string, number>);
 
+        // Sort route distribution by frequency
+        const sortedRouteDistribution = Object.entries(routeCount)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
         // Calculate monthly trends
         const sixMonthsAgo = subMonths(new Date(), 6);
         const monthRange = eachMonthOfInterval({
@@ -171,9 +176,7 @@ export function DoseStats() {
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => b.value - a.value)
             .slice(0, 10),
-          routeDistribution: Object.entries(routeCount)
-            .map(([name, value]) => ({ name, value }))
-            .sort((a, b) => b.value - a.value),
+          routeDistribution: sortedRouteDistribution,
           timeDistribution: Object.entries(timeCount)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => a.name.localeCompare(b.name)),
@@ -235,9 +238,11 @@ export function DoseStats() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="font-semibold">Active Period</CardHeader>
+            <CardHeader className="font-semibold">Most Frequent Method</CardHeader>
             <CardContent>
-              <span className="text-2xl">{stats.monthlyTrends.length} months</span>
+              <span className="text-2xl">
+                {stats.routeDistribution[0]?.name || 'None'}
+              </span>
             </CardContent>
           </Card>
         </div>
@@ -245,18 +250,16 @@ export function DoseStats() {
         {/* Calendar View */}
         <Card>
           <CardHeader className="font-semibold">Dose Frequency Calendar</CardHeader>
-          <CardContent className="h-[200px] w-full">
-            <div className="w-full h-full">
+          <CardContent>
+            <div className="w-full" style={{ height: '200px' }}>
               <ResponsiveContainer width="100%" height={200}>
                 <Calendar
                   data={stats.calendarData}
                   from={subMonths(new Date(), 12)}
                   to={new Date()}
-                  width={900}
-                  height={200}
                   emptyColor="#eeeeee"
                   colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
-                  margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                  margin={{ top: 20, right: 40, bottom: 40, left: 40 }}
                   yearSpacing={40}
                   monthBorderColor="#ffffff"
                   dayBorderWidth={2}
