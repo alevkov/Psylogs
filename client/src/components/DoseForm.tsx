@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ADMINISTRATION_METHODS } from '@/lib/constants';
 import { Loader2 } from 'lucide-react';
+import { useDoseContext } from '@/contexts/DoseContext';
 
 const formSchema = z.object({
   doseString: z.string().min(1, 'Please enter a dose'),
@@ -30,6 +31,8 @@ export function DoseForm() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
+  const { triggerUpdate } = useDoseContext();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -42,6 +45,7 @@ export function DoseForm() {
       await addDose(parsed);
       form.reset();
       setSubmitStatus('success');
+      triggerUpdate(); // Trigger update after successful dose addition
       toast({
         title: navigator.onLine ? "Dose logged successfully" : "Dose queued for sync",
         description: navigator.onLine ? undefined : "Will be synced when you're back online",
@@ -56,12 +60,11 @@ export function DoseForm() {
       });
     } finally {
       setIsSubmitting(false);
-      // Reset status after animation
       setTimeout(() => setSubmitStatus('idle'), 2000);
     }
   };
 
-  // Handle input suggestions
+  // Rest of the component remains the same
   useEffect(() => {
     const doseString = form.watch('doseString')?.toLowerCase() || '';
     const words = doseString.split(' ');
@@ -72,15 +75,12 @@ export function DoseForm() {
       return;
     }
 
-    // Suggest substances
     if (words.length <= 2) {
       const substanceSuggestions = COMMON_SUBSTANCES
         .filter(s => s.startsWith(lastWord))
         .slice(0, 5);
       setSuggestions(substanceSuggestions);
-    }
-    // Suggest routes
-    else {
+    } else {
       const routeSuggestions = Object.values(ADMINISTRATION_METHODS)
         .flat()
         .filter(r => r.startsWith(lastWord))
@@ -88,7 +88,6 @@ export function DoseForm() {
       setSuggestions(routeSuggestions);
     }
 
-    // Show unit conversion preview
     const match = doseString.match(/(\d+\.?\d*)(ug|g)\s/);
     if (match) {
       const [, amount, unit] = match;

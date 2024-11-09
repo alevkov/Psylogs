@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useDoseContext } from '@/contexts/DoseContext';
 
 // Generate consistent colors for substances
 const getSubstanceColor = (substance: string) => {
@@ -24,6 +25,7 @@ export function DoseHistory() {
   const [loading, setLoading] = useState(true);
   const [undoStack, setUndoStack] = useState<DoseEntry[]>([]);
   const { toast } = useToast();
+  const { updateTrigger } = useDoseContext();
 
   useEffect(() => {
     const loadDoses = async () => {
@@ -37,7 +39,7 @@ export function DoseHistory() {
       }
     };
     loadDoses();
-  }, []);
+  }, [updateTrigger]); // Add updateTrigger as dependency
 
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
@@ -90,7 +92,7 @@ export function DoseHistory() {
           <AnimatePresence>
             {doses.map((dose, index) => (
               <motion.div
-                key={dose.id}
+                key={dose.id || index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}

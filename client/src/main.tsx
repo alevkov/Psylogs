@@ -6,6 +6,7 @@ import { SWRConfig } from "swr";
 import { fetcher } from "./lib/fetcher";
 import { Toaster } from "@/components/ui/toaster";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { DoseProvider } from "@/contexts/DoseContext";
 
 // Pages
 import HomePage from "./pages/index";
@@ -48,14 +49,16 @@ function Layout({ children }: { children: React.ReactNode }) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <SWRConfig value={{ fetcher }}>
-      <Layout>
-        <Switch>
-          <Route path="/" component={HomePage} />
-          <Route path="/history" component={HistoryPage} />
-          <Route path="/settings" component={SettingsPage} />
-          <Route>404 Page Not Found</Route>
-        </Switch>
-      </Layout>
+      <DoseProvider>
+        <Layout>
+          <Switch>
+            <Route path="/" component={HomePage} />
+            <Route path="/history" component={HistoryPage} />
+            <Route path="/settings" component={SettingsPage} />
+            <Route>404 Page Not Found</Route>
+          </Switch>
+        </Layout>
+      </DoseProvider>
     </SWRConfig>
   </StrictMode>
 );
