@@ -5,7 +5,11 @@ interface DoseLogDB extends DBSchema {
   doses: {
     key: number;
     value: DoseEntry;
-    indexes: { 'by-date': Date };
+    indexes: { 
+      'by-date': Date;
+      'by-substance': string;
+      'by-route': string;
+    };
   };
 }
 
@@ -20,6 +24,8 @@ export async function getDB() {
           autoIncrement: true,
         });
         store.createIndex('by-date', 'timestamp');
+        store.createIndex('by-substance', 'substance');
+        store.createIndex('by-route', 'route');
       },
     });
   }
@@ -28,12 +34,41 @@ export async function getDB() {
 
 export async function addDose(dose: Omit<DoseEntry, 'id'>) {
   const db = await getDB();
-  return db.add('doses', { ...dose, timestamp: new Date() });
+  const id = await db.add('doses', { ...dose, timestamp: new Date() });
+  
+  // Register for background sync if supported
+  if ('serviceWorker' in navigator && 'sync' in registration) {
+    try {
+      await registration.sync.register('sync-doses');
+    } catch (err) {
+      console.error('Background sync registration failed:', err);
+    }
+  }
+  
+  return id;
 }
 
 export async function getDoses() {
   const db = await getDB();
   return db.getAllFromIndex('doses', 'by-date');
+}
+
+export async function getDosesBySubstance(substance: string) {
+  const db = await getDB();
+  return db.getAllFromIndex('doses', 'by-substance', substance);
+}
+
+export async function getDosesByRoute(route: string) {
+  const db = await getDB();
+  return db.getAllFromIndex('doses', 'by-route', route);
+}
+
+export async function getDosesByDateRange(startDate: Date, endDate: Date) {
+  const db = await getDB();
+  const doses = await db.getAllFromIndex('doses', 'by-date');
+  return doses.filter(dose => 
+    dose.timestamp >= startDate && dose.timestamp <= endDate
+  );
 }
 
 export async function clearDoses() {
