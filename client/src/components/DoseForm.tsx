@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { parseDoseString } from '@/lib/dose-parser';
@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { ADMINISTRATION_METHODS } from '@/lib/constants';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   doseString: z.string().min(1, 'Please enter a dose'),
@@ -27,6 +28,7 @@ export function DoseForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewConversion, setPreviewConversion] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,16 +36,19 @@ export function DoseForm() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
+    setSubmitStatus('idle');
     try {
       const parsed = parseDoseString(data.doseString);
       await addDose(parsed);
       form.reset();
+      setSubmitStatus('success');
       toast({
         title: navigator.onLine ? "Dose logged successfully" : "Dose queued for sync",
         description: navigator.onLine ? undefined : "Will be synced when you're back online",
         duration: 2000,
       });
     } catch (error) {
+      setSubmitStatus('error');
       toast({
         title: "Error logging dose",
         description: error instanceof Error ? error.message : "Unknown error occurred",
@@ -51,6 +56,8 @@ export function DoseForm() {
       });
     } finally {
       setIsSubmitting(false);
+      // Reset status after animation
+      setTimeout(() => setSubmitStatus('idle'), 2000);
     }
   };
 
@@ -114,44 +121,75 @@ export function DoseForm() {
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
+            <motion.div 
+              className="space-y-2"
+              animate={submitStatus}
+              variants={{
+                success: { scale: [1, 1.02, 1], borderColor: ['#ccc', '#22c55e', '#ccc'] },
+                error: { x: [0, -10, 10, -10, 10, 0] },
+              }}
+            >
               <Input
                 placeholder="20mg substance route"
                 {...form.register('doseString')}
-                className="w-full"
+                className="w-full transition-all"
+                disabled={isSubmitting}
               />
-              {suggestions.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {suggestions.map((suggestion) => (
-                    <Button
-                      key={suggestion}
-                      variant="outline"
-                      size="sm"
-                      type="button"
-                      onClick={() => applySuggestion(suggestion)}
-                    >
-                      {suggestion}
-                    </Button>
-                  ))}
-                </div>
-              )}
+              <AnimatePresence>
+                {suggestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex flex-wrap gap-2"
+                  >
+                    {suggestions.map((suggestion) => (
+                      <Button
+                        key={suggestion}
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onClick={() => applySuggestion(suggestion)}
+                        className="hover:scale-105 transition-transform"
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {previewConversion && (
-                <p className="text-sm text-muted-foreground">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-muted-foreground"
+                >
                   {previewConversion}
-                </p>
+                </motion.p>
               )}
               {form.formState.errors.doseString && (
-                <p className="text-sm text-destructive">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-destructive"
+                >
                   {form.formState.errors.doseString.message}
-                </p>
+                </motion.p>
               )}
-            </div>
+            </motion.div>
             <Button 
               type="submit" 
-              className="w-full"
+              className="w-full relative"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Logging...' : 'Log Dose'}
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging...
+                </span>
+              ) : (
+                'Log Dose'
+              )}
             </Button>
           </form>
         </CardContent>
