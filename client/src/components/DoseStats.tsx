@@ -35,7 +35,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, TrendingDown, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from '@nivo/calendar';
-import { HeatMap } from '@nivo/heatmap';
 import { 
   calculateTimeCorrelations,
   analyzeUsagePatterns,
@@ -246,22 +245,24 @@ export function DoseStats() {
         {/* Calendar View */}
         <Card>
           <CardHeader className="font-semibold">Dose Frequency Calendar</CardHeader>
-          <CardContent style={{ height: '160px' }}>
-            <div style={{ height: '160px', width: '100%' }}>
-              <Calendar
-                data={stats.calendarData}
-                from={subMonths(new Date(), 12)}
-                to={new Date()}
-                width={800}
-                height={160}
-                emptyColor="#eeeeee"
-                colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-                yearSpacing={40}
-                monthBorderColor="#ffffff"
-                dayBorderWidth={2}
-                dayBorderColor="#ffffff"
-              />
+          <CardContent className="h-[200px] w-full">
+            <div className="w-full h-full">
+              <ResponsiveContainer width="100%" height={200}>
+                <Calendar
+                  data={stats.calendarData}
+                  from={subMonths(new Date(), 12)}
+                  to={new Date()}
+                  width={900}
+                  height={200}
+                  emptyColor="#eeeeee"
+                  colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
+                  margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                  yearSpacing={40}
+                  monthBorderColor="#ffffff"
+                  dayBorderWidth={2}
+                  dayBorderColor="#ffffff"
+                />
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>

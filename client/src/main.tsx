@@ -20,23 +20,20 @@ function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link 
-                to="/" 
-                className="font-semibold hover:text-primary transition-colors cursor-pointer"
-              >
-                Home
+              <Link href="/">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  Home
+                </div>
               </Link>
-              <Link 
-                to="/history" 
-                className="font-semibold hover:text-primary transition-colors cursor-pointer"
-              >
-                History
+              <Link href="/history">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  History
+                </div>
               </Link>
-              <Link 
-                to="/settings" 
-                className="font-semibold hover:text-primary transition-colors cursor-pointer"
-              >
-                Settings
+              <Link href="/settings">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  Settings
+                </div>
               </Link>
             </div>
             <ConnectionStatus />
