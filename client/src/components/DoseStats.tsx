@@ -31,7 +31,7 @@ import {
   addDays
 } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
+import { AlertTriangle, TrendingDown, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from '@nivo/calendar';
 import { HeatMap } from '@nivo/heatmap';
@@ -52,7 +52,6 @@ const COLORS = [
 ];
 
 interface Stats {
-  // ... existing stats interface ...
   timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
   usagePatterns: ReturnType<typeof analyzeUsagePatterns>;
   usageForecasts: ReturnType<typeof generateUsageForecast>;
@@ -61,9 +60,20 @@ interface Stats {
   recoveryPeriods: ReturnType<typeof calculateRecoveryPeriods>;
 }
 
+const getTrendIcon = (trend: string) => {
+  switch (trend) {
+    case 'increasing':
+      return <TrendingUp className="h-4 w-4 text-green-500" />;
+    case 'decreasing':
+      return <TrendingDown className="h-4 w-4 text-red-500" />;
+    default:
+      return <ArrowRight className="h-4 w-4 text-yellow-500" />;
+  }
+};
+
 export function DoseStats() {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
-    // ... existing initial state ...
     timeCorrelations: [],
     usagePatterns: [],
     usageForecasts: [],
@@ -74,31 +84,55 @@ export function DoseStats() {
 
   useEffect(() => {
     const calculateStats = async () => {
-      const doses = await getDoses();
-      
-      // Calculate all statistics
-      const timeCorrelations = calculateTimeCorrelations(doses);
-      const usagePatterns = analyzeUsagePatterns(doses);
-      const usageForecasts = generateUsageForecast(doses);
-      const substanceInteractions = analyzeSubstanceInteractions(doses);
-      const calendarData = generateCalendarData(doses);
-      const recoveryPeriods = calculateRecoveryPeriods(doses);
+      try {
+        setLoading(true);
+        const doses = await getDoses();
+        
+        // Calculate all statistics
+        const timeCorrelations = calculateTimeCorrelations(doses);
+        const usagePatterns = analyzeUsagePatterns(doses);
+        const usageForecasts = generateUsageForecast(doses);
+        const substanceInteractions = analyzeSubstanceInteractions(doses);
+        const calendarData = generateCalendarData(doses);
+        const recoveryPeriods = calculateRecoveryPeriods(doses);
 
-      // ... existing stats calculations ...
-
-      setStats({
-        // ... existing stats ...
-        timeCorrelations,
-        usagePatterns,
-        usageForecasts,
-        substanceInteractions,
-        calendarData,
-        recoveryPeriods
-      });
+        setStats({
+          timeCorrelations,
+          usagePatterns,
+          usageForecasts,
+          substanceInteractions,
+          calendarData,
+          recoveryPeriods
+        });
+      } catch (error) {
+        console.error('Error calculating stats:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     calculateStats();
   }, []);
+
+  if (loading) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-8 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!stats.calendarData.length) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-8 text-center text-muted-foreground">
+          No dose data available
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <motion.div
@@ -150,7 +184,7 @@ export function DoseStats() {
       <Card>
         <CardHeader className="font-semibold">Dose Frequency Calendar</CardHeader>
         <CardContent style={{ height: '200px' }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '200px', width: '100%' }}>
             <Calendar
               data={stats.calendarData}
               from={subMonths(new Date(), 12)}
@@ -163,7 +197,7 @@ export function DoseStats() {
               dayBorderWidth={2}
               dayBorderColor="#ffffff"
             />
-          </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
@@ -247,10 +281,6 @@ export function DoseStats() {
           </div>
         </CardContent>
       </Card>
-
-      {/* ... existing visualization components ... */}
     </motion.div>
   );
 }
-
-// ... rest of the file remains the same ...
