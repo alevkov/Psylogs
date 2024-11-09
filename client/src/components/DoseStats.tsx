@@ -15,15 +15,24 @@ import {
   YAxis, 
   Tooltip, 
   ResponsiveContainer,
-  Legend
+  Legend,
+  CartesianGrid
 } from 'recharts';
-import { format, startOfMonth, eachMonthOfInterval, subMonths } from 'date-fns';
+import { format, startOfMonth, eachMonthOfInterval, subMonths, differenceInHours } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 // Generate colors for charts
 const COLORS = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD',
   '#D4A5A5', '#9E9E9E', '#58B19F', '#FFD93D', '#6C5B7B'
 ];
+
+// Safety thresholds (in hours)
+const SAFETY_THRESHOLDS: Record<string, number> = {
+  default: 24, // Default minimum hours between doses
+  high_risk: 12 // High-risk threshold for frequent dosing
+};
 
 interface Stats {
   totalDoses: number;
@@ -34,6 +43,21 @@ interface Stats {
   monthlyTrends: { name: string; doses: number }[];
   routeDistribution: { name: string; value: number }[];
   timeDistribution: { name: string; count: number }[];
+  safetyAlerts: Array<{
+    substance: string;
+    message: string;
+    severity: 'warning' | 'error';
+  }>;
+  frequencyBySubstance: Array<{
+    substance: string;
+    daily: number;
+    weekly: number;
+    monthly: number;
+  }>;
+  combinationPatterns: Array<{
+    combination: string;
+    count: number;
+  }>;
 }
 
 export function DoseStats() {
@@ -46,15 +70,90 @@ export function DoseStats() {
     monthlyTrends: [],
     routeDistribution: [],
     timeDistribution: [],
+    safetyAlerts: [],
+    frequencyBySubstance: [],
+    combinationPatterns: []
   });
 
   useEffect(() => {
     const calculateStats = async () => {
       const doses = await getDoses();
+      
+      // Basic stats calculation
       const substances = new Set(doses.map(d => d.substance));
       const total = doses.reduce((sum, d) => sum + d.amount, 0);
-      
-      // Calculate recent activity (last 7 days)
+
+      // Safety analysis
+      const safetyAlerts = [];
+      const now = new Date();
+      const recentDoses = doses.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+
+      // Check for frequent dosing
+      const substanceLastDoses = new Map<string, Date>();
+      for (const dose of recentDoses) {
+        const lastDose = substanceLastDoses.get(dose.substance);
+        if (lastDose) {
+          const hoursSinceLastDose = differenceInHours(now, new Date(dose.timestamp));
+          const threshold = SAFETY_THRESHOLDS.default;
+          
+          if (hoursSinceLastDose < threshold) {
+            safetyAlerts.push({
+              substance: dose.substance,
+              message: `Frequent dosing detected: ${hoursSinceLastDose} hours between doses`,
+              severity: hoursSinceLastDose < SAFETY_THRESHOLDS.high_risk ? 'error' : 'warning'
+            });
+          }
+        }
+        substanceLastDoses.set(dose.substance, new Date(dose.timestamp));
+      }
+
+      // Calculate frequency by substance
+      const frequencyBySubstance = Array.from(substances).map(substance => {
+        const substanceDoses = doses.filter(d => d.substance === substance);
+        const now = new Date();
+        const daily = substanceDoses.filter(d => 
+          differenceInHours(now, new Date(d.timestamp)) <= 24
+        ).length;
+        const weekly = substanceDoses.filter(d => 
+          differenceInHours(now, new Date(d.timestamp)) <= 24 * 7
+        ).length;
+        const monthly = substanceDoses.filter(d => 
+          differenceInHours(now, new Date(d.timestamp)) <= 24 * 30
+        ).length;
+
+        return { substance, daily, weekly, monthly };
+      }).sort((a, b) => b.monthly - a.monthly);
+
+      // Calculate combination patterns
+      const combinations = new Map<string, number>();
+      const timeWindow = 24; // hours
+      for (let i = 0; i < doses.length; i++) {
+        const currentDose = doses[i];
+        const windowStart = new Date(currentDose.timestamp);
+        const windowEnd = new Date(windowStart.getTime() + timeWindow * 60 * 60 * 1000);
+        
+        const concurrent = doses.filter(d => 
+          d !== currentDose &&
+          new Date(d.timestamp) >= windowStart &&
+          new Date(d.timestamp) <= windowEnd
+        );
+
+        for (const other of concurrent) {
+          const combo = [currentDose.substance, other.substance]
+            .sort()
+            .join(' + ');
+          combinations.set(combo, (combinations.get(combo) || 0) + 1);
+        }
+      }
+
+      const combinationPatterns = Array.from(combinations.entries())
+        .map(([combination, count]) => ({ combination, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      // Original stats calculations...
       const last7Days = doses
         .filter(d => d.timestamp > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
         .reduce((acc, dose) => {
@@ -63,13 +162,11 @@ export function DoseStats() {
           return acc;
         }, {} as Record<string, number>);
 
-      // Calculate substance distribution
       const substanceCount = doses.reduce((acc, dose) => {
         acc[dose.substance] = (acc[dose.substance] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // Calculate monthly trends
       const sixMonthsAgo = subMonths(new Date(), 6);
       const monthRange = eachMonthOfInterval({
         start: sixMonthsAgo,
@@ -86,13 +183,11 @@ export function DoseStats() {
         };
       });
 
-      // Calculate route distribution
       const routeCount = doses.reduce((acc, dose) => {
         acc[dose.route] = (acc[dose.route] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      // Calculate time of day distribution
       const timeCount = doses.reduce((acc, dose) => {
         const hour = new Date(dose.timestamp).getHours();
         const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
@@ -116,6 +211,9 @@ export function DoseStats() {
         timeDistribution: Object.entries(timeCount)
           .map(([name, count]) => ({ name, count }))
           .sort((a, b) => a.name.localeCompare(b.name)),
+        safetyAlerts,
+        frequencyBySubstance,
+        combinationPatterns
       });
     };
 
@@ -129,6 +227,20 @@ export function DoseStats() {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
+      {/* Safety Alerts */}
+      {stats.safetyAlerts.length > 0 && (
+        <div className="space-y-2">
+          {stats.safetyAlerts.map((alert, index) => (
+            <Alert key={index} variant={alert.severity === 'error' ? 'destructive' : 'default'}>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Safety Alert - {alert.substance}</AlertTitle>
+              <AlertDescription>{alert.message}</AlertDescription>
+            </Alert>
+          ))}
+        </div>
+      )}
+
+      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="font-semibold">Total Doses</CardHeader>
@@ -150,6 +262,7 @@ export function DoseStats() {
         </Card>
       </div>
 
+      {/* Detailed Charts */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* Monthly Trends */}
         <Card>
@@ -157,6 +270,7 @@ export function DoseStats() {
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.monthlyTrends}>
+                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
@@ -203,6 +317,7 @@ export function DoseStats() {
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.routeDistribution}>
+                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
@@ -222,6 +337,7 @@ export function DoseStats() {
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={stats.timeDistribution}>
+                <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
@@ -235,6 +351,41 @@ export function DoseStats() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
+        {/* Frequency Analysis */}
+        <Card>
+          <CardHeader className="font-semibold">Substance Frequency</CardHeader>
+          <CardContent className="h-[300px] overflow-auto">
+            <div className="space-y-4">
+              {stats.frequencyBySubstance.map((item, index) => (
+                <div key={index} className="space-y-2">
+                  <h4 className="font-medium">{item.substance}</h4>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>Daily: {item.daily}</div>
+                    <div>Weekly: {item.weekly}</div>
+                    <div>Monthly: {item.monthly}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Combination Patterns */}
+        <Card>
+          <CardHeader className="font-semibold">Common Combinations (24h window)</CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.combinationPatterns} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="combination" type="category" width={150} />
+                <Tooltip />
+                <Bar dataKey="count" fill="hsl(var(--primary))" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Activity */}
@@ -243,6 +394,7 @@ export function DoseStats() {
         <CardContent className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.recentActivity}>
+              <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
