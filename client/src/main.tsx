@@ -17,14 +17,14 @@ function Layout({ children }: { children: React.ReactNode }) {
       <nav className="border-b">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center space-x-4">
-            <Link href="/">
-              <a className="font-semibold">Home</a>
+            <Link href="/" className="font-semibold">
+              Home
             </Link>
-            <Link href="/history">
-              <a className="font-semibold">History</a>
+            <Link href="/history" className="font-semibold">
+              History
             </Link>
-            <Link href="/settings">
-              <a className="font-semibold">Settings</a>
+            <Link href="/settings" className="font-semibold">
+              Settings
             </Link>
           </div>
         </div>
