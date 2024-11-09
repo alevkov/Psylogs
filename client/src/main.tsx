@@ -5,6 +5,7 @@ import "./index.css";
 import { SWRConfig } from "swr";
 import { fetcher } from "./lib/fetcher";
 import { Toaster } from "@/components/ui/toaster";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 // Pages
 import HomePage from "./pages/index";
@@ -16,16 +17,19 @@ function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       <nav className="border-b">
         <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center space-x-4">
-            <Link href="/" className="font-semibold hover:text-primary transition-colors">
-              Home
-            </Link>
-            <Link href="/history" className="font-semibold hover:text-primary transition-colors">
-              History
-            </Link>
-            <Link href="/settings" className="font-semibold hover:text-primary transition-colors">
-              Settings
-            </Link>
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="font-semibold hover:text-primary transition-colors">
+                Home
+              </Link>
+              <Link href="/history" className="font-semibold hover:text-primary transition-colors">
+                History
+              </Link>
+              <Link href="/settings" className="font-semibold hover:text-primary transition-colors">
+                Settings
+              </Link>
+            </div>
+            <ConnectionStatus />
           </div>
         </div>
       </nav>
