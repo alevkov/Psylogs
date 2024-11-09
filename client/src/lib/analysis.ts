@@ -277,20 +277,23 @@ export function generateCalendarData(doses: DoseEntry[]) {
   const startDate = subMonths(new Date(), 12); // Last 12 months
   const endDate = new Date();
   
-  // Create a map of dates to dose counts
-  const doseCounts = new Map<string, number>();
-  
-  doses.forEach(dose => {
-    const date = startOfDay(new Date(dose.timestamp)).toISOString();
-    doseCounts.set(date, (doseCounts.get(date) || 0) + 1);
-  });
+  // Generate calendar data with improved aggregation
+  const calendarData = doses
+    .map(dose => ({
+      day: startOfDay(new Date(dose.timestamp)).toISOString(),
+      value: 1
+    }))
+    .reduce((acc, curr) => {
+      const existing = acc.find(d => d.day === curr.day);
+      if (existing) {
+        existing.value += curr.value;
+      } else {
+        acc.push(curr);
+      }
+      return acc;
+    }, [] as Array<{ day: string; value: number }>);
 
-  // Generate calendar data
-  return eachDayOfInterval({ start: startDate, end: endDate })
-    .map(date => ({
-      day: date.toISOString(),
-      value: doseCounts.get(date.toISOString()) || 0
-    }));
+  return calendarData;
 }
 
 export function calculateRecoveryPeriods(doses: DoseEntry[]) {

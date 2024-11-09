@@ -27,9 +27,10 @@ import {
   startOfMonth, 
   eachMonthOfInterval, 
   subMonths, 
-  differenceInHours, 
+  differenceInHours,
   differenceInDays,
-  addDays
+  addDays,
+  startOfDay
 } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, TrendingDown, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
@@ -250,23 +251,21 @@ export function DoseStats() {
         {/* Calendar View */}
         <Card>
           <CardHeader className="font-semibold">Dose Frequency Calendar</CardHeader>
-          <CardContent>
-            <div className="w-full" style={{ height: '200px' }}>
-              <ResponsiveContainer width="100%" height={200}>
-                <Calendar
-                  data={stats.calendarData}
-                  from={subMonths(new Date(), 12)}
-                  to={new Date()}
-                  emptyColor="#eeeeee"
-                  colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
-                  margin={{ top: 20, right: 40, bottom: 40, left: 40 }}
-                  yearSpacing={40}
-                  monthBorderColor="#ffffff"
-                  dayBorderWidth={2}
-                  dayBorderColor="#ffffff"
-                />
-              </ResponsiveContainer>
-            </div>
+          <CardContent className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height={300}>
+              <Calendar
+                data={stats.calendarData}
+                from={subMonths(new Date(), 12)}
+                to={new Date()}
+                emptyColor="#eeeeee"
+                colors={['#61cdbb', '#97e3d5', '#e8c1a0', '#f47560']}
+                margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
+                yearSpacing={40}
+                monthBorderColor="#ffffff"
+                dayBorderWidth={2}
+                dayBorderColor="#ffffff"
+              />
+            </ResponsiveContainer>
           </CardContent>
         </Card>
 
