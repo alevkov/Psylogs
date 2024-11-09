@@ -37,9 +37,12 @@ export async function addDose(dose: Omit<DoseEntry, 'id'>) {
   const id = await db.add('doses', { ...dose, timestamp: new Date() });
   
   // Register for background sync if supported
-  if ('serviceWorker' in navigator && 'sync' in registration) {
+  if ('serviceWorker' in navigator) {
     try {
-      await registration.sync.register('sync-doses');
+      const registration = await navigator.serviceWorker.ready;
+      if ('sync' in registration) {
+        await registration.sync.register('sync-doses');
+      }
     } catch (err) {
       console.error('Background sync registration failed:', err);
     }
