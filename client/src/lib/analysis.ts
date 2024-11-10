@@ -7,18 +7,6 @@ import {
   startOfDay,
 } from 'date-fns';
 
-// Unit conversion constants
-export const UNIT_CONVERSION = {
-  ML_TO_MG: 1000, // 1ml = 1000mg
-};
-
-// Substance interaction thresholds (in hours)
-export const INTERACTION_THRESHOLDS = {
-  default: 24,
-  high_risk: 12,
-  critical: 6
-};
-
 // Interface definitions
 export interface EnhancedUsagePattern {
   substance: string;
@@ -48,50 +36,6 @@ export interface EnhancedUsagePattern {
   };
 }
 
-// Unit conversion functions
-export function convertDoseUnit(amount: number, fromUnit: string, toUnit: string): number {
-  try {
-    const normalizedFromUnit = normalizeUnit(fromUnit);
-    const normalizedToUnit = normalizeUnit(toUnit);
-    
-    if (normalizedFromUnit === normalizedToUnit) return amount;
-    
-    // Handle ml to mg conversion
-    if (normalizedFromUnit === 'ml' && normalizedToUnit === 'mg') {
-      return amount * UNIT_CONVERSION.ML_TO_MG;
-    }
-    
-    // Handle mg to ml conversion
-    if (normalizedFromUnit === 'mg' && normalizedToUnit === 'ml') {
-      return amount / UNIT_CONVERSION.ML_TO_MG;
-    }
-    
-    throw new Error(`Unsupported unit conversion: ${fromUnit} to ${toUnit}`);
-  } catch (error) {
-    console.error(`Error converting units: ${error}`);
-    throw error;
-  }
-}
-
-// Normalize units to standard format
-function normalizeUnit(unit: string): string {
-  const unitMap: Record<string, string> = {
-    'mg': 'mg',
-    'g': 'mg',
-    'mcg': 'mg',
-    'ug': 'mg',
-    'ml': 'ml',
-    'mL': 'ml',
-  };
-  
-  const normalized = unitMap[unit.toLowerCase()];
-  if (!normalized) {
-    throw new Error(`Unsupported unit: ${unit}`);
-  }
-  
-  return normalized;
-}
-
 // Helper functions
 function average(numbers: number[]): number {
   return numbers.length ? numbers.reduce((sum, n) => sum + n, 0) / numbers.length : 0;
@@ -103,71 +47,12 @@ function standardDeviation(numbers: number[]): number {
   return Math.sqrt(average(squareDiffs));
 }
 
-// Time correlation analysis
-export function calculateTimeCorrelations(doses: DoseEntry[]) {
-  try {
-    const substanceDays = new Map<string, Set<string>>();
-
-    // Group doses by substance and day
-    doses.forEach(dose => {
-      const day = startOfDay(new Date(dose.timestamp)).toISOString();
-      if (!substanceDays.has(dose.substance)) {
-        substanceDays.set(dose.substance, new Set());
-      }
-      substanceDays.get(dose.substance)?.add(day);
-    });
-
-    const correlations = [];
-    const substances = Array.from(substanceDays.keys());
-
-    // Calculate correlations between substance pairs
-    for (let i = 0; i < substances.length; i++) {
-      for (let j = i + 1; j < substances.length; j++) {
-        const substance1 = substances[i];
-        const substance2 = substances[j];
-        const days1 = Array.from(substanceDays.get(substance1) || []);
-        const days2 = Array.from(substanceDays.get(substance2) || []);
-
-        // Find common days
-        const commonDays = days1.filter(day => days2.includes(day)).length;
-        const totalDays = new Set([...days1, ...days2]).size;
-
-        // Calculate correlation coefficient
-        const correlation = commonDays / Math.sqrt(days1.length * days2.length);
-
-        if (correlation > 0) {
-          correlations.push({
-            substance1,
-            substance2,
-            correlation,
-            commonDays
-          });
-        }
-      }
-    }
-
-    return correlations.sort((a, b) => b.correlation - a.correlation);
-  } catch (error) {
-    console.error('Error calculating time correlations:', error);
-    return [];
-  }
-}
-
-// Update the function to normalize units before calculations
 export function analyzePersonalPatterns(doses: DoseEntry[]): EnhancedUsagePattern[] {
   try {
-    const normalizedDoses = doses.map(dose => ({
-      ...dose,
-      amount: dose.unit.toLowerCase() === 'ml' 
-        ? convertDoseUnit(dose.amount, 'ml', 'mg')
-        : dose.amount,
-      unit: dose.unit.toLowerCase() === 'ml' ? 'mg' : dose.unit
-    }));
-
     const substanceDoses = new Map<string, DoseEntry[]>();
 
     // Group doses by substance
-    normalizedDoses.forEach(dose => {
+    doses.forEach(dose => {
       if (!substanceDoses.has(dose.substance)) {
         substanceDoses.set(dose.substance, []);
       }
@@ -245,10 +130,10 @@ export function analyzePersonalPatterns(doses: DoseEntry[]): EnhancedUsagePatter
           }
         },
         changeMetrics: {
-          doseSizeTrend: 0, // Placeholder for trend calculation
-          frequencyTrend: 0, // Placeholder for trend calculation
-          weekOverWeekChange: 0, // Placeholder for trend calculation
-          monthOverMonthChange: 0 // Placeholder for trend calculation
+          doseSizeTrend: 0,
+          frequencyTrend: 0,
+          weekOverWeekChange: 0,
+          monthOverMonthChange: 0
         },
         variationMetrics: {
           doseConsistency: Math.max(0, Math.min(1, doseConsistency)),
