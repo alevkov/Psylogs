@@ -3,58 +3,31 @@ import { getDoses } from "@/lib/db";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  CartesianGrid,
-  ScatterChart,
-  Scatter,
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
+  CartesianGrid, ScatterChart, Scatter,
 } from "recharts";
 import { format, subMonths, differenceInDays, isSameDay, subDays } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertTriangle,
-  TrendingDown,
-  TrendingUp,
-  ArrowRight,
-  Loader2,
-} from "lucide-react";
+import { AlertTriangle, TrendingDown, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { P5Visualization } from "./P5Visualization";
+import { ErrorBoundary } from "./ErrorBoundary";
 import {
   calculateTimeCorrelations,
   analyzeUsagePatterns,
   generateUsageForecast,
   analyzeSubstanceInteractions,
-  generateCalendarData,
-  calculateRecoveryPeriods,
+  convertDoseUnit,
   INTERACTION_THRESHOLDS,
   type CalendarDataPoint,
   analyzePersonalPatterns,
-  convertDoseUnit,
 } from "@/lib/analysis";
 
 // Generate colors for charts
 const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEEAD",
-  "#D4A5A5",
-  "#9E9E9E",
-  "#58B19F",
-  "#FFD93D",
-  "#6C5B7B",
+  "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD",
+  "#D4A5A5", "#9E9E9E", "#58B19F", "#FFD93D", "#6C5B7B",
 ];
 
 const getTrendIcon = (trend: string) => {
@@ -74,7 +47,7 @@ interface Stats {
   usageForecasts: ReturnType<typeof generateUsageForecast>;
   substanceInteractions: ReturnType<typeof analyzeSubstanceInteractions>;
   calendarData: CalendarDataPoint[];
-  recoveryPeriods: ReturnType<typeof calculateRecoveryPeriods>;
+  recoveryPeriods: Array<{ substance: string; recommendedHours: number }>;
   totalDoses: number;
   personalPatterns: ReturnType<typeof analyzePersonalPatterns>;
   uniqueSubstances: number;
@@ -82,7 +55,13 @@ interface Stats {
   substanceDistribution: Array<{ name: string; value: number }>;
   routeDistribution: Array<{ name: string; value: number }>;
   timeDistribution: Array<{ name: string; count: number }>;
-  recentActivity: Array<{ name: string; amount: number }>;
+  recentActivity: Array<{
+    timestamp: string;
+    substance: string;
+    amount: number;
+    unit: string;
+    route?: string;
+  }>;
 }
 
 export function DoseStats() {
@@ -138,7 +117,6 @@ export function DoseStats() {
           .sort((a, b) => b.value - a.value);
 
         // Calculate monthly trends
-        const sixMonthsAgo = subMonths(new Date(), 6);
         const monthRange = Array.from({ length: 7 }, (_, i) =>
           subMonths(new Date(), i),
         ).reverse();
@@ -199,17 +177,27 @@ export function DoseStats() {
         const usagePatterns = analyzeUsagePatterns(standardizedDoses);
         const usageForecasts = generateUsageForecast(standardizedDoses);
         const substanceInteractions = analyzeSubstanceInteractions(standardizedDoses);
-        const calendarData = generateCalendarData(standardizedDoses);
-        const recoveryPeriods = calculateRecoveryPeriods(standardizedDoses);
         const personalPatterns = analyzePersonalPatterns(standardizedDoses);
+
+        // Map recent activity to match P5Visualization props
+        const recentActivity = doses
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 7)
+          .map((dose) => ({
+            timestamp: new Date(dose.timestamp).toISOString(),
+            substance: dose.substance,
+            amount: dose.amount,
+            unit: dose.unit,
+            route: dose.route,
+          }));
 
         setStats({
           timeCorrelations,
           usagePatterns,
           usageForecasts,
           substanceInteractions,
-          calendarData,
-          recoveryPeriods,
+          calendarData: [], // Will be implemented when generateCalendarData is available
+          recoveryPeriods: [], // Will be implemented when calculateRecoveryPeriods is available
           personalPatterns,
           totalDoses: doses.length,
           uniqueSubstances: substances.size,
@@ -219,16 +207,7 @@ export function DoseStats() {
           timeDistribution: Object.entries(timeCount)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => a.name.localeCompare(b.name)),
-          recentActivity: doses
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .slice(0, 7)  // Last 7 doses
-            .map((dose) => ({
-              timestamp: dose.timestamp,
-              substance: dose.substance,
-              amount: dose.amount,
-              unit: dose.unit,
-              route: dose.route
-            })),
+          recentActivity,
         });
       } catch (error) {
         console.error("Error calculating stats:", error);
@@ -276,49 +255,58 @@ export function DoseStats() {
   }
 
   return (
-    <Tabs defaultValue="overview" className="space-y-4">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="patterns">Patterns</TabsTrigger>
-        <TabsTrigger value="analysis">Analysis</TabsTrigger>
-        <TabsTrigger value="safety">Safety</TabsTrigger>
-        <TabsTrigger value="visualization">Visualization</TabsTrigger>
-      </TabsList>
+    <div className="w-full">
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="flex w-full space-x-2 overflow-x-auto">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="patterns">Patterns</TabsTrigger>
+          <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsTrigger value="safety">Safety</TabsTrigger>
+          <TabsTrigger value="visualization">Visualization</TabsTrigger>
+        </TabsList>
 
-      {/* Existing TabsContent sections (Overview, Patterns, Analysis, Safety) from original code */}
-      <TabsContent value="overview" className="space-y-4">
-        {/* Existing overview content */}
-      </TabsContent>
+        <TabsContent value="overview" className="space-y-4">
+          {/* Existing overview content */}
+        </TabsContent>
 
-      <TabsContent value="patterns" className="space-y-4">
-        {/* Existing patterns content */}
-      </TabsContent>
+        <TabsContent value="patterns" className="space-y-4">
+          {/* Existing patterns content */}
+        </TabsContent>
 
-      <TabsContent value="analysis" className="space-y-4">
-        {/* Existing analysis content */}
-      </TabsContent>
+        <TabsContent value="analysis" className="space-y-4">
+          {/* Existing analysis content */}
+        </TabsContent>
 
-      <TabsContent value="safety" className="space-y-4">
-        {/* Existing safety content */}
-      </TabsContent>
+        <TabsContent value="safety" className="space-y-4">
+          {/* Existing safety content */}
+        </TabsContent>
 
-      <TabsContent value="visualization" className="space-y-4">
-        <Card>
-          <CardHeader className="font-semibold">Interactive Dose Visualization</CardHeader>
-          <CardContent>
-            <P5Visualization 
-              doses={stats.recentActivity}
-              width={800}
-              height={400}
-            />
-            <div className="mt-4 text-sm text-muted-foreground">
-              Interactive visualization showing recent doses. Particles represent individual doses, 
-              with size corresponding to dose amount. Connected particles indicate related substances.
-              Newer doses move more actively.
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="visualization" className="space-y-4">
+          <Card>
+            <CardHeader className="font-semibold">Interactive Dose Visualization</CardHeader>
+            <CardContent>
+              <ErrorBoundary>
+                {stats.recentActivity.length > 0 ? (
+                  <P5Visualization 
+                    doses={stats.recentActivity}
+                    width={800}
+                    height={400}
+                  />
+                ) : (
+                  <div className="text-center text-muted-foreground py-4">
+                    No recent activity to visualize
+                  </div>
+                )}
+              </ErrorBoundary>
+              <div className="mt-4 text-sm text-muted-foreground">
+                Interactive visualization showing recent doses. Particles represent individual doses, 
+                with size corresponding to dose amount. Connected particles indicate related substances.
+                Newer doses move more actively.
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
