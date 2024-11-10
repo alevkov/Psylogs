@@ -73,7 +73,6 @@ export function DoseForm() {
     }
   };
 
-  // Rest of the component remains the same
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
     const words = doseString.split(" ");

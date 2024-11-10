@@ -8,10 +8,10 @@ export class DoseParsingError extends Error {
 }
 
 const UNIT_CONVERSIONS = {
-  ug: (amount: number) => amount / 1000, // Convert to mg
-  g: (amount: number) => amount * 1000,  // Convert to mg
-  mg: (amount: number) => amount,        // Keep as is
-  ml: (amount: number) => amount,        // Volume unit, keep as is
+  ug: (amount: number) => ({ amount: amount / 1000, unit: "mg" as const }), // Convert to mg
+  g: (amount: number) => ({ amount: amount * 1000, unit: "mg" as const }), // Convert to mg
+  mg: (amount: number) => ({ amount, unit: "mg" as const }), // Keep as is
+  ml: (amount: number) => ({ amount, unit: "ml" as const }), // Keep ml as is
 };
 
 export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "timestamp"> {
@@ -41,7 +41,7 @@ export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "tim
       throw new DoseParsingError(
         "Invalid dose string format.\n" +
         "Expected formats:\n" +
-        "1. 'amount[unit] substance route' (e.g., '20mg methamphetamine oral')\n" +
+        "1. 'amount[unit] substance route' (e.g., '20mg methamphetamine oral' or '5ml morphine oral')\n" +
         "2. '@verb amount[unit] substance' (e.g., '@ate 30mg adderall')"
       );
     }
@@ -61,20 +61,19 @@ export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "tim
     }
   }
 
-  // Convert amount to number and apply unit conversion
+  // Convert amount to number and apply unit conversion if needed
   amount = parseFloat(amount as unknown as string);
-  const convertedAmount = UNIT_CONVERSIONS[unit as keyof typeof UNIT_CONVERSIONS](amount);
-
-  // Validate the converted amount
-  if (isNaN(convertedAmount) || convertedAmount <= 0) {
+  if (isNaN(amount) || amount <= 0) {
     throw new DoseParsingError("Amount must be a positive number");
   }
 
+  const conversion = UNIT_CONVERSIONS[unit as keyof typeof UNIT_CONVERSIONS](amount);
+
   return {
     substance: substance.toLowerCase(),
-    amount: convertedAmount,
+    amount: conversion.amount,
     route: ROUTE_ALIASES[route],
-    unit: "mg" // Store everything in mg internally
+    unit: conversion.unit
   };
 }
 
@@ -97,21 +96,47 @@ export function filterByDateRange(
   );
 }
 
-export function calculateAverageDose(entries: DoseEntry[]): number {
-  if (entries.length === 0) return 0;
-  const total = entries.reduce((sum, entry) => sum + entry.amount, 0);
-  return total / entries.length;
+export function calculateAverageDoseByUnit(entries: DoseEntry[]): Record<string, number> {
+  const totals: Record<string, { sum: number; count: number }> = {};
+  
+  entries.forEach(entry => {
+    if (!totals[entry.unit]) {
+      totals[entry.unit] = { sum: 0, count: 0 };
+    }
+    totals[entry.unit].sum += entry.amount;
+    totals[entry.unit].count += 1;
+  });
+
+  return Object.entries(totals).reduce((acc, [unit, { sum, count }]) => {
+    acc[unit] = count > 0 ? sum / count : 0;
+    return acc;
+  }, {} as Record<string, number>);
 }
 
-export function calculateMedianDose(entries: DoseEntry[]): number {
-  if (entries.length === 0) return 0;
-  const sorted = [...entries].sort((a, b) => a.amount - b.amount);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1].amount + sorted[mid].amount) / 2
-    : sorted[mid].amount;
+export function calculateMedianDoseByUnit(entries: DoseEntry[]): Record<string, number> {
+  const valuesByUnit: Record<string, number[]> = {};
+  
+  entries.forEach(entry => {
+    if (!valuesByUnit[entry.unit]) {
+      valuesByUnit[entry.unit] = [];
+    }
+    valuesByUnit[entry.unit].push(entry.amount);
+  });
+
+  return Object.entries(valuesByUnit).reduce((acc, [unit, values]) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    acc[unit] = sorted.length === 0 ? 0 : 
+                sorted.length % 2 === 0 ? 
+                (sorted[mid - 1] + sorted[mid]) / 2 : 
+                sorted[mid];
+    return acc;
+  }, {} as Record<string, number>);
 }
 
-export function calculateTotalDose(entries: DoseEntry[]): number {
-  return entries.reduce((sum, entry) => sum + entry.amount, 0);
+export function calculateTotalDoseByUnit(entries: DoseEntry[]): Record<string, number> {
+  return entries.reduce((acc, entry) => {
+    acc[entry.unit] = (acc[entry.unit] || 0) + entry.amount;
+    return acc;
+  }, {} as Record<string, number>);
 }
