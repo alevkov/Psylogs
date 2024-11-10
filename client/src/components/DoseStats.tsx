@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getDoses } from "@/lib/db";
+import { getDoses, addTestData } from "@/lib/db";
 import {
   calculateTimeCorrelations,
   analyzeUsagePatterns,
@@ -92,7 +92,13 @@ export function DoseStats() {
       try {
         setLoading(true);
         setError(null);
-        const doses = await getDoses();
+        
+        // Add test data if no doses exist
+        let doses = await getDoses();
+        if (!doses || doses.length === 0) {
+          await addTestData();
+          doses = await getDoses();
+        }
 
         if (!doses || doses.length === 0) {
           setError("No dose data available");

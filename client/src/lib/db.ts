@@ -32,6 +32,59 @@ export async function getDB() {
   return db;
 }
 
+export async function addTestData() {
+  const testDoses = [
+    // ML doses
+    {
+      substance: "morphine",
+      amount: 5,
+      unit: "ml",
+      route: "oral",
+      timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+    },
+    {
+      substance: "codeine",
+      amount: 10,
+      unit: "ml",
+      route: "oral",
+      timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+    },
+    {
+      substance: "morphine",
+      amount: 7,
+      unit: "ml",
+      route: "oral",
+      timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+    },
+    // MG doses
+    {
+      substance: "caffeine",
+      amount: 200,
+      unit: "mg",
+      route: "oral",
+      timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+    },
+    {
+      substance: "ibuprofen",
+      amount: 400,
+      unit: "mg",
+      route: "oral",
+      timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+    },
+    {
+      substance: "caffeine",
+      amount: 150,
+      unit: "mg",
+      route: "oral",
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    }
+  ];
+
+  const db = await getDB();
+  await clearDoses(); // Clear existing data
+  await Promise.all(testDoses.map(dose => db.add("doses", dose)));
+}
+
 export async function addDose(dose: Omit<DoseEntry, "id">) {
   const db = await getDB();
   const id = await db.add("doses", {
