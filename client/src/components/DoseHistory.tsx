@@ -39,7 +39,7 @@ export function DoseHistory() {
       }
     };
     loadDoses();
-  }, [updateTrigger]); // Add updateTrigger as dependency
+  }, [updateTrigger]);
 
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
@@ -114,7 +114,7 @@ export function DoseHistory() {
                         <div>
                           <h3 className="font-semibold">{dose.substance}</h3>
                           <p className="text-sm text-muted-foreground">
-                            {dose.amount}mg via {dose.route}
+                            {dose.amount}{dose.unit} via {dose.route}
                           </p>
                           {!navigator.onLine && dose.id === undefined && (
                             <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">

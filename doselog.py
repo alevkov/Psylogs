@@ -36,7 +36,7 @@ class DoseEntry:
     amount: float
     route: str
     timestamp: datetime = field(default_factory=datetime.now)
-    unit: str = "mg"  # Added unit field
+    unit: str = "mg"  # Default unit is mg but can be ml
 
 class DoseParsingError(Exception):
     """Raised when a dose string cannot be parsed correctly."""
@@ -55,6 +55,7 @@ class User:
         Valid formats:
         - "20mg methamphetamine oral"
         - "0.4ug lsd sublingual"
+        - "5ml morphine oral"
         - "@ate 30mg adderall"
         - "@sniffed 30mg adderall"
         """
@@ -93,18 +94,21 @@ class User:
             if not standard_route:
                 raise DoseParsingError(f"Unknown route or verb: {route_or_verb}")
 
-            # Convert units to mg if necessary
-            if unit == "ug":
-                amount = amount / 1000
-            elif unit == "g":
-                amount = amount * 1000
+            # Only convert between mg/g/ug if the unit is not ml
+            if unit != "ml":
+                if unit == "ug":
+                    amount = amount / 1000
+                    unit = "mg"
+                elif unit == "g":
+                    amount = amount * 1000
+                    unit = "mg"
             
             # Create and store the entry
             entry = DoseEntry(
                 substance=substance,
                 amount=amount,
                 route=standard_route,
-                unit="mg"  # Store everything in mg internally
+                unit=unit  # Preserve the unit (mg or ml)
             )
             self.entries.append(entry)
             return self
@@ -116,16 +120,15 @@ class User:
             print(f"Unexpected error logging dose: {e}")
             return self
 
-    def log_dose(self, substance: str, amount: float, route: str) -> 'User':
+    def log_dose(self, substance: str, amount: float, route: str, unit: str = "mg") -> 'User':
         """Log a new dose entry with explicit parameters."""
         if route not in ROUTE_ALIASES:
             print(f"Warning: Unknown route '{route}', defaulting to 'other'")
             route = "other"
         
         standard_route = ROUTE_ALIASES.get(route, "other")
-        self.entries.append(DoseEntry(substance, amount, standard_route))
+        self.entries.append(DoseEntry(substance, amount, standard_route, unit=unit))
         return self
-
 
     def only(self, *substances: str) -> 'User':
         """Filter entries by substance(s)."""
@@ -164,18 +167,36 @@ class User:
         ]
         return self
 
-    def tally_each(self) -> Dict[str, Dict[str, float]]:
-        """Calculate total amounts per substance and route."""
-        tally: Dict[str, Dict[str, float]] = defaultdict(lambda: defaultdict(float))
+    def tally_each(self) -> Dict[str, Dict[str, Dict[str, float]]]:
+        """Calculate total amounts per substance, route and unit."""
+        tally: Dict[str, Dict[str, Dict[str, float]]] = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
         for entry in self.filtered_entries:
-            tally[entry.substance][entry.route] += entry.amount
+            tally[entry.substance][entry.route][entry.unit] += entry.amount
         return dict(tally)
 
-    def average_dose(self) -> float:
-        """Calculate average dose amount."""
+    def print_tally(self) -> None:
+        """Print detailed tally of doses."""
+        tally = self.tally_each()
+        for substance, routes in tally.items():
+            print(f"\n{substance}")
+            for route, units in routes.items():
+                for unit, amount in units.items():
+                    print(f"  {route.capitalize()}: {amount:.1f}{unit}")
+            last_time = self.last_dose_time()
+            if last_time:
+                hours = last_time.total_seconds() / 3600
+                print(f"  Last dose {hours:.1f} hours ago")
+
+    def average_dose(self) -> Dict[str, float]:
+        """Calculate average dose amount per unit."""
         if not self.filtered_entries:
-            return 0.0
-        return sum(entry.amount for entry in self.filtered_entries) / len(self.filtered_entries)
+            return {}
+        totals: Dict[str, float] = defaultdict(float)
+        counts: Dict[str, int] = defaultdict(int)
+        for entry in self.filtered_entries:
+            totals[entry.unit] += entry.amount
+            counts[entry.unit] += 1
+        return {unit: total/counts[unit] for unit, total in totals.items()}
 
     def last_dose_time(self) -> Optional[timedelta]:
         """Get time since last dose."""
@@ -184,58 +205,25 @@ class User:
         last_dose = max(self.filtered_entries, key=lambda x: x.timestamp)
         return datetime.now() - last_dose.timestamp
 
-    def median_dose(self) -> float:
-        """Calculate median dose amount."""
+    def median_dose(self) -> Dict[str, float]:
+        """Calculate median dose amount per unit."""
         if not self.filtered_entries:
-            return 0.0
-        doses = sorted(entry.amount for entry in self.filtered_entries)
-        n = len(doses)
-        mid = n // 2
-        return doses[mid] if n % 2 else (doses[mid-1] + doses[mid]) / 2
+            return {}
+        doses_by_unit: Dict[str, List[float]] = defaultdict(list)
+        for entry in self.filtered_entries:
+            doses_by_unit[entry.unit].append(entry.amount)
+        
+        result = {}
+        for unit, doses in doses_by_unit.items():
+            sorted_doses = sorted(doses)
+            n = len(sorted_doses)
+            mid = n // 2
+            result[unit] = sorted_doses[mid] if n % 2 else (sorted_doses[mid-1] + sorted_doses[mid]) / 2
+        return result
 
-    def total_dose(self) -> float:
-        """Calculate total dose amount."""
-        return sum(entry.amount for entry in self.filtered_entries)
-
-    def print_tally(self) -> None:
-        """Print detailed tally of doses."""
-        tally = self.tally_each()
-        for substance, routes in tally.items():
-            total = sum(routes.values())
-            print(f"{substance} (Total {total:.1f}mg)")
-            for route, amount in routes.items():
-                print(f"  {route.capitalize()} {amount:.1f}mg")
-            last_time = self.last_dose_time()
-            if last_time:
-                hours = last_time.total_seconds() / 3600
-                print(f"  Last dose {hours:.1f} hours ago")
-        print(f"Total: {self.total_dose():.1f}mg")
-
-def main():
-    # Example usage with string parsing
-    sernyl = User("sernyl")
-    
-    # Test various dose string formats
-    test_strings = [
-        "20mg methamphetamine oral",
-        "0.4ug lsd sublingual",
-        "@ate 30mg adderall",
-        "@sniffed 25mg ketamine",
-        "@boofed 100mg mdma",
-        "@injected 50mg morphine"
-    ]
-    
-    for dose_string in test_strings:
-        print(f"\nLogging dose: {dose_string}")
-        sernyl.log_dose_string(dose_string)
-
-    # Print results
-    print("\nAll doses:")
-    sernyl.print_tally()
-    
-    # Test specific substance
-    print("\nJust methamphetamine:")
-    sernyl.only("methamphetamine").print_tally()
-
-if __name__ == "__main__":
-    main()
+    def total_dose(self) -> Dict[str, float]:
+        """Calculate total dose amount per unit."""
+        totals: Dict[str, float] = defaultdict(float)
+        for entry in self.filtered_entries:
+            totals[entry.unit] += entry.amount
+        return dict(totals)
