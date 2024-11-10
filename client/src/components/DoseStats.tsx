@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDoses } from "@/lib/db";
 import {
@@ -31,10 +31,8 @@ import {
   ResponsiveContainer,
   Legend,
   CartesianGrid,
-  ScatterChart,
-  Scatter,
 } from "recharts";
-import { format, subMonths, differenceInDays, isSameDay, subDays } from "date-fns";
+import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertTriangle,
@@ -43,20 +41,6 @@ import {
   ArrowRight,
   Loader2,
 } from "lucide-react";
-
-// Generate colors for charts
-const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEEAD",
-  "#D4A5A5",
-  "#9E9E9E",
-  "#58B19F",
-  "#FFD93D",
-  "#6C5B7B",
-];
 
 interface Stats {
   timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
@@ -84,6 +68,7 @@ interface Stats {
 
 export function DoseStats() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
     timeCorrelations: [],
     usagePatterns: [],
@@ -106,15 +91,18 @@ export function DoseStats() {
     const calculateStats = async () => {
       try {
         setLoading(true);
+        setError(null);
         const doses = await getDoses();
 
-        // Calculate basic stats
-        const substances = new Set(doses.map((d) => d.substance));
-        
+        if (!doses || doses.length === 0) {
+          setError("No dose data available");
+          return;
+        }
+
         // Calculate unit-specific statistics
         const unitSpecificStats = calculateUnitSpecificStats(doses);
         
-        // Calculate other statistics...
+        // Calculate other statistics
         const timeCorrelations = calculateTimeCorrelations(doses);
         const usagePatterns = analyzeUsagePatterns(doses);
         const usageForecasts = generateUsageForecast(doses);
@@ -123,7 +111,12 @@ export function DoseStats() {
         const recoveryPeriods = calculateRecoveryPeriods(doses);
         const personalPatterns = analyzePersonalPatterns(doses);
 
-        // ... [Previous calculations remain the same]
+        // Basic stats
+        const substances = new Set(doses.map((d) => d.substance));
+        const routeCount = doses.reduce((acc, dose) => {
+          acc[dose.route] = (acc[dose.route] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
 
         setStats({
           timeCorrelations,
@@ -135,10 +128,10 @@ export function DoseStats() {
           personalPatterns,
           totalDoses: doses.length,
           uniqueSubstances: substances.size,
-          monthlyTrends: [], // ... previous calculation
-          substanceDistribution: [], // ... previous calculation
-          routeDistribution: [], // ... previous calculation
-          timeDistribution: [], // ... previous calculation
+          monthlyTrends: [], 
+          substanceDistribution: [],
+          routeDistribution: Object.entries(routeCount).map(([name, value]) => ({ name, value })),
+          timeDistribution: [],
           recentActivity: doses
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, 7)
@@ -153,6 +146,7 @@ export function DoseStats() {
         });
       } catch (error) {
         console.error("Error calculating stats:", error);
+        setError(error instanceof Error ? error.message : "An error occurred while calculating statistics");
       } finally {
         setLoading(false);
       }
@@ -171,7 +165,19 @@ export function DoseStats() {
     );
   }
 
-  // ... [Rest of the rendering logic remains the same until Analysis tab]
+  if (error) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-6">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Tabs defaultValue="overview" className="space-y-4">
@@ -183,7 +189,6 @@ export function DoseStats() {
       </TabsList>
 
       <TabsContent value="analysis" className="space-y-4">
-        {/* Unit-Specific Analysis Section */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div className="space-y-1">
@@ -194,119 +199,121 @@ export function DoseStats() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue={stats.unitSpecificStats[0]?.unit || "overview"} className="space-y-4">
-              <TabsList>
-                {stats.unitSpecificStats?.map((unitStat) => (
-                  <TabsTrigger key={unitStat.unit} value={unitStat.unit}>
-                    {unitStat.unit.toUpperCase()}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              
-              {stats.unitSpecificStats?.map((unitStat) => (
-                <TabsContent key={unitStat.unit} value={unitStat.unit} className="space-y-4">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Average Dose</p>
-                      <p className="text-2xl">{unitStat.average.toFixed(2)}{unitStat.unit}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Median Dose</p>
-                      <p className="text-2xl">{unitStat.median.toFixed(2)}{unitStat.unit}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Total Amount</p>
-                      <p className="text-2xl">{unitStat.total.toFixed(2)}{unitStat.unit}</p>
-                      <Badge variant={
-                        unitStat.trend === "increasing" ? "default" :
-                        unitStat.trend === "decreasing" ? "secondary" :
-                        "outline"
-                      }>
-                        {unitStat.trend}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <h4 className="text-sm font-medium">Weekly Totals</h4>
-                      </CardHeader>
-                      <CardContent className="h-[200px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={unitStat.weeklyTotals}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="week" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar
-                              dataKey="total"
-                              fill="hsl(var(--primary))"
-                              name={`Total (${unitStat.unit})`}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <h4 className="text-sm font-medium">Monthly Averages</h4>
-                      </CardHeader>
-                      <CardContent className="h-[200px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={unitStat.monthlyAverages}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line
-                              type="monotone"
-                              dataKey="average"
-                              stroke="hsl(var(--primary))"
-                              name={`Average (${unitStat.unit})`}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <h4 className="text-sm font-medium">Common Substances ({unitStat.unit})</h4>
-                    </CardHeader>
-                    <CardContent>
+            {stats.unitSpecificStats.length > 0 ? (
+              <Tabs defaultValue={stats.unitSpecificStats[0]?.unit} className="space-y-4">
+                <TabsList>
+                  {stats.unitSpecificStats.map((unitStat) => (
+                    <TabsTrigger key={unitStat.unit} value={unitStat.unit}>
+                      {unitStat.unit.toUpperCase()}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                
+                {stats.unitSpecificStats.map((unitStat) => (
+                  <TabsContent key={unitStat.unit} value={unitStat.unit} className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        {unitStat.commonSubstances.map((substance) => (
-                          <div key={substance.substance} className="flex items-center justify-between">
-                            <span className="text-sm">{substance.substance}</span>
-                            <div className="flex items-center gap-2">
-                              <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-primary"
-                                  style={{ width: `${substance.percentage}%` }}
-                                />
-                              </div>
-                              <span className="text-sm text-muted-foreground">
-                                {substance.percentage.toFixed(1)}%
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                        <p className="text-sm font-medium">Average Dose</p>
+                        <p className="text-2xl">{unitStat.average.toFixed(2)}{unitStat.unit}</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              ))}
-            </Tabs>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Median Dose</p>
+                        <p className="text-2xl">{unitStat.median.toFixed(2)}{unitStat.unit}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Total Amount</p>
+                        <p className="text-2xl">{unitStat.total.toFixed(2)}{unitStat.unit}</p>
+                        <Badge variant={
+                          unitStat.trend === "increasing" ? "default" :
+                          unitStat.trend === "decreasing" ? "secondary" :
+                          "outline"
+                        }>
+                          {unitStat.trend}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <h4 className="text-sm font-medium">Weekly Totals</h4>
+                        </CardHeader>
+                        <CardContent className="h-[200px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={unitStat.weeklyTotals}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="week" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar
+                                dataKey="total"
+                                fill="hsl(var(--primary))"
+                                name={`Total (${unitStat.unit})`}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <h4 className="text-sm font-medium">Monthly Averages</h4>
+                        </CardHeader>
+                        <CardContent className="h-[200px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={unitStat.monthlyAverages}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="month" />
+                              <YAxis />
+                              <Tooltip />
+                              <Line
+                                type="monotone"
+                                dataKey="average"
+                                stroke="hsl(var(--primary))"
+                                name={`Average (${unitStat.unit})`}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <h4 className="text-sm font-medium">Common Substances ({unitStat.unit})</h4>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {unitStat.commonSubstances.map((substance) => (
+                            <div key={substance.substance} className="flex items-center justify-between">
+                              <span className="text-sm">{substance.substance}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-32 h-2 bg-secondary rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-primary"
+                                    style={{ width: `${substance.percentage}%` }}
+                                  />
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                  {substance.percentage.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No dose data available for unit-specific analysis
+              </div>
+            )}
           </CardContent>
         </Card>
-
-        {/* ... [Rest of the analysis content remains the same] */}
       </TabsContent>
-
-      {/* ... [Rest of the tabs content remains the same] */}
     </Tabs>
   );
 }
