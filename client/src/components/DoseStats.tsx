@@ -16,7 +16,6 @@ import { ErrorBoundary } from "./ErrorBoundary";
 import {
   calculateTimeCorrelations,
   analyzeUsagePatterns,
-  generateUsageForecast,
   analyzeSubstanceInteractions,
   convertDoseUnit,
   INTERACTION_THRESHOLDS,
@@ -44,7 +43,7 @@ const getTrendIcon = (trend: string) => {
 interface Stats {
   timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
   usagePatterns: ReturnType<typeof analyzeUsagePatterns>;
-  usageForecasts: ReturnType<typeof generateUsageForecast>;
+  usageForecasts: ReturnType<typeof analyzeUsagePatterns>;
   substanceInteractions: ReturnType<typeof analyzeSubstanceInteractions>;
   calendarData: CalendarDataPoint[];
   recoveryPeriods: Array<{ substance: string; recommendedHours: number }>;
@@ -175,7 +174,7 @@ export function DoseStats() {
         // Calculate advanced statistics
         const timeCorrelations = calculateTimeCorrelations(standardizedDoses);
         const usagePatterns = analyzeUsagePatterns(standardizedDoses);
-        const usageForecasts = generateUsageForecast(standardizedDoses);
+        const usageForecasts = analyzeUsagePatterns(standardizedDoses); // Using analyzeUsagePatterns instead of generateUsageForecast
         const substanceInteractions = analyzeSubstanceInteractions(standardizedDoses);
         const personalPatterns = analyzePersonalPatterns(standardizedDoses);
 
