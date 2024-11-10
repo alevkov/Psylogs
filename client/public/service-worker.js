@@ -42,7 +42,8 @@ const processOfflineQueue = async () => {
   const db = await openDB();
   const tx = db.transaction("offline-queue", "readwrite");
   const store = tx.objectStore("offline-queue");
-  const requests = await store.getAll();
+  const requestsObj = await store.getAll();
+  const requests = Array.from(requestsObj || []);
 
   for (const request of requests) {
     try {
@@ -93,7 +94,7 @@ self.addEventListener("fetch", (event) => {
     // Handle static assets
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return response || fetch(event.request);
+        return response || fetch(request);
       }),
     );
   }
