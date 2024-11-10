@@ -222,6 +222,7 @@ export function DoseStats() {
         <TabsTrigger value="safety">Safety</TabsTrigger>
       </TabsList>
 
+      {/* Overview Tab Content */}
       <TabsContent value="overview" className="space-y-4">
         <div className="grid grid-cols-4 gap-4">
           <Card>
@@ -379,6 +380,7 @@ export function DoseStats() {
         </Card>
       </TabsContent>
 
+      {/* Patterns Tab Content */}
       <TabsContent value="patterns" className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           {stats.personalPatterns.map((pattern, index) => (
@@ -446,6 +448,7 @@ export function DoseStats() {
         </div>
       </TabsContent>
 
+      {/* Analysis Tab Content */}
       <TabsContent value="analysis" className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <Card>
@@ -454,20 +457,31 @@ export function DoseStats() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={stats.usageForecasts.flatMap(f => f.predictedDoses)}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tickFormatter={(date) => format(new Date(date), "MMM d")} />
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(date) => format(new Date(date), "MMM d")}
+                  />
                   <YAxis />
                   <Tooltip
                     labelFormatter={(date) => format(new Date(date), "MMM d, yyyy")}
-                    formatter={(value: number) => [value.toFixed(1), "Amount"]}
+                    formatter={(value: number) => [`${value.toFixed(1)}mg`, "Predicted Amount"]}
                   />
-                  <Line type="monotone" dataKey="amount" stroke={COLORS[0]} strokeWidth={2} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    name="Predicted Usage"
+                    stroke={COLORS[0]}
+                    strokeWidth={2}
+                    dot={false}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="font-semibold">Time Correlations</CardHeader>
+            <CardHeader className="font-semibold">Interaction Patterns</CardHeader>
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.timeCorrelations}>
@@ -475,10 +489,25 @@ export function DoseStats() {
                   <XAxis
                     dataKey="substance1"
                     tickFormatter={(value) => value.substring(0, 3)}
+                    interval={0}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
                   />
                   <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="correlation" fill={COLORS[0]}>
+                  <Tooltip
+                    formatter={(value: number, name: string, props: any) => [
+                      `${(value * 100).toFixed(1)}%`,
+                      "Correlation"
+                    ]}
+                    labelFormatter={(label) => `${label} + ${props.payload.substance2}`}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="correlation"
+                    name="Interaction Strength"
+                    fill={COLORS[0]}
+                  >
                     {stats.timeCorrelations.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -488,49 +517,191 @@ export function DoseStats() {
             </CardContent>
           </Card>
         </div>
+
+        <Card>
+          <CardHeader className="font-semibold">Time Correlation Analysis</CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  type="number"
+                  dataKey="timeBetweenDoses"
+                  name="Hours Between Doses"
+                  unit="h"
+                />
+                <YAxis
+                  type="number"
+                  dataKey="amount"
+                  name="Dose Amount"
+                  unit="mg"
+                />
+                <Tooltip
+                  formatter={(value: number) => `${value.toFixed(1)}`}
+                  labelFormatter={(label) => `Time between doses: ${label}h`}
+                />
+                <Legend />
+                {stats.usagePatterns.map((pattern, index) => (
+                  <Scatter
+                    key={pattern.substance}
+                    name={pattern.substance}
+                    data={[{
+                      timeBetweenDoses: pattern.periodicity * 24,
+                      amount: pattern.consistency * 100
+                    }]}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </ScatterChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </TabsContent>
 
+      {/* Safety Tab Content */}
       <TabsContent value="safety" className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
-          {stats.substanceInteractions.map((interaction, index) => (
-            <Alert
-              key={index}
-              variant={
-                interaction.riskLevel === "critical"
-                  ? "destructive"
-                  : interaction.riskLevel === "high"
-                    ? "destructive"
-                    : "default"
-              }
-            >
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>
-                Interaction detected: {interaction.substances.join(" + ")}
-              </AlertTitle>
-              <AlertDescription>
-                Risk Level: {interaction.riskLevel}
-                <br />
-                Time Gap: {interaction.timeGap.toFixed(1)} hours
-                <br />
-                Frequency: {interaction.frequency} occurrences
-              </AlertDescription>
-            </Alert>
-          ))}
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="font-semibold">Current Risk Assessment</CardHeader>
+            <CardContent className="space-y-4">
+              {stats.substanceInteractions.map((interaction, index) => (
+                <Alert
+                  key={index}
+                  variant={
+                    interaction.riskLevel === "critical"
+                      ? "destructive"
+                      : interaction.riskLevel === "high"
+                        ? "warning"
+                        : "default"
+                  }
+                  className="relative overflow-hidden"
+                >
+                  <div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      background: interaction.riskLevel === "critical"
+                        ? "linear-gradient(45deg, #ff0000, #ff6b6b)"
+                        : interaction.riskLevel === "high"
+                          ? "linear-gradient(45deg, #ffa500, #ffd700)"
+                          : "linear-gradient(45deg, #4ecdc4, #45b7d1)"
+                    }}
+                  />
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle className="flex items-center gap-2">
+                    <span>Interaction Warning</span>
+                    <Badge
+                      variant={
+                        interaction.riskLevel === "critical"
+                          ? "destructive"
+                          : interaction.riskLevel === "high"
+                            ? "warning"
+                            : "default"
+                      }
+                    >
+                      {interaction.riskLevel.toUpperCase()}
+                    </Badge>
+                  </AlertTitle>
+                  <AlertDescription className="mt-2">
+                    <div className="space-y-2">
+                      <p><strong>Substances:</strong> {interaction.substances.join(" + ")}</p>
+                      <p><strong>Time Gap:</strong> {interaction.timeGap.toFixed(1)} hours</p>
+                      <p><strong>Frequency:</strong> {interaction.frequency} occurrences</p>
+                      <p className="text-sm italic mt-1">
+                        {interaction.riskLevel === "critical"
+                          ? "Immediate attention required - High risk combination detected"
+                          : interaction.riskLevel === "high"
+                            ? "Caution advised - Potentially dangerous interaction"
+                            : "Monitor carefully - Known interaction present"}
+                      </p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </CardContent>
+          </Card>
 
-          {stats.recoveryPeriods.map((period, index) => (
-            <Alert key={index}>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Recovery Period: {period.substance}</AlertTitle>
-              <AlertDescription>
-                Recommended Break: {period.recommendedRecoveryTime}h
-                <br />
-                Current Break: {differenceInDays(new Date(), new Date(period.lastDose))} days
-                <br />
-                Adherence Rate: {(period.adherenceRate * 100).toFixed(1)}%
-              </AlertDescription>
-            </Alert>
-          ))}
+          <Card>
+            <CardHeader className="font-semibold">Recovery Periods</CardHeader>
+            <CardContent className="space-y-4">
+              {stats.recoveryPeriods.map((period, index) => (
+                <Alert
+                  key={index}
+                  variant={period.adherenceRate > 0.7 ? "default" : "warning"}
+                  className="relative overflow-hidden"
+                >
+                  <div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      background: period.adherenceRate > 0.7
+                        ? "linear-gradient(45deg, #4ecdc4, #45b7d1)"
+                        : "linear-gradient(45deg, #ffa500, #ffd700)"
+                    }}
+                  />
+                  <AlertTitle className="flex items-center gap-2">
+                    <span>{period.substance}</span>
+                    <Badge variant={period.adherenceRate > 0.7 ? "default" : "warning"}>
+                      {(period.adherenceRate * 100).toFixed(0)}% Adherence
+                    </Badge>
+                  </AlertTitle>
+                  <AlertDescription className="mt-2">
+                    <div className="space-y-2">
+                      <p>
+                        <strong>Recommended Break:</strong> {period.recommendedRecoveryTime}h
+                      </p>
+                      <p>
+                        <strong>Current Break:</strong>{" "}
+                        {differenceInDays(new Date(), new Date(period.lastDose))} days
+                      </p>
+                      <div className="w-full bg-secondary h-2 rounded-full mt-2">
+                        <div
+                          className="bg-primary h-full rounded-full transition-all"
+                          style={{
+                            width: `${period.adherenceRate * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </CardContent>
+          </Card>
         </div>
+
+        <Card>
+          <CardHeader className="font-semibold">Safety Recommendations</CardHeader>
+          <CardContent className="space-y-4">
+            {stats.personalPatterns.map((pattern, index) => (
+              <Alert key={index}>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>{pattern.substance} Usage Guidelines</AlertTitle>
+                <AlertDescription>
+                  <div className="space-y-2 mt-2">
+                    <p>
+                      <strong>Typical Dose Range:</strong>{" "}
+                      {pattern.recentTrends.typicalDoseRange.min.toFixed(1)} -{" "}
+                      {pattern.recentTrends.typicalDoseRange.max.toFixed(1)}mg
+                    </p>
+                    <p>
+                      <strong>Recommended Frequency:</strong>{" "}
+                      Every {pattern.recentTrends.avgTimeBetweenDoses.toFixed(1)}h
+                    </p>
+                    {pattern.changeMetrics.monthOverMonthChange > 0.1 && (
+                      <p className="text-warning">
+                        ⚠️ Usage frequency has increased significantly
+                      </p>
+                    )}
+                    {pattern.variationMetrics.doseConsistency < 0.5 && (
+                      <p className="text-warning">
+                        ⚠️ High dose variability detected
+                      </p>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+            ))}
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );
