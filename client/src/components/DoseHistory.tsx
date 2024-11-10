@@ -43,14 +43,14 @@ export function DoseHistory() {
 
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
-    
+
     const lastDose = undoStack[undoStack.length - 1];
     try {
       // Remove from undo stack
       setUndoStack(prev => prev.slice(0, -1));
       // Remove from doses
       setDoses(prev => prev.filter(d => d.id !== lastDose.id));
-      
+
       toast({
         title: "Dose removed",
         description: "The last dose has been removed",
