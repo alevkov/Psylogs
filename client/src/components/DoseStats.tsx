@@ -19,7 +19,7 @@ import {
   ScatterChart,
   Scatter,
 } from "recharts";
-import { format, subMonths, differenceInDays, isSameDay, subDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertTriangle,
@@ -37,8 +37,8 @@ import {
   generateCalendarData,
   calculateRecoveryPeriods,
   INTERACTION_THRESHOLDS,
-  type CalendarDataPoint,
   analyzePersonalPatterns,
+  type Stats
 } from "@/lib/analysis";
 
 // Generate colors for charts
@@ -54,23 +54,6 @@ const COLORS = [
   "#FFD93D",
   "#6C5B7B",
 ];
-
-interface Stats {
-  timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
-  usagePatterns: ReturnType<typeof analyzeUsagePatterns>;
-  usageForecasts: ReturnType<typeof generateUsageForecast>;
-  substanceInteractions: ReturnType<typeof analyzeSubstanceInteractions>;
-  calendarData: CalendarDataPoint[];
-  recoveryPeriods: ReturnType<typeof calculateRecoveryPeriods>;
-  totalDoses: number;
-  personalPatterns: ReturnType<typeof analyzePersonalPatterns>;
-  uniqueSubstances: number;
-  monthlyTrends: Array<{ name: string; doses: number }>;
-  substanceDistribution: Array<{ name: string; value: number }>;
-  routeDistribution: Array<{ name: string; value: number }>;
-  timeDistribution: Array<{ name: string; count: number }>;
-  recentActivity: Array<{ name: string; amount: number }>;
-}
 
 const getTrendIcon = (trend: string) => {
   switch (trend) {
@@ -108,8 +91,6 @@ export function DoseStats() {
         setLoading(true);
         const doses = await getDoses();
 
-        console.log(doses)
-
         // Calculate basic stats
         const substances = new Set(doses.map((d) => d.substance));
         const routeCount = doses.reduce(
@@ -120,30 +101,12 @@ export function DoseStats() {
           {} as Record<string, number>,
         );
 
-        // Sort route distribution by frequency
+        // Calculate route distribution
         const sortedRouteDistribution = Object.entries(routeCount)
           .map(([name, value]) => ({ name, value }))
           .sort((a, b) => b.value - a.value);
 
-        // Calculate monthly trends
-        const sixMonthsAgo = subMonths(new Date(), 6);
-        const monthRange = Array.from({ length: 7 }, (_, i) =>
-          subMonths(new Date(), i),
-        ).reverse();
-
-        const monthlyData = monthRange.map((month) => {
-          const monthDoses = doses.filter(
-            (dose) =>
-              new Date(dose.timestamp).getMonth() === month.getMonth() &&
-              new Date(dose.timestamp).getFullYear() === month.getFullYear(),
-          ).length;
-          return {
-            name: format(month, "MMM yy"),
-            doses: monthDoses,
-          };
-        });
-
-        // Calculate substance distribution with Others category
+        // Calculate substance distribution
         const substanceCount = doses.reduce(
           (acc, dose) => {
             acc[dose.substance] = (acc[dose.substance] || 0) + 1;
@@ -154,22 +117,8 @@ export function DoseStats() {
 
         const substanceDistribution = Object.entries(substanceCount)
           .sort((a, b) => b[1] - a[1])
-          .reduce(
-            (acc, [name, value], index) => {
-              if (index < 5) {
-                acc.push({ name, value });
-              } else {
-                const others = acc.find((item) => item.name === "Others") || {
-                  name: "Others",
-                  value: 0,
-                };
-                others.value += value;
-                if (!acc.includes(others)) acc.push(others);
-              }
-              return acc;
-            },
-            [] as Array<{ name: string; value: number }>,
-          );
+          .slice(0, 5)
+          .map(([name, value]) => ({ name, value }));
 
         // Calculate time distribution
         const timeCount = doses.reduce(
@@ -182,6 +131,22 @@ export function DoseStats() {
           {} as Record<string, number>,
         );
 
+        // Calculate monthly trends (last 6 months)
+        const monthlyTrends = Array.from({ length: 6 }, (_, i) => {
+          const date = new Date();
+          date.setMonth(date.getMonth() - i);
+          const month = format(date, "MMM yy");
+          const monthDoses = doses.filter(
+            (dose) =>
+              new Date(dose.timestamp).getMonth() === date.getMonth() &&
+              new Date(dose.timestamp).getFullYear() === date.getFullYear(),
+          );
+          return {
+            name: month,
+            doses: monthDoses.length,
+          };
+        }).reverse();
+
         // Calculate advanced statistics
         const timeCorrelations = calculateTimeCorrelations(doses);
         const usagePatterns = analyzeUsagePatterns(doses);
@@ -190,6 +155,7 @@ export function DoseStats() {
         const calendarData = generateCalendarData(doses);
         const recoveryPeriods = calculateRecoveryPeriods(doses);
         const personalPatterns = analyzePersonalPatterns(doses);
+
         setStats({
           timeCorrelations,
           usagePatterns,
@@ -200,7 +166,7 @@ export function DoseStats() {
           personalPatterns,
           totalDoses: doses.length,
           uniqueSubstances: substances.size,
-          monthlyTrends: monthlyData,
+          monthlyTrends,
           substanceDistribution,
           routeDistribution: sortedRouteDistribution,
           timeDistribution: Object.entries(timeCount)
@@ -208,13 +174,13 @@ export function DoseStats() {
             .sort((a, b) => a.name.localeCompare(b.name)),
           recentActivity: doses
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .slice(0, 7)  // Last 7 doses
+            .slice(0, 7)
             .map((dose) => ({
               timestamp: dose.timestamp,
               substance: dose.substance,
               amount: dose.amount,
               unit: dose.unit,
-              route: dose.route
+              route: dose.route,
             })),
         });
       } catch (error) {
@@ -256,149 +222,228 @@ export function DoseStats() {
         <TabsTrigger value="safety">Safety</TabsTrigger>
       </TabsList>
 
-      {/* Previous Overview, Patterns, Analysis and Safety TabsContent from the original code remain the same */}
       <TabsContent value="overview" className="space-y-4">
-        {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-4 gap-4">
           <Card>
             <CardHeader className="font-semibold">Total Doses</CardHeader>
             <CardContent>
               <div className="flex flex-col">
                 <span className="text-2xl">{stats.totalDoses}</span>
-                <div className="flex items-center mt-2">
-                  {stats.monthlyTrends.length >= 2 && (
-                    <>
-                      {getTrendIcon(
-                        stats.monthlyTrends[stats.monthlyTrends.length - 1].doses >
-                        stats.monthlyTrends[stats.monthlyTrends.length - 2].doses
-                          ? "increasing"
-                          : "decreasing"
-                      )}
-                      <span className="text-sm text-muted-foreground ml-1">
-                        {Math.abs(
-                          ((stats.monthlyTrends[stats.monthlyTrends.length - 1].doses -
-                            stats.monthlyTrends[stats.monthlyTrends.length - 2].doses) /
-                            stats.monthlyTrends[stats.monthlyTrends.length - 2].doses) *
-                            100
-                        ).toFixed(1)}% MoM
-                      </span>
-                    </>
-                  )}
+                {stats.monthlyTrends.length >= 2 && (
+                  <div className="flex items-center mt-2">
+                    {getTrendIcon(
+                      stats.monthlyTrends[stats.monthlyTrends.length - 1].doses >
+                      stats.monthlyTrends[stats.monthlyTrends.length - 2].doses
+                        ? "increasing"
+                        : "decreasing"
+                    )}
+                    <span className="text-sm text-muted-foreground ml-1">
+                      {Math.abs(
+                        ((stats.monthlyTrends[stats.monthlyTrends.length - 1].doses -
+                          stats.monthlyTrends[stats.monthlyTrends.length - 2].doses) /
+                          stats.monthlyTrends[stats.monthlyTrends.length - 2].doses) *
+                          100
+                      ).toFixed(1)}% MoM
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="font-semibold">Unique Substances</CardHeader>
+            <CardContent>
+              <div className="flex flex-col">
+                <span className="text-2xl">{stats.uniqueSubstances}</span>
+                {stats.substanceDistribution[0] && (
+                  <div className="mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      Most used: {stats.substanceDistribution[0].name}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="font-semibold">Main Route</CardHeader>
+            <CardContent>
+              <div className="flex flex-col">
+                <span className="text-2xl">
+                  {stats.routeDistribution[0]?.name || "N/A"}
+                </span>
+                {stats.routeDistribution[0] && (
+                  <div className="mt-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {((stats.routeDistribution[0].value / stats.totalDoses) * 100).toFixed(1)}% of doses
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="font-semibold">Peak Hours</CardHeader>
+            <CardContent>
+              <div className="flex flex-col">
+                <span className="text-2xl">
+                  {stats.timeDistribution
+                    .reduce((max, curr) => 
+                      curr.count > max.count ? curr : max
+                    ).name.split(':')[0]}:00
+                </span>
+                <div className="mt-2">
+                  <Badge variant="secondary" className="text-xs">
+                    {Math.max(...stats.timeDistribution.map(t => t.count))} doses
+                  </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          {/* Remaining Overview content stays the same */}
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="font-semibold">Usage Trends</CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats.monthlyTrends}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="doses"
+                    stroke={COLORS[0]}
+                    strokeWidth={2}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="font-semibold">Substance Distribution</CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.substanceDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label
+                  >
+                    {stats.substanceDistribution.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader className="font-semibold">Recent Activity</CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {stats.recentActivity.map((dose, index) => (
+                <div key={index} className="flex items-center justify-between border-b last:border-0 pb-2">
+                  <div className="flex flex-col">
+                    <div className="font-medium">
+                      {format(new Date(dose.timestamp), "MMM d, h:mm a")}
+                    </div>
+                    <div className="text-sm text-muted-foreground">{dose.substance}</div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Badge variant="outline">
+                      {dose.amount}{dose.unit}
+                    </Badge>
+                    <Badge variant="secondary">
+                      {dose.route}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </TabsContent>
 
       <TabsContent value="patterns" className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="font-semibold">Usage Regularity</CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {stats.personalPatterns.map((pattern, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="font-medium min-w-[100px]">{pattern.substance}</div>
-                      <div className="text-sm text-muted-foreground">
-                        every {pattern.recentTrends.avgTimeBetweenDoses.toFixed(1)}h
+          {stats.personalPatterns.map((pattern, index) => (
+            <Card key={index}>
+              <CardHeader className="font-semibold">{pattern.substance}</CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="text-sm text-muted-foreground">Average Dose</div>
+                      <div className="font-medium">
+                        {pattern.recentTrends.typicalDoseRange.avg.toFixed(1)}mg
                       </div>
                     </div>
-                    <div className="w-32">
-                      <Badge 
+                    <div>
+                      <div className="text-sm text-muted-foreground">Frequency</div>
+                      <div className="font-medium">
+                        Every {pattern.recentTrends.avgTimeBetweenDoses.toFixed(1)}h
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Usage Pattern</div>
+                    <div className="flex gap-2">
+                      {pattern.changeMetrics.monthOverMonthChange > 0.1 && (
+                        <Badge variant="warning">Increasing</Badge>
+                      )}
+                      {pattern.changeMetrics.monthOverMonthChange < -0.1 && (
+                        <Badge variant="default">Decreasing</Badge>
+                      )}
+                      {Math.abs(pattern.changeMetrics.monthOverMonthChange) <= 0.1 && (
+                        <Badge variant="secondary">Stable</Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1">Consistency</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Badge
                         variant={pattern.variationMetrics.timingConsistency > 0.7 ? "default" : "secondary"}
                         className="w-full justify-center"
                       >
-                        {(pattern.variationMetrics.timingConsistency * 100).toFixed(0)}% regular
+                        Timing {(pattern.variationMetrics.timingConsistency * 100).toFixed(0)}%
+                      </Badge>
+                      <Badge
+                        variant={pattern.variationMetrics.doseConsistency > 0.7 ? "default" : "secondary"}
+                        className="w-full justify-center"
+                      >
+                        Dose {(pattern.variationMetrics.doseConsistency * 100).toFixed(0)}%
+                      </Badge>
+                      <Badge
+                        variant={pattern.variationMetrics.routeConsistency > 0.7 ? "default" : "secondary"}
+                        className="w-full justify-center"
+                      >
+                        Route {(pattern.variationMetrics.routeConsistency * 100).toFixed(0)}%
                       </Badge>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="font-semibold">Recent Trends</CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {stats.personalPatterns.map((pattern, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="font-medium min-w-[100px]">{pattern.substance}</div>
-                    <div className="flex gap-2">
-                      {pattern.changeMetrics.monthOverMonthChange > 0.1 && (
-                        <Badge variant="warning">More frequent</Badge>
-                      )}
-                      {pattern.changeMetrics.monthOverMonthChange < -0.1 && (
-                        <Badge variant="default">Less frequent</Badge>
-                      )}
-                      {pattern.changeMetrics.doseSizeTrend > 0.1 && (
-                        <Badge variant="warning">Doses increasing</Badge>
-                      )}
-                      {pattern.changeMetrics.doseSizeTrend < -0.1 && (
-                        <Badge variant="default">Doses decreasing</Badge>
-                      )}
-                      {Math.abs(pattern.changeMetrics.monthOverMonthChange) <= 0.1 && 
-                        Math.abs(pattern.changeMetrics.doseSizeTrend) <= 0.1 && (
-                        <Badge variant="secondary">Stable usage</Badge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
-        {/* Remaining Patterns TabsContent from the original code stays the same */}
-        
-        <Card>
-          <CardHeader className="font-semibold">Dose Correlations</CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="timeBetweenDoses" 
-                  name="Time Between Doses (hours)"
-                  type="number"
-                />
-                <YAxis 
-                  dataKey="doseAmount" 
-                  name="Dose Amount"
-                  type="number"
-                />
-                <Tooltip 
-                  cursor={{ strokeDasharray: '3 3' }}
-                  content={({ payload, label }) => {
-                    if (payload && payload.length) {
-                      return (
-                        <div className="bg-background border p-2 rounded-md">
-                          <p>Time: {payload[0].value.toFixed(1)}h</p>
-                          <p>Amount: {payload[1].value.toFixed(1)}</p>
-                          <p>{payload[0].payload.substance}</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Legend />
-                {stats.timeCorrelations.map((correlation, index) => (
-                  <Scatter
-                    key={correlation.substance}
-                    name={correlation.substance}
-                    data={correlation.correlationData}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </ScatterChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
       </TabsContent>
 
       <TabsContent value="analysis" className="space-y-4">
@@ -407,53 +452,39 @@ export function DoseStats() {
             <CardHeader className="font-semibold">Usage Forecasts</CardHeader>
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={stats.usageForecasts}>
+                <LineChart data={stats.usageForecasts.flatMap(f => f.predictedDoses)}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
+                  <XAxis dataKey="date" tickFormatter={(date) => format(new Date(date), "MMM d")} />
                   <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="actual"
-                    name="Actual Usage"
-                    stroke={COLORS[0]}
-                    strokeWidth={2}
-                    dot={false}
+                  <Tooltip
+                    labelFormatter={(date) => format(new Date(date), "MMM d, yyyy")}
+                    formatter={(value: number) => [value.toFixed(1), "Amount"]}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="predicted"
-                    name="Predicted"
-                    stroke={COLORS[1]}
-                    strokeDasharray="5 5"
-                    strokeWidth={2}
-                    dot={false}
-                  />
+                  <Line type="monotone" dataKey="amount" stroke={COLORS[0]} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="font-semibold">Calendar Heatmap</CardHeader>
+            <CardHeader className="font-semibold">Time Correlations</CardHeader>
             <CardContent className="h-[300px]">
-              <div className="grid grid-cols-7 gap-1">
-                {stats.calendarData.map((day, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square rounded"
-                    style={{
-                      backgroundColor: `hsl(var(--primary) / ${
-                        day.doseCount ? 0.1 + day.doseCount * 0.2 : 0
-                      })`,
-                    }}
-                    title={`${format(new Date(day.date), 'MMM d')}: ${
-                      day.doseCount
-                    } doses`}
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.timeCorrelations}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="substance1"
+                    tickFormatter={(value) => value.substring(0, 3)}
                   />
-                ))}
-              </div>
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="correlation" fill={COLORS[0]}>
+                    {stats.timeCorrelations.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
@@ -465,11 +496,11 @@ export function DoseStats() {
             <Alert
               key={index}
               variant={
-                interaction.riskLevel > INTERACTION_THRESHOLDS.HIGH
+                interaction.riskLevel === "critical"
                   ? "destructive"
-                  : interaction.riskLevel > INTERACTION_THRESHOLDS.MEDIUM
-                  ? "warning"
-                  : "default"
+                  : interaction.riskLevel === "high"
+                    ? "destructive"
+                    : "default"
               }
             >
               <AlertTriangle className="h-4 w-4" />
@@ -477,16 +508,11 @@ export function DoseStats() {
                 Interaction detected: {interaction.substances.join(" + ")}
               </AlertTitle>
               <AlertDescription>
-                Risk Level:{" "}
-                {interaction.riskLevel > INTERACTION_THRESHOLDS.HIGH
-                  ? "High"
-                  : interaction.riskLevel > INTERACTION_THRESHOLDS.MEDIUM
-                  ? "Medium"
-                  : "Low"}
+                Risk Level: {interaction.riskLevel}
                 <br />
-                Last occurred: {format(new Date(interaction.lastOccurrence), "PPp")}
+                Time Gap: {interaction.timeGap.toFixed(1)} hours
                 <br />
-                Frequency: {interaction.frequency} times in the past month
+                Frequency: {interaction.frequency} occurrences
               </AlertDescription>
             </Alert>
           ))}
@@ -494,14 +520,13 @@ export function DoseStats() {
           {stats.recoveryPeriods.map((period, index) => (
             <Alert key={index}>
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Recovery Period Analysis: {period.substance}</AlertTitle>
+              <AlertTitle>Recovery Period: {period.substance}</AlertTitle>
               <AlertDescription>
-                Recommended recovery time: {period.recommendedRecoveryTime}h
+                Recommended Break: {period.recommendedRecoveryTime}h
                 <br />
-                Current recovery streak:{" "}
-                {differenceInDays(new Date(), new Date(period.lastDose))} days
+                Current Break: {differenceInDays(new Date(), new Date(period.lastDose))} days
                 <br />
-                Average adherence rate: {(period.adherenceRate * 100).toFixed(1)}%
+                Adherence Rate: {(period.adherenceRate * 100).toFixed(1)}%
               </AlertDescription>
             </Alert>
           ))}
