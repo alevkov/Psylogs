@@ -1,73 +1,82 @@
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { parseDoseString } from '@/lib/dose-parser';
-import { addDose } from '@/lib/db';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardHeader, CardContent } from '@/components/ui/card';
-import { ADMINISTRATION_METHODS } from '@/lib/constants';
-import { Loader2 } from 'lucide-react';
-import { useDoseContext } from '@/contexts/DoseContext';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { motion, AnimatePresence } from "framer-motion";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { parseDoseString } from "@/lib/dose-parser";
+import { addDose } from "@/lib/db";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { ADMINISTRATION_METHODS } from "@/lib/constants";
+import { Loader2 } from "lucide-react";
+import { useDoseContext } from "@/contexts/DoseContext";
 
 const formSchema = z.object({
-  doseString: z.string().min(1, 'Please enter a dose'),
+  doseString: z.string().min(1, "Please enter a dose"),
 });
 
 const COMMON_SUBSTANCES = [
-  'acetaminophen',
-  'ibuprofen',
-  'aspirin',
-  'amoxicillin',
-  'omeprazole',
+  "acetaminophen",
+  "ibuprofen",
+  "aspirin",
+  "amoxicillin",
+  "omeprazole",
 ];
 
 export function DoseForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewConversion, setPreviewConversion] = useState<string | null>(null);
+  const [previewConversion, setPreviewConversion] = useState<string | null>(
+    null,
+  );
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const { toast } = useToast();
   const { triggerUpdate } = useDoseContext();
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    setSubmitStatus('idle');
+    setSubmitStatus("idle");
     try {
       const parsed = parseDoseString(data.doseString);
       await addDose(parsed);
       form.reset();
-      setSubmitStatus('success');
+      setSubmitStatus("success");
       triggerUpdate(); // Trigger update after successful dose addition
       toast({
-        title: navigator.onLine ? "Dose logged successfully" : "Dose queued for sync",
-        description: navigator.onLine ? undefined : "Will be synced when you're back online",
+        title: navigator.onLine
+          ? "Dose logged successfully"
+          : "Dose queued for sync",
+        description: navigator.onLine
+          ? undefined
+          : "Will be synced when you're back online",
         duration: 2000,
       });
     } catch (error) {
-      setSubmitStatus('error');
+      setSubmitStatus("error");
       toast({
         title: "Error logging dose",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setSubmitStatus('idle'), 2000);
+      setTimeout(() => setSubmitStatus("idle"), 2000);
     }
   };
 
   // Rest of the component remains the same
   useEffect(() => {
-    const doseString = form.watch('doseString')?.toLowerCase() || '';
-    const words = doseString.split(' ');
+    const doseString = form.watch("doseString")?.toLowerCase() || "";
+    const words = doseString.split(" ");
     const lastWord = words[words.length - 1];
 
     if (!lastWord) {
@@ -76,14 +85,14 @@ export function DoseForm() {
     }
 
     if (words.length <= 2) {
-      const substanceSuggestions = COMMON_SUBSTANCES
-        .filter(s => s.startsWith(lastWord))
-        .slice(0, 5);
+      const substanceSuggestions = COMMON_SUBSTANCES.filter((s) =>
+        s.startsWith(lastWord),
+      ).slice(0, 5);
       setSuggestions(substanceSuggestions);
     } else {
       const routeSuggestions = Object.values(ADMINISTRATION_METHODS)
         .flat()
-        .filter(r => r.startsWith(lastWord))
+        .filter((r) => r.startsWith(lastWord))
         .slice(0, 5);
       setSuggestions(routeSuggestions);
     }
@@ -93,19 +102,19 @@ export function DoseForm() {
       const [, amount, unit] = match;
       const value = parseFloat(amount);
       if (!isNaN(value)) {
-        const mgValue = unit === 'ug' ? value / 1000 : value * 1000;
+        const mgValue = unit === "ug" ? value / 1000 : value * 1000;
         setPreviewConversion(`${value}${unit} = ${mgValue}mg`);
       }
     } else {
       setPreviewConversion(null);
     }
-  }, [form.watch('doseString')]);
+  }, [form.watch("doseString")]);
 
   const applySuggestion = (suggestion: string) => {
-    const doseString = form.watch('doseString') || '';
-    const words = doseString.split(' ');
+    const doseString = form.watch("doseString") || "";
+    const words = doseString.split(" ");
     words[words.length - 1] = suggestion;
-    form.setValue('doseString', words.join(' '));
+    form.setValue("doseString", words.join(" "));
   };
 
   return (
@@ -116,21 +125,24 @@ export function DoseForm() {
     >
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <h2 className="text-2xl font-bold text-center">Log Dose</h2>
+          <h2 className="text-xl font-bold text-center">Enter Dose</h2>
         </CardHeader>
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <motion.div 
+            <motion.div
               className="space-y-2"
               animate={submitStatus}
               variants={{
-                success: { scale: [1, 1.02, 1], borderColor: ['#ccc', '#22c55e', '#ccc'] },
+                success: {
+                  scale: [1, 1.02, 1],
+                  borderColor: ["#ccc", "#22c55e", "#ccc"],
+                },
                 error: { x: [0, -10, 10, -10, 10, 0] },
               }}
             >
               <Input
-                placeholder="20mg substance route"
-                {...form.register('doseString')}
+                placeholder="e.g. 200mg caffeine oral"
+                {...form.register("doseString")}
                 className="w-full transition-all"
                 disabled={isSubmitting}
               />
@@ -176,8 +188,8 @@ export function DoseForm() {
                 </motion.p>
               )}
             </motion.div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full relative"
               disabled={isSubmitting}
             >
@@ -187,7 +199,7 @@ export function DoseForm() {
                   Logging...
                 </span>
               ) : (
-                'Log Dose'
+                "Log Dose"
               )}
             </Button>
           </form>

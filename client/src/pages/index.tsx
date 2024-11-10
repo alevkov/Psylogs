@@ -9,7 +9,7 @@ export default function HomePage() {
       animate={{ opacity: 1 }}
       className="container mx-auto px-4 py-8"
     >
-      <h1 className="text-4xl font-bold text-center mb-8">Dose Logger</h1>
+      <h1 className="text-4xl font-bold text-center mb-8">Psylo.gs</h1>
       <div className="max-w-4xl mx-auto space-y-8">
         <DoseForm />
         <DoseHistory />

@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@nivo/calendar": "^0.87.0",
     "@nivo/core": "^0.87.0",
     "@nivo/heatmap": "^0.87.0",
     "@radix-ui/react-accordion": "^1.2.1",
