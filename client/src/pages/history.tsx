@@ -1,11 +1,14 @@
 import { DoseStats } from '@/components/DoseStats';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { exportData, importData } from '@/lib/db';
+import { exportData, importData, importPWJournalData } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function HistoryPage() {
   const { toast } = useToast();
+  const [isImporting, setIsImporting] = useState(false);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,6 +29,29 @@ export default function HistoryPage() {
     }
   };
 
+  const handlePWJournalImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const result = await importPWJournalData(file);
+      toast({
+        title: "PW Journal data imported successfully",
+        description: result.message,
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error importing PW Journal data",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -40,8 +66,23 @@ export default function HistoryPage() {
             <Button
               variant="outline"
               onClick={() => document.getElementById('import-input')?.click()}
+              disabled={isImporting}
             >
               Import Data
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => document.getElementById('pw-journal-import')?.click()}
+              disabled={isImporting}
+            >
+              {isImporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                'Import PW Journal Data'
+              )}
             </Button>
             <input
               id="import-input"
@@ -49,6 +90,13 @@ export default function HistoryPage() {
               accept=".json"
               className="hidden"
               onChange={handleImport}
+            />
+            <input
+              id="pw-journal-import"
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={handlePWJournalImport}
             />
           </div>
         </div>

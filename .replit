@@ -12,7 +12,7 @@ run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 5000
-externalPort = 80
+externalPort = 5000
 
 [packager]
 language = "nodejs"
@@ -37,10 +37,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Dose Logger"
+args = "Psylogs"
 
 [[workflows.workflow]]
-name = "Dose Logger"
+name = "Psylogs"
 author = "agent"
 
 [workflows.workflow.metadata]

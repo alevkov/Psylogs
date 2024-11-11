@@ -13,6 +13,19 @@ import HomePage from "./pages/index";
 import HistoryPage from "./pages/history";
 import SettingsPage from "./pages/settings";
 
+// Initialize dark mode from localStorage on app load
+const initializeDarkMode = () => {
+  const darkMode = localStorage.getItem("darkMode") === "true";
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+};
+
+// Call it before rendering
+initializeDarkMode();
+
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
@@ -54,12 +67,12 @@ createRoot(document.getElementById("root")!).render(
         </Layout>
       </DoseProvider>
     </SWRConfig>
-  </StrictMode>
+  </StrictMode>,
 );
 
 // Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js');
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js");
   });
 }
