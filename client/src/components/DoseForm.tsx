@@ -4,21 +4,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { parseDoseString } from "@/lib/dose-parser";
-import { addDose } from "@/lib/db";
+import { addDose, getDoses } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { ADMINISTRATION_METHODS } from "@/lib/constants";
-import { Loader2, AlertCircle, Check, Info } from "lucide-react";
+import { Loader2, AlertCircle, Check, Info, Clock, Star } from "lucide-react";
 import { useDoseContext } from "@/contexts/DoseContext";
 import { Badge } from "@/components/ui/badge";
+import { analyzePersonalPatterns } from "@/lib/analysis";
 
 const formSchema = z.object({
   doseString: z.string().min(1, "Please enter a dose"),
 });
 
-const COMMON_SUBSTANCES = [
+// Base common substances
+const BASE_SUBSTANCES = [
   "acetaminophen",
   "ibuprofen",
   "aspirin",
@@ -31,6 +33,28 @@ interface ParseError {
   message: string;
   suggestion?: string;
   example?: string;
+}
+
+// Fuzzy match function for substance names
+function fuzzyMatch(query: string, substance: string): number {
+  query = query.toLowerCase();
+  substance = substance.toLowerCase();
+  
+  if (substance.startsWith(query)) return 2; // Prefix match gets highest priority
+  if (substance.includes(query)) return 1; // Contains match gets medium priority
+  
+  let score = 0;
+  const queryChars = query.split('');
+  let lastFoundIndex = -1;
+  
+  for (const char of queryChars) {
+    const index = substance.indexOf(char, lastFoundIndex + 1);
+    if (index === -1) return 0;
+    score += 1 / (index - lastFoundIndex);
+    lastFoundIndex = index;
+  }
+  
+  return score / queryChars.length;
 }
 
 function getErrorDetails(error: Error, input: string): ParseError | null {
@@ -110,6 +134,13 @@ function getErrorDetails(error: Error, input: string): ParseError | null {
 
   return null; // Don't show error while still typing
 }
+
+interface SuggestionItem {
+  text: string;
+  type: 'recent' | 'common' | 'frequent' | 'pattern';
+  icon?: React.ReactNode;
+}
+
 export function DoseForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewParse, setPreviewParse] = useState<{
@@ -119,7 +150,9 @@ export function DoseForm() {
     route: string;
   } | null>(null);
   const [parseError, setParseError] = useState<ParseError | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
+  const [recentSubstances, setRecentSubstances] = useState<string[]>([]);
+  const [frequentSubstances, setFrequentSubstances] = useState<string[]>([]);
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
@@ -132,6 +165,38 @@ export function DoseForm() {
       doseString: "",
     },
   });
+
+  // Load historical data on mount
+  useEffect(() => {
+    const loadHistoricalData = async () => {
+      try {
+        const doses = await getDoses();
+        const patterns = analyzePersonalPatterns(doses);
+        
+        // Get recent substances (last 5 unique)
+        const recent = Array.from(new Set(
+          doses
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .map(d => d.substance)
+        )).slice(0, 5);
+        
+        // Get most frequent substances
+        const frequent = patterns
+          .sort((a, b) => 
+            (b.recentTrends.avgDailyDose || 0) - (a.recentTrends.avgDailyDose || 0)
+          )
+          .map(p => p.substance)
+          .slice(0, 5);
+        
+        setRecentSubstances(recent);
+        setFrequentSubstances(frequent);
+      } catch (error) {
+        console.error("Error loading historical data:", error);
+      }
+    };
+
+    loadHistoricalData();
+  }, []);
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -168,32 +233,24 @@ export function DoseForm() {
   function getDoseFormat(input: string): "standard" | "command" | null {
     const words = input.trim().split(/\s+/);
     if (words[0]?.startsWith("@")) return "command";
-    // Check if first word starts with a number, regardless of what follows
     if (words[0]?.match(/^\d+\.?\d*/)) return "standard";
     return null;
   }
 
   function isValidDoseUnitPrefix(input: string): boolean {
-    // Include 'g' as a valid standalone unit
     return /^\d+\.?\d*[mug]?$/i.test(input);
   }
 
   function isCompleteDoseUnit(input: string): boolean {
-    // Include 'g' as a standalone unit option
     return /^\d+\.?\d*(mg|g|ug|ml)$/i.test(input);
   }
 
-  // Modified useEffect for suggestions
+  // Enhanced useEffect for smart suggestions
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
     const words = doseString.trim().split(/\s+/);
     const lastWord = words[words.length - 1];
     const format = getDoseFormat(doseString);
-
-    console.log("Current input:", doseString);
-    console.log("Format:", format);
-    console.log("Words:", words);
-    console.log("Last word:", lastWord);
 
     setParseError(null);
 
@@ -202,17 +259,16 @@ export function DoseForm() {
       setPreviewParse(null);
       return;
     }
-    // Enhanced suggestion logic
+
     if (format === "command") {
       if (words[0] === "@" && words.length === 1) {
-        // Show method suggestions immediately at @
         const methodSuggestions = Object.values(ADMINISTRATION_METHODS)
           .flat()
           .filter((r) => r.startsWith("@"))
+          .map(text => ({ text, type: 'common' as const }))
           .slice(0, 5);
         setSuggestions(methodSuggestions);
       } else if (words.length === 2) {
-        // Clear method suggestions and validate dose unit
         setSuggestions([]);
         const doseAmount = words[1];
         if (
@@ -226,10 +282,42 @@ export function DoseForm() {
             example: "Valid units: mg, g, ug, ml",
           });
         }
-      } else if (words.length === 3 && words[2].length > 1) {
-        // Only validate if second letter of substance is typed
-        // Clear suggestions and validate complete dose
-        setSuggestions([]);
+      } else if (words.length === 3 && lastWord.length > 1) {
+        // Smart substance suggestions
+        const allSubstances = Array.from(new Set([
+          ...recentSubstances,
+          ...frequentSubstances,
+          ...BASE_SUBSTANCES
+        ]));
+
+        const matchedSubstances = allSubstances
+          .map(substance => ({
+            substance,
+            score: fuzzyMatch(lastWord, substance)
+          }))
+          .filter(({ score }) => score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5)
+          .map(({ substance }) => {
+            const suggestionItem: SuggestionItem = {
+              text: substance,
+              type: 'common',
+              icon: undefined
+            };
+
+            if (recentSubstances.includes(substance)) {
+              suggestionItem.type = 'recent';
+              suggestionItem.icon = <Clock className="w-4 h-4" />;
+            } else if (frequentSubstances.includes(substance)) {
+              suggestionItem.type = 'frequent';
+              suggestionItem.icon = <Star className="w-4 h-4" />;
+            }
+
+            return suggestionItem;
+          });
+
+        setSuggestions(matchedSubstances);
+
         try {
           const parsed = parseDoseString(doseString);
           setPreviewParse(parsed);
@@ -241,29 +329,14 @@ export function DoseForm() {
             setParseError(errorDetails);
           }
         }
-      } else {
-        // Clear any errors while typing first letter of substance
-        setParseError(null);
-        setPreviewParse(null);
       }
     } else if (format === "standard") {
-      console.log("Words:", words);
-      console.log("Last word:", lastWord);
-
       if (words.length === 1) {
-        // Check if it's a complete valid unit
         if (isCompleteDoseUnit(lastWord)) {
-          console.log("Valid complete unit");
           setParseError(null);
-        }
-        // Check if it's a potentially valid partial unit
-        else if (isValidDoseUnitPrefix(lastWord)) {
-          console.log("Valid unit prefix");
+        } else if (isValidDoseUnitPrefix(lastWord)) {
           setParseError(null);
-        }
-        // Show error for invalid unit
-        else if (lastWord.match(/^\d+\.?\d*[a-z]+$/i)) {
-          console.log("Invalid unit detected");
+        } else if (lastWord.match(/^\d+\.?\d*[a-z]+$/i)) {
           setParseError({
             type: "unit",
             message: "Invalid dose unit",
@@ -271,29 +344,52 @@ export function DoseForm() {
             example: "Valid units: mg, g, ug, ml",
           });
         }
-      } else if (words.length === 2) {
-        const substanceSuggestions = COMMON_SUBSTANCES.filter((s) =>
-          lastWord ? s.startsWith(lastWord) : true,
-        ).slice(0, 5);
-        setSuggestions(substanceSuggestions);
-      } else if (words.length === 3) {
-        // Debug logs
-        console.log("Last word:", lastWord);
+      } else if (words.length === 2 && lastWord.length > 0) {
+        // Enhanced substance suggestions with history
+        const allSubstances = Array.from(new Set([
+          ...recentSubstances,
+          ...frequentSubstances,
+          ...BASE_SUBSTANCES
+        ]));
 
+        const matchedSubstances = allSubstances
+          .map(substance => ({
+            substance,
+            score: fuzzyMatch(lastWord, substance)
+          }))
+          .filter(({ score }) => score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 5)
+          .map(({ substance }) => {
+            const suggestionItem: SuggestionItem = {
+              text: substance,
+              type: 'common',
+              icon: undefined
+            };
+
+            if (recentSubstances.includes(substance)) {
+              suggestionItem.type = 'recent';
+              suggestionItem.icon = <Clock className="w-4 h-4" />;
+            } else if (frequentSubstances.includes(substance)) {
+              suggestionItem.type = 'frequent';
+              suggestionItem.icon = <Star className="w-4 h-4" />;
+            }
+
+            return suggestionItem;
+          });
+
+        setSuggestions(matchedSubstances);
+      } else if (words.length === 3) {
         const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
           .flat()
-          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""));
-
-        // Debug logs
-        console.log("Matching routes:", matchingRoutes);
-        console.log("ADMINISTRATION_METHODS:", ADMINISTRATION_METHODS);
+          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""))
+          .map(text => ({ text, type: 'common' as const }));
 
         if (matchingRoutes.length > 0) {
-          console.log("Found matches, setting suggestions");
-          setSuggestions(matchingRoutes.slice(0, 5));
+          setSuggestions(matchingRoutes);
           setParseError(null);
 
-          if (matchingRoutes.some((r) => r === lastWord)) {
+          if (matchingRoutes.some((r) => r.text === lastWord)) {
             try {
               const parsed = parseDoseString(doseString);
               setPreviewParse(parsed);
@@ -302,7 +398,6 @@ export function DoseForm() {
             }
           }
         } else {
-          console.log("No matches found");
           if (lastWord && lastWord.length > 0) {
             setSuggestions([]);
             setParseError({
@@ -315,6 +410,7 @@ export function DoseForm() {
             const allRoutes = Object.values(ADMINISTRATION_METHODS)
               .flat()
               .filter((r) => !r.startsWith("@"))
+              .map(text => ({ text, type: 'common' as const }))
               .slice(0, 5);
             setSuggestions(allRoutes);
             setParseError(null);
@@ -322,12 +418,12 @@ export function DoseForm() {
         }
       }
     }
-  }, [form.watch("doseString")]);
+  }, [form.watch("doseString"), recentSubstances, frequentSubstances]);
 
-  const applySuggestion = (suggestion: string) => {
+  const applySuggestion = (suggestion: SuggestionItem) => {
     const doseString = form.watch("doseString") || "";
     const words = doseString.split(" ");
-    words[words.length - 1] = suggestion;
+    words[words.length - 1] = suggestion.text;
     form.setValue("doseString", words.join(" "));
   };
 
@@ -420,14 +516,15 @@ export function DoseForm() {
                   >
                     {suggestions.map((suggestion) => (
                       <Button
-                        key={suggestion}
+                        key={suggestion.text}
                         variant="outline"
                         size="sm"
                         type="button"
                         onClick={() => applySuggestion(suggestion)}
-                        className="hover:scale-105 transition-transform"
+                        className="hover:scale-105 transition-transform flex items-center gap-1"
                       >
-                        {suggestion}
+                        {suggestion.icon}
+                        {suggestion.text}
                       </Button>
                     ))}
                   </motion.div>
@@ -465,13 +562,10 @@ export function DoseForm() {
             <Button
               type="submit"
               className="w-full relative"
-              disabled={isSubmitting || !previewParse}
+              disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Logging...
-                </span>
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Log Dose"
               )}
