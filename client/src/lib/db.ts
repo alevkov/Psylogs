@@ -112,6 +112,40 @@ export async function getDosesByDateRange(startDate: Date, endDate: Date): Promi
   );
 }
 
+export async function deleteDose(id: number): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction("doses", "readwrite");
+    await tx.store.delete(id);
+    await tx.done;
+  } catch (error) {
+    console.error("Failed to delete dose:", error);
+    throw error;
+  }
+}
+
+export async function editDose(id: number, updates: Partial<DoseEntry>): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction("doses", "readwrite");
+    const dose = await tx.store.get(id);
+    
+    if (!dose) {
+      throw new Error("Dose not found");
+    }
+    
+    await tx.store.put({
+      ...dose,
+      ...updates,
+    });
+    
+    await tx.done;
+  } catch (error) {
+    console.error("Failed to edit dose:", error);
+    throw error;
+  }
+}
+
 export async function clearDoses(): Promise<void> {
   try {
     const db = await getDB();
@@ -178,32 +212,6 @@ export async function importData(file: File): Promise<void> {
     console.error("Failed to import data:", error);
     throw error;
   }
-}
-
-// Map PW Journal route names to our format
-const routeMap: Record<string, string> = {
-  'ORAL': 'oral',
-  'INSUFFLATED': 'nasal',
-  'SUBLINGUAL': 'sublingual',
-  'INTRAVENOUS': 'intravenous-injection',
-  'INTRAMUSCULAR': 'intramuscular-injection',
-  'RECTAL': 'rectal',
-  'TRANSDERMAL': 'transdermal',
-  'BUCCAL': 'buccal',
-  'SMOKED': 'inhaled',
-  'VAPORIZED': 'inhaled',
-};
-
-interface PWJournalData {
-  experiences: Array<{
-    ingestions: Array<{
-      substanceName: string;
-      dose: number;
-      units: string;
-      administrationRoute: string;
-      time: number;
-    }>;
-  }>;
 }
 
 export async function importPWJournalData(file: File) {
