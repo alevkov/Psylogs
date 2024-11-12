@@ -520,7 +520,10 @@ export function DoseForm() {
                         variant="outline"
                         size="sm"
                         type="button"
-                        onClick={() => applySuggestion(suggestion)}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          applySuggestion(suggestion);
+                        }}
                         className="hover:scale-105 transition-transform flex items-center gap-1"
                       >
                         {suggestion.icon}
