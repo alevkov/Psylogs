@@ -27,68 +27,89 @@ const COMMON_SUBSTANCES = [
 ];
 
 interface ParseError {
-  type: 'format' | 'amount' | 'route' | 'unit' | 'substance' | 'unknown';
+  type: "format" | "amount" | "route" | "unit" | "substance" | "unknown";
   message: string;
   suggestion?: string;
   example?: string;
 }
 
-function getErrorDetails(error: Error): ParseError {
+function getErrorDetails(error: Error, input: string): ParseError | null {
   const message = error.message.toLowerCase();
-  
-  if (message.includes('invalid dose string format')) {
+  const words = input.trim().split(/\s+/);
+
+  // Don't show errors while user is still typing if following valid patterns
+  if (words.length < 3) {
+    // Check if starting with @ format
+    if (words[0]?.startsWith("@")) {
+      const validPrefix = /^@[a-z]+$/i.test(words[0]); // Valid @ command
+      if (validPrefix) return null;
+
+      return {
+        type: "format",
+        message: "Invalid shorthand format",
+        suggestion: "Start with @ followed by action, amount, and substance",
+        example: "Example: @ate 30mg substance",
+      };
+    }
+
+    // Check if starting with amount format
+    const amountPattern = /^\d+\.?\d*(mg|g|ug|ml)?$/i;
+    if (words[0] && amountPattern.test(words[0])) {
+      return null; // Valid amount pattern, still typing
+    }
+  }
+
+  // Only show format error when they've typed enough to make a judgment
+  if (words.length >= 3 && message.includes("invalid dose string format")) {
     return {
-      type: 'format',
+      type: "format",
       message: "Format not recognized",
-      suggestion: "Use the format: amount + unit + substance + route",
-      example: "Example: 200mg caffeine oral"
+      suggestion:
+        "Use either: amount + unit + substance + route OR @action + amount + substance",
+      example: "Examples:\n200mg caffeine oral\n@ate 30mg adderall",
     };
   }
-  
-  if (message.includes('amount must be')) {
+
+  if (message.includes("amount must be")) {
     return {
-      type: 'amount',
+      type: "amount",
       message: "Invalid amount",
       suggestion: "Enter a positive number",
-      example: "Examples: 20, 0.5, 100"
+      example: "Examples: 20, 0.5, 100",
     };
   }
-  
-  if (message.includes('unknown route')) {
+
+  if (message.includes("unknown route") && words.length >= 3) {
     return {
-      type: 'route',
+      type: "route",
       message: "Route not recognized",
       suggestion: "Use one of the standard administration routes",
-      example: "Common routes: oral, nasal, inhaled, injected"
+      example: "Common routes: oral, nasal, inhaled, injected",
     };
   }
-  
-  if (message.includes('unknown unit')) {
+
+  if (message.includes("unknown unit") && words.length >= 2) {
     return {
-      type: 'unit',
+      type: "unit",
       message: "Unit not recognized",
       suggestion: "Use a standard unit of measurement",
-      example: "Valid units: mg, g, ug, ml"
+      example: "Valid units: mg, g, ug, ml",
     };
   }
 
-  if (message.includes('@')) {
+  // Only show unknown error if they've completed typing
+  if (words.length >= 3) {
     return {
-      type: 'format',
-      message: "Invalid shorthand format",
-      suggestion: "Start with @ followed by action, amount, and substance",
-      example: "Example: @ate 30mg substance"
+      type: "unknown",
+      message: "Something's not quite right",
+      suggestion: "Check that your input follows one of these formats:",
+      example:
+        "1. amount + unit + substance + route\n2. @action + amount + substance",
     };
   }
 
-  return {
-    type: 'unknown',
-    message: "Something's not quite right",
-    suggestion: "Check that your input follows the expected format",
-    example: "Format: amount + unit + substance + route"
-  };
+  return null; // Don't show error while still typing
 }
-
 export function DoseForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewParse, setPreviewParse] = useState<{
@@ -99,7 +120,9 @@ export function DoseForm() {
   } | null>(null);
   const [parseError, setParseError] = useState<ParseError | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
   const { toast } = useToast();
   const { triggerUpdate } = useDoseContext();
 
@@ -120,7 +143,9 @@ export function DoseForm() {
       setSubmitStatus("success");
       triggerUpdate();
       toast({
-        title: navigator.onLine ? "Dose logged successfully" : "Dose queued for sync",
+        title: navigator.onLine
+          ? "Dose logged successfully"
+          : "Dose queued for sync",
         description: navigator.onLine
           ? undefined
           : "Will be synced when you're back online",
@@ -130,7 +155,8 @@ export function DoseForm() {
       setSubmitStatus("error");
       toast({
         title: "Error logging dose",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
     } finally {
@@ -139,44 +165,162 @@ export function DoseForm() {
     }
   };
 
+  function getDoseFormat(input: string): "standard" | "command" | null {
+    const words = input.trim().split(/\s+/);
+    if (words[0]?.startsWith("@")) return "command";
+    // Check if first word starts with a number, regardless of what follows
+    if (words[0]?.match(/^\d+\.?\d*/)) return "standard";
+    return null;
+  }
+
+  function isValidDoseUnitPrefix(input: string): boolean {
+    // Include 'g' as a valid standalone unit
+    return /^\d+\.?\d*[mug]?$/i.test(input);
+  }
+
+  function isCompleteDoseUnit(input: string): boolean {
+    // Include 'g' as a standalone unit option
+    return /^\d+\.?\d*(mg|g|ug|ml)$/i.test(input);
+  }
+
+  // Modified useEffect for suggestions
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
-    const words = doseString.split(" ");
+    const words = doseString.trim().split(/\s+/);
     const lastWord = words[words.length - 1];
+    const format = getDoseFormat(doseString);
 
-    // Reset error state when input changes
+    console.log("Current input:", doseString);
+    console.log("Format:", format);
+    console.log("Words:", words);
+    console.log("Last word:", lastWord);
+
     setParseError(null);
 
-    if (!lastWord) {
+    if (!doseString.trim()) {
       setSuggestions([]);
       setPreviewParse(null);
       return;
     }
-
-    // Try to parse the current input
-    try {
-      const parsed = parseDoseString(doseString);
-      setPreviewParse(parsed);
-      setParseError(null);
-    } catch (error) {
-      setPreviewParse(null);
-      if (error instanceof Error) {
-        setParseError(getErrorDetails(error));
+    // Enhanced suggestion logic
+    if (format === "command") {
+      if (words[0] === "@" && words.length === 1) {
+        // Show method suggestions immediately at @
+        const methodSuggestions = Object.values(ADMINISTRATION_METHODS)
+          .flat()
+          .filter((r) => r.startsWith("@"))
+          .slice(0, 5);
+        setSuggestions(methodSuggestions);
+      } else if (words.length === 2) {
+        // Clear method suggestions and validate dose unit
+        setSuggestions([]);
+        const doseAmount = words[1];
+        if (
+          !isCompleteDoseUnit(doseAmount) &&
+          !isValidDoseUnitPrefix(doseAmount)
+        ) {
+          setParseError({
+            type: "unit",
+            message: "Invalid dose unit",
+            suggestion: "Use a standard unit of measurement",
+            example: "Valid units: mg, g, ug, ml",
+          });
+        }
+      } else if (words.length === 3 && words[2].length > 1) {
+        // Only validate if second letter of substance is typed
+        // Clear suggestions and validate complete dose
+        setSuggestions([]);
+        try {
+          const parsed = parseDoseString(doseString);
+          setPreviewParse(parsed);
+          setParseError(null);
+        } catch (error) {
+          setPreviewParse(null);
+          if (error instanceof Error) {
+            const errorDetails = getErrorDetails(error, doseString);
+            setParseError(errorDetails);
+          }
+        }
+      } else {
+        // Clear any errors while typing first letter of substance
+        setParseError(null);
+        setPreviewParse(null);
       }
-    }
+    } else if (format === "standard") {
+      console.log("Words:", words);
+      console.log("Last word:", lastWord);
 
-    // Generate suggestions based on input context
-    if (words.length <= 2) {
-      const substanceSuggestions = COMMON_SUBSTANCES.filter((s) =>
-        s.startsWith(lastWord)
-      ).slice(0, 5);
-      setSuggestions(substanceSuggestions);
-    } else {
-      const routeSuggestions = Object.values(ADMINISTRATION_METHODS)
-        .flat()
-        .filter((r) => r.startsWith(lastWord))
-        .slice(0, 5);
-      setSuggestions(routeSuggestions);
+      if (words.length === 1) {
+        // Check if it's a complete valid unit
+        if (isCompleteDoseUnit(lastWord)) {
+          console.log("Valid complete unit");
+          setParseError(null);
+        }
+        // Check if it's a potentially valid partial unit
+        else if (isValidDoseUnitPrefix(lastWord)) {
+          console.log("Valid unit prefix");
+          setParseError(null);
+        }
+        // Show error for invalid unit
+        else if (lastWord.match(/^\d+\.?\d*[a-z]+$/i)) {
+          console.log("Invalid unit detected");
+          setParseError({
+            type: "unit",
+            message: "Invalid dose unit",
+            suggestion: "Use a standard unit of measurement",
+            example: "Valid units: mg, g, ug, ml",
+          });
+        }
+      } else if (words.length === 2) {
+        const substanceSuggestions = COMMON_SUBSTANCES.filter((s) =>
+          lastWord ? s.startsWith(lastWord) : true,
+        ).slice(0, 5);
+        setSuggestions(substanceSuggestions);
+      } else if (words.length === 3) {
+        // Debug logs
+        console.log("Last word:", lastWord);
+
+        const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
+          .flat()
+          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""));
+
+        // Debug logs
+        console.log("Matching routes:", matchingRoutes);
+        console.log("ADMINISTRATION_METHODS:", ADMINISTRATION_METHODS);
+
+        if (matchingRoutes.length > 0) {
+          console.log("Found matches, setting suggestions");
+          setSuggestions(matchingRoutes.slice(0, 5));
+          setParseError(null);
+
+          if (matchingRoutes.some((r) => r === lastWord)) {
+            try {
+              const parsed = parseDoseString(doseString);
+              setPreviewParse(parsed);
+            } catch (error) {
+              setPreviewParse(null);
+            }
+          }
+        } else {
+          console.log("No matches found");
+          if (lastWord && lastWord.length > 0) {
+            setSuggestions([]);
+            setParseError({
+              type: "route",
+              message: "Route not recognized",
+              suggestion: "Use one of the standard administration routes",
+              example: "Common routes: oral, nasal, inhaled, injected",
+            });
+          } else {
+            const allRoutes = Object.values(ADMINISTRATION_METHODS)
+              .flat()
+              .filter((r) => !r.startsWith("@"))
+              .slice(0, 5);
+            setSuggestions(allRoutes);
+            setParseError(null);
+          }
+        }
+      }
     }
   }, [form.watch("doseString")]);
 
@@ -195,7 +339,7 @@ export function DoseForm() {
     >
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
-          <motion.div 
+          <motion.div
             className="flex items-center justify-between"
             initial={false}
             animate={submitStatus}
@@ -220,13 +364,19 @@ export function DoseForm() {
                   placeholder="e.g. 200mg caffeine oral"
                   {...form.register("doseString")}
                   className={`w-full pr-10 transition-all ${
-                    previewParse ? "border-green-500" : parseError ? "border-red-500" : ""
+                    previewParse
+                      ? "border-green-500"
+                      : parseError
+                        ? "border-red-500"
+                        : ""
                   }`}
                   disabled={isSubmitting}
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   {previewParse && <Check className="w-4 h-4 text-green-500" />}
-                  {parseError && <AlertCircle className="w-4 h-4 text-destructive" />}
+                  {parseError && (
+                    <AlertCircle className="w-4 h-4 text-destructive" />
+                  )}
                 </div>
               </div>
 
@@ -292,12 +442,15 @@ export function DoseForm() {
                   >
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Substance:</span>
-                      <span className="font-medium">{previewParse.substance}</span>
+                      <span className="font-medium">
+                        {previewParse.substance}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Amount:</span>
                       <span className="font-medium">
-                        {previewParse.amount}{previewParse.unit}
+                        {previewParse.amount}
+                        {previewParse.unit}
                       </span>
                     </div>
                     <div className="flex justify-between">

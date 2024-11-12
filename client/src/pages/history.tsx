@@ -1,10 +1,10 @@
-import { DoseStats } from '@/components/DoseStats';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { exportData, importData, importPWJournalData } from '@/lib/db';
-import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { DoseStats } from "@/components/DoseStats";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { exportData, importData, importPWJournalData } from "@/lib/db";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Loader2, Download, Upload, FileInput } from "lucide-react";
 
 export default function HistoryPage() {
   const { toast } = useToast();
@@ -29,7 +29,9 @@ export default function HistoryPage() {
     }
   };
 
-  const handlePWJournalImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePWJournalImport = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -44,7 +46,8 @@ export default function HistoryPage() {
     } catch (error) {
       toast({
         title: "Error importing PW Journal data",
-        description: error instanceof Error ? error.message : "Unknown error occurred",
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
     } finally {
@@ -59,29 +62,43 @@ export default function HistoryPage() {
       className="container mx-auto px-4 py-8"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">History & Stats</h1>
-          <div className="space-x-4">
-            <Button onClick={exportData}>Export Data</Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold">History & Stats</h1>
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+            <Button
+              onClick={exportData}
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export Data
+            </Button>
             <Button
               variant="outline"
-              onClick={() => document.getElementById('import-input')?.click()}
+              onClick={() => document.getElementById("import-input")?.click()}
               disabled={isImporting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
             >
+              <Upload className="h-4 w-4" />
               Import Data
             </Button>
             <Button
               variant="outline"
-              onClick={() => document.getElementById('pw-journal-import')?.click()}
+              onClick={() =>
+                document.getElementById("pw-journal-import")?.click()
+              }
               disabled={isImporting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2"
             >
               {isImporting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Importing...
                 </>
               ) : (
-                'Import PW Journal Data'
+                <>
+                  <FileInput className="h-4 w-4" />
+                  Import PW Journal
+                </>
               )}
             </Button>
             <input

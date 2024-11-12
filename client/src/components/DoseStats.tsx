@@ -16,8 +16,6 @@ import {
   ResponsiveContainer,
   Legend,
   CartesianGrid,
-  ScatterChart,
-  Scatter,
 } from "recharts";
 import {
   format,
@@ -51,7 +49,6 @@ import {
   analyzePersonalPatterns,
 } from "@/lib/analysis";
 
-// Generate colors for charts
 const COLORS = [
   "#FF6B6B",
   "#4ECDC4",
@@ -65,6 +62,16 @@ const COLORS = [
   "#6C5B7B",
 ];
 
+const getTrendIcon = (trend: string) => {
+  switch (trend) {
+    case "increasing":
+      return <TrendingUp className="h-4 w-4 text-green-500" />;
+    case "decreasing":
+      return <TrendingDown className="h-4 w-4 text-red-500" />;
+    default:
+      return <ArrowRight className="h-4 w-4 text-yellow-500" />;
+  }
+};
 interface Stats {
   timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
   usagePatterns: ReturnType<typeof analyzeUsagePatterns>;
@@ -81,17 +88,6 @@ interface Stats {
   timeDistribution: Array<{ name: string; count: number }>;
   recentActivity: Array<{ name: string; amount: number }>;
 }
-
-const getTrendIcon = (trend: string) => {
-  switch (trend) {
-    case "increasing":
-      return <TrendingUp className="h-4 w-4 text-green-500" />;
-    case "decreasing":
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
-    default:
-      return <ArrowRight className="h-4 w-4 text-yellow-500" />;
-  }
-};
 
 export function DoseStats() {
   const [loading, setLoading] = useState(true);
@@ -263,19 +259,41 @@ export function DoseStats() {
 
   return (
     <Tabs defaultValue="overview" className="space-y-4">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="patterns">Patterns</TabsTrigger>
-        <TabsTrigger value="analysis">Analysis</TabsTrigger>
-        <TabsTrigger value="safety">Safety</TabsTrigger>
-      </TabsList>
+      <div className="overflow-x-auto">
+        <TabsList className="w-full min-w-[400px]">
+          <TabsTrigger
+            value="overview"
+            className="flex-1 min-w-[100px] whitespace-nowrap"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="patterns"
+            className="flex-1 min-w-[100px] whitespace-nowrap"
+          >
+            Patterns
+          </TabsTrigger>
+          <TabsTrigger
+            value="analysis"
+            className="flex-1 min-w-[100px] whitespace-nowrap"
+          >
+            Analysis
+          </TabsTrigger>
+          <TabsTrigger
+            value="safety"
+            className="flex-1 min-w-[100px] whitespace-nowrap"
+          >
+            Safety
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
       <TabsContent value="overview" className="space-y-4">
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-4 gap-4">
+        {/* Stats Grid - Mobile Responsive */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
-            <CardHeader className="font-semibold">Total Doses</CardHeader>
-            <CardContent>
+            <CardHeader className="font-semibold p-4">Total Doses</CardHeader>
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="flex flex-col">
                 <span className="text-2xl">{stats.totalDoses}</span>
                 <div className="flex items-center mt-2">
@@ -309,8 +327,10 @@ export function DoseStats() {
           </Card>
 
           <Card>
-            <CardHeader className="font-semibold">Unique Substances</CardHeader>
-            <CardContent>
+            <CardHeader className="font-semibold p-4">
+              Unique Substances
+            </CardHeader>
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="flex flex-col">
                 <span className="text-2xl">{stats.uniqueSubstances}</span>
                 <div className="mt-2">
@@ -323,8 +343,10 @@ export function DoseStats() {
           </Card>
 
           <Card>
-            <CardHeader className="font-semibold">Administration</CardHeader>
-            <CardContent>
+            <CardHeader className="font-semibold p-4">
+              Administration
+            </CardHeader>
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="flex flex-col">
                 <span className="text-2xl">
                   {stats.routeDistribution[0]?.name}
@@ -343,8 +365,8 @@ export function DoseStats() {
           </Card>
 
           <Card>
-            <CardHeader className="font-semibold">Peak Hours</CardHeader>
-            <CardContent>
+            <CardHeader className="font-semibold p-4">Peak Hours</CardHeader>
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="flex flex-col">
                 <span className="text-2xl">
                   {stats.timeDistribution.length > 0
@@ -368,9 +390,9 @@ export function DoseStats() {
           </Card>
         </div>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
+        {/* Charts - Mobile Responsive */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="min-h-[400px]">
             <CardHeader className="font-semibold">Usage Trends</CardHeader>
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -392,7 +414,7 @@ export function DoseStats() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="min-h-[400px]">
             <CardHeader className="font-semibold">
               Substance Distribution
             </CardHeader>
@@ -423,9 +445,9 @@ export function DoseStats() {
           </Card>
         </div>
 
-        {/* Additional Charts */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
+        {/* Additional Charts and Recent Activity - Mobile Responsive */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="min-h-[350px]">
             <CardHeader className="font-semibold">
               Time of Day Distribution
             </CardHeader>
@@ -459,9 +481,9 @@ export function DoseStats() {
                 {stats.recentActivity.map((dose, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between border-b last:border-0 pb-2"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between border-b last:border-0 pb-2"
                   >
-                    <div className="flex flex-col">
+                    <div className="flex flex-col mb-2 sm:mb-0">
                       <div className="font-medium">
                         {format(new Date(dose.timestamp), "MMM d, h:mm a")}
                       </div>
@@ -469,7 +491,7 @@ export function DoseStats() {
                         {dose.substance}
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
                       <Badge variant="outline">
                         {dose.amount}
                         {dose.unit}
@@ -489,7 +511,7 @@ export function DoseStats() {
         </div>
       </TabsContent>
       <TabsContent value="patterns" className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader className="font-semibold">Usage Regularity</CardHeader>
             <CardContent>
@@ -864,144 +886,20 @@ export function DoseStats() {
           </CardContent>
         </Card>
       </TabsContent>
-
       <TabsContent value="safety" className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Interaction Summary Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="font-semibold">Interaction Summary</div>
-              <AlertOctagon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {["critical", "high", "moderate", "low"].map((level) => {
-                  const levelInteractions = stats.substanceInteractions.filter(
-                    (i) => i.riskLevel === level,
-                  );
-                  if (levelInteractions.length === 0) return null;
-
-                  return (
-                    <div key={level} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Badge
-                          variant={
-                            level === "critical" || level === "high"
-                              ? "destructive"
-                              : level === "moderate"
-                                ? "default"
-                                : "secondary"
-                          }
-                          className="capitalize"
-                        >
-                          {level}
-                        </Badge>
-                        <span className="text-sm text-muted-foreground">
-                          {levelInteractions.length} interaction
-                          {levelInteractions.length !== 1 ? "s" : ""}
-                        </span>
-                      </div>
-
-                      <div className="space-y-1">
-                        {levelInteractions.map((interaction, idx) => (
-                          <div
-                            key={idx}
-                            className="text-sm bg-muted/50 rounded-md p-2 flex items-center justify-between"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Activity className="h-4 w-4 text-muted-foreground" />
-                              <span>{interaction.substances.join(" + ")}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              <span>{interaction.timeGap.toFixed(1)}h gap</span>
-                              <span>({interaction.frequency}x)</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {stats.substanceInteractions.length === 0 && (
-                  <div className="text-center text-muted-foreground py-4">
-                    No interactions detected
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recovery Periods Card */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="font-semibold">Recovery Periods</div>
-              <Shield className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {stats.recoveryPeriods.map((period, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-muted/50 rounded-md p-2"
-                  >
-                    <span className="font-medium">{period.substance}</span>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <Badge variant="secondary">
-                        {period.recommendedHours}h recovery
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-
-                {stats.recoveryPeriods.length === 0 && (
-                  <div className="text-center text-muted-foreground py-4">
-                    No recovery periods calculated
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Safety Guidelines Card */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <div className="font-semibold">Safety Guidelines</div>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {Object.entries(INTERACTION_THRESHOLDS).map(([level, hours]) => (
-                <div
-                  key={level}
-                  className="flex flex-col space-y-1.5 bg-muted/50 rounded-md p-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="capitalize font-medium">
-                      {level.replace("_", " ")}
-                    </span>
-                    <Badge
-                      variant={
-                        level === "critical" || level === "high_risk"
-                          ? "destructive"
-                          : "default"
-                      }
-                    >
-                      {hours}h
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {level === "critical"
-                      ? "Immediate medical attention may be required"
-                      : level === "high_risk"
-                        ? "High risk of adverse effects"
-                        : "Monitor for potential interactions"}
-                  </p>
-                </div>
-              ))}
+          <CardContent className="p-12">
+            <div className="flex flex-col items-center justify-center text-center space-y-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <Shield className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-semibold">
+                Safety Analytics Coming Soon
+              </h2>
+              <p className="text-muted-foreground max-w-sm">
+                Check back soon for interaction monitoring, recovery periods,
+                and safety guidelines.
+              </p>
             </div>
           </CardContent>
         </Card>

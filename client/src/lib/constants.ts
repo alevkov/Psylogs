@@ -1,5 +1,5 @@
 export const ADMINISTRATION_METHODS = {
-  oral: ["oral", "swallowed", "chewed", "@ate"],
+  oral: ["oral", "swallowed", "chewed", "@ate", "@drank"],
   insufflation: ["insufflation", "snorted", "intranasal", "nasal", "@sniffed"],
   inhalation: ["inhalation", "inhaled", "smoked", "vaporized"],
   intravenous: ["intravenous-injection", "intra-arterial", "injected", "@injected"],
