@@ -47,7 +47,7 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
             className="absolute h-full opacity-30"
             style={getRangeStyle(
               ranges.threshold || 0,
-              ranges.light.upper,
+              ranges.light.upper || 0,
               'rgb(74, 222, 128)' // green
             )}
           />
@@ -58,8 +58,8 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
           <div
             className="absolute h-full opacity-30"
             style={getRangeStyle(
-              ranges.common.lower,
-              ranges.common.upper,
+              ranges.common.lower || 0,
+              ranges.common.upper || 0,
               'rgb(34, 197, 94)' // darker green
             )}
           />
@@ -70,8 +70,8 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
           <div
             className="absolute h-full opacity-30"
             style={getRangeStyle(
-              ranges.strong.lower,
-              ranges.strong.upper,
+              ranges.strong.lower || 0,
+              ranges.strong.upper || 0,
               'rgb(234, 179, 8)' // yellow
             )}
           />
@@ -92,8 +92,10 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Current dose indicator */}
         <div 
           className={cn(
-            "absolute w-1 h-full bg-foreground transition-all duration-300",
-            currentDose >= (ranges.heavy || Infinity) && "animate-pulse"
+            "absolute w-1 h-full transition-all duration-300",
+            currentDose >= (ranges.heavy || Infinity) 
+              ? "bg-red-500 animate-pulse" 
+              : "bg-foreground"
           )}
           style={{ left: `${dosePosition}%` }}
         />
