@@ -112,6 +112,18 @@ export async function getDosesByDateRange(startDate: Date, endDate: Date): Promi
   );
 }
 
+export async function clearDoses(): Promise<void> {
+  try {
+    const db = await getDB();
+    const tx = db.transaction("doses", "readwrite");
+    await tx.store.clear();
+    await tx.done;
+  } catch (error) {
+    console.error("Failed to clear doses:", error);
+    throw error;
+  }
+}
+
 export async function deleteDose(id: number): Promise<void> {
   try {
     const db = await getDB();
@@ -124,36 +136,27 @@ export async function deleteDose(id: number): Promise<void> {
   }
 }
 
-export async function editDose(id: number, updates: Partial<DoseEntry>): Promise<void> {
+export async function updateDose(id: number, updates: Partial<Omit<DoseEntry, "id">>): Promise<void> {
   try {
     const db = await getDB();
     const tx = db.transaction("doses", "readwrite");
-    const dose = await tx.store.get(id);
-    
-    if (!dose) {
+
+    // Get existing dose
+    const existingDose = await tx.store.get(id);
+    if (!existingDose) {
       throw new Error("Dose not found");
     }
-    
-    await tx.store.put({
-      ...dose,
-      ...updates,
-    });
-    
-    await tx.done;
-  } catch (error) {
-    console.error("Failed to edit dose:", error);
-    throw error;
-  }
-}
 
-export async function clearDoses(): Promise<void> {
-  try {
-    const db = await getDB();
-    const tx = db.transaction("doses", "readwrite");
-    await tx.store.clear();
+    // Update dose
+    const updatedDose = {
+      ...existingDose,
+      ...updates,
+    };
+
+    await tx.store.put(updatedDose);
     await tx.done;
   } catch (error) {
-    console.error("Failed to clear doses:", error);
+    console.error("Failed to update dose:", error);
     throw error;
   }
 }
@@ -212,6 +215,79 @@ export async function importData(file: File): Promise<void> {
     console.error("Failed to import data:", error);
     throw error;
   }
+}
+
+// New function to handle the newline-separated JSON objects
+export async function importDataFromTextFile(file: File): Promise<void> {
+  try {
+    const text = await file.text();
+    const lines = text.split("\n").filter(line => line.trim());
+
+    const doses: DoseEntry[] = lines.map((line, index) => {
+      try {
+        const obj = JSON.parse(line);
+        const { drug, dose, units, created } = obj;
+
+        if (!drug || !dose || !units || !created) {
+          throw new Error(`Missing fields at line ${index + 1}`);
+        }
+
+        const amount = units === 'g' ? parseFloat(dose) * 1000 : parseFloat(dose);
+        const unit = units === 'g' ? 'mg' : units.toLowerCase() as 'mg' | 'ug' | 'ml';
+        const timestamp = new Date(created).toISOString();
+        const route = "oral"; // Default to 'oral', adjust based on your needs
+
+        if (isNaN(amount) || isNaN(Date.parse(timestamp))) {
+          throw new Error(`Invalid data at line ${index + 1}`);
+        }
+
+        return {
+          substance: drug.toLowerCase(),
+          amount,
+          unit,
+          route,
+          timestamp
+        };
+      } catch (error) {
+        throw new Error(`Error parsing line ${index + 1}: ${error.message}`);
+      }
+    });
+
+    const db = await getDB();
+    const tx = db.transaction("doses", "readwrite");
+
+    await Promise.all(doses.map(dose => tx.store.add(dose)));
+    await tx.done;
+  } catch (error) {
+    console.error("Failed to import data from text file:", error);
+    throw error;
+  }
+}
+
+// Map PW Journal route names to our format
+const routeMap: Record<string, string> = {
+  'ORAL': 'oral',
+  'INSUFFLATED': 'nasal',
+  'SUBLINGUAL': 'sublingual',
+  'INTRAVENOUS': 'intravenous-injection',
+  'INTRAMUSCULAR': 'intramuscular-injection',
+  'RECTAL': 'rectal',
+  'TRANSDERMAL': 'transdermal',
+  'BUCCAL': 'buccal',
+  'SMOKED': 'inhaled',
+  'VAPORIZED': 'inhaled',
+};
+
+interface PWJournalData {
+  experiences: Array<{
+    ingestions: Array<{
+      substanceName: string;
+      dose: number;
+      units: string;
+      administrationRoute: string;
+      time: number;
+    }>;
+  }>;
 }
 
 export async function importPWJournalData(file: File) {

@@ -1,0 +1,1427 @@
+[
+  {
+    "drug": "1,4-Butanediol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'ml'}, 'light': {'lower_value': 1.0, 'lower_unit': 'ml', 'upper_value': 1.1, 'upper_unit': 'ml'}, 'common': {'lower_value': 1.1, 'lower_unit': 'ml', 'upper_value': 2.0, 'upper_unit': 'ml'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'ml', 'upper_value': 3.0, 'upper_unit': 'ml'}, 'heavy': {'value': 3.0, 'unit': 'ml'}}"
+  },
+  {
+    "drug": "2-Fluorodeschloroketamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'heavy': {'value': 35, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2-Fluoromethamphetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2-Fluoromethamphetamine",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2-Me-AP-237",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 7.5, 'lower_unit': 'mg', 'upper_value': 8.25, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.25, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2-Me-AP-237",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "25I-NBOMe",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.1, 'lower_unit': 'mg', 'upper_value': 1.21, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.21, 'lower_unit': 'mg', 'upper_value': 1.33, 'upper_unit': 'mg'}, 'heavy': {'value': 1.33, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-B",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-B",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-B-Fly",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-C",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'heavy': {'value': 40, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-D",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 7.3, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'heavy': {'value': 40, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-E",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 1.5, 'lower_unit': 'mg', 'upper_value': 2.9, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.9, 'lower_unit': 'mg', 'upper_value': 5.14, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.14, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-E",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'Error: Unsupported conversion from µg to mg', 'heavy': 'Error: Unsupported conversion from µg to mg'}"
+  },
+  {
+    "drug": "2C-I",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 4.0, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 6.35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 6.35, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-I",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-P",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 5.35, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.0, 'lower_unit': 'mg', 'upper_value': 9.51, 'upper_unit': 'mg'}, 'strong': {'lower_value': 9.51, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-2",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 2.2, 'lower_unit': 'mg', 'upper_value': 2.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-2",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-21",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.8, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.8, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-4",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 2.05, 'lower_unit': 'mg', 'upper_value': 4.7, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.7, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-7",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 4.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.0, 'lower_unit': 'mg', 'upper_value': 6.77, 'upper_unit': 'mg'}, 'strong': {'lower_value': 6.77, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "2C-T-7",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.5, 'unit': 'mg'}, 'light': {'lower_value': 7.4, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-HO-PCE",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-HO-PCE",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "3-HO-PCP",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-HO-PCP",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-MeO-PCE",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 4.25, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-MeO-PCE",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 3.62, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 7.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-MeO-PCE",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 8.8, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.8, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-MeO-PCP",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3-Methylmethcathinone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 95, 'upper_unit': 'mg'}, 'strong': {'lower_value': 95, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3F-Phenmetrazine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 6.0, 'unit': 'mg'}, 'light': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 9.4, 'upper_unit': 'mg'}, 'common': {'lower_value': 9.4, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'heavy': {'value': 35, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "3F-Phenmetrazine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-DET",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 6.2, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.2, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-DMT",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 3.95, 'lower_unit': 'mg', 'upper_value': 4.9, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.9, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-DMT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 5.6, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-DiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-MET",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-AcO-MiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 6.17, 'lower_unit': 'mg', 'upper_value': 6.25, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.25, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-Fluoroamphetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 85, 'upper_unit': 'mg'}, 'strong': {'lower_value': 85, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'heavy': {'value': 120, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-Fluoromethylphenidate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 6.0, 'unit': 'mg'}, 'light': {'lower_value': 7.22, 'lower_unit': 'mg', 'upper_value': 7.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 7.5, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-Fluoromethylphenidate",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': {'value': 8.0, 'unit': 'mg'}, 'light': {'lower_value': 9.7, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-HO-DET",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-HO-DiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.5, 'unit': 'mg'}, 'light': {'lower_value': 6.75, 'lower_unit': 'mg', 'upper_value': 8.7, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.7, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-HO-EPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-HO-MET",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-HO-MiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 8.6, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-Methylethcathinone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 3.2, 'lower_unit': 'mg', 'upper_value': 4.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.0, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "4-Methylmethcathinone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MAPB",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 70, 'upper_unit': 'mg'}, 'heavy': {'value': 70, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-AMT",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 2.35, 'lower_unit': 'mg', 'upper_value': 2.9, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.9, 'lower_unit': 'mg', 'upper_value': 3.94, 'upper_unit': 'mg'}, 'strong': {'lower_value': 3.94, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-AMT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 2.12, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 7.0, 'upper_unit': 'mg'}, 'heavy': {'value': 7.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-DALT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 8.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'heavy': {'value': 40, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-DMT",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 7.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-DMT",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.87, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.87, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-DiPT",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.1, 'lower_unit': 'mg', 'upper_value': 4.54, 'upper_unit': 'mg'}, 'strong': {'lower_value': 4.54, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-DiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "5-MeO-MIPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.12, 'unit': 'mg'}, 'light': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 2.35, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.35, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 8.41, 'upper_unit': 'mg'}, 'heavy': {'value': 8.41, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "6-APB",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 9.0, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'strong': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'heavy': {'value': 65, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "6-APB",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 85, 'upper_unit': 'mg'}, 'strong': {'lower_value': 85, 'lower_unit': 'mg', 'upper_value': 115, 'upper_unit': 'mg'}, 'heavy': {'value': 115, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "AMT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 7.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Acacia confusa",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1000, 'unit': 'g'}, 'light': {'lower_value': 1250, 'lower_unit': 'g', 'upper_value': 1400, 'upper_unit': 'g'}, 'common': {'lower_value': 1400, 'lower_unit': 'g', 'upper_value': 5000, 'upper_unit': 'g'}, 'strong': {'lower_value': 5000, 'lower_unit': 'g', 'upper_value': 8160, 'upper_unit': 'g'}, 'heavy': {'value': 8160, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Acetaminophen",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 270, 'lower_unit': 'mg', 'upper_value': 325, 'upper_unit': 'mg'}, 'common': {'lower_value': 325, 'lower_unit': 'mg', 'upper_value': 600, 'upper_unit': 'mg'}, 'strong': {'lower_value': 600, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'heavy': {'value': 1.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Adrafinil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 200, 'unit': 'mg'}, 'light': {'lower_value': 295, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'common': {'lower_value': 300, 'lower_unit': 'mg', 'upper_value': 330, 'upper_unit': 'mg'}, 'strong': {'lower_value': 330, 'lower_unit': 'mg', 'upper_value': 365, 'upper_unit': 'mg'}, 'heavy': {'value': 365, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Allylescaline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 7.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Alprazolam",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 0.25, 'lower_unit': 'mg', 'upper_value': 0.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Alprazolam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.12, 'unit': 'mg'}, 'light': {'lower_value': 0.25, 'lower_unit': 'mg', 'upper_value': 0.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Amanitas - A. muscaria",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'g'}, 'light': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'common': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 5000, 'upper_unit': 'g'}, 'strong': {'lower_value': 5000, 'lower_unit': 'g', 'upper_value': 10000, 'upper_unit': 'g'}, 'heavy': {'value': 10000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Amitriptyline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Amphetamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Amphetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 7.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Amphetamine",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.87, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.87, 'lower_unit': 'mg', 'upper_value': 7.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'heavy': {'value': 8.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Aniracetam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 350, 'unit': 'g'}, 'light': {'lower_value': 405, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'common': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 750, 'upper_unit': 'g'}, 'strong': {'lower_value': 750, 'lower_unit': 'g', 'upper_value': 1500, 'upper_unit': 'g'}, 'heavy': {'value': 1500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Aripiprazole",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Armodafinil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 50, 'unit': 'mg'}, 'light': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'common': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Articaine",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'strong': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Atomoxetine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "BK-2C-B",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'strong': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 130, 'upper_unit': 'mg'}, 'heavy': {'value': 130, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Baclofen",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Banisteriopsis caapi",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 500, 'unit': 'g'}, 'light': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 3000, 'upper_unit': 'g'}, 'common': {'lower_value': 3000, 'lower_unit': 'g', 'upper_value': 20000, 'upper_unit': 'g'}, 'strong': {'lower_value': 20000, 'lower_unit': 'g', 'upper_value': 49400, 'upper_unit': 'g'}, 'heavy': {'value': 49400, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Benzocaine",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Bisfluoroadrafinil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 245, 'lower_unit': 'mg', 'upper_value': 270, 'upper_unit': 'mg'}, 'common': {'lower_value': 270, 'lower_unit': 'mg', 'upper_value': 280, 'upper_unit': 'mg'}, 'strong': {'lower_value': 280, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'heavy': {'value': 300, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Bromazepam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.5, 'unit': 'mg'}, 'light': {'lower_value': 2.78, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 6.0, 'lower_unit': 'mg', 'upper_value': 7.32, 'upper_unit': 'mg'}, 'heavy': {'value': 7.32, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Buprenorphine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 0.2, 'unit': 'mg'}, 'light': {'lower_value': 0.92, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 2.2, 'upper_unit': 'mg'}, 'heavy': {'value': 2.2, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Buprenorphine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.4, 'unit': 'mg'}, 'light': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'heavy': {'value': 5.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Buprenorphine",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': {'value': 0.2, 'unit': 'mg'}, 'light': {'lower_value': 0.83, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 4.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 4.0, 'lower_unit': 'mg', 'upper_value': 8.0, 'upper_unit': 'mg'}, 'heavy': {'value': 8.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Bupropion",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 70, 'upper_unit': 'mg'}, 'common': {'lower_value': 70, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Bupropion",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.2, 'unit': 'mg'}, 'light': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'common': {'lower_value': 150, 'lower_unit': 'mg', 'upper_value': 165, 'upper_unit': 'mg'}, 'strong': {'lower_value': 165, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'heavy': {'value': 300, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Buspirone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Butalbital",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'strong': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Cacti - T. pachanoi",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'g'}, 'light': {'lower_value': 150, 'lower_unit': 'g', 'upper_value': 325, 'upper_unit': 'g'}, 'common': {'lower_value': 325, 'lower_unit': 'g', 'upper_value': 1400, 'upper_unit': 'g'}, 'strong': {'lower_value': 1400, 'lower_unit': 'g', 'upper_value': 27800, 'upper_unit': 'g'}, 'heavy': {'value': 27800, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Cacti - T. peruvianus",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 50, 'unit': 'g'}, 'light': {'lower_value': 520, 'lower_unit': 'g', 'upper_value': 6550, 'upper_unit': 'g'}, 'common': {'lower_value': 6550, 'lower_unit': 'g', 'upper_value': 20000, 'upper_unit': 'g'}, 'strong': {'lower_value': 20000, 'lower_unit': 'g', 'upper_value': 31380, 'upper_unit': 'g'}, 'heavy': {'value': 31380, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Caffeine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 8.0, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'common': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'strong': {'lower_value': 200, 'lower_unit': 'mg', 'upper_value': 400, 'upper_unit': 'mg'}, 'heavy': {'value': 400, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Calcium Phosphate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'common': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 90, 'upper_unit': 'mg'}, 'strong': {'lower_value': 90, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Calea zacatechichi",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 6.5, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'common': {'lower_value': 150, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'g', 'upper_value': 2.12, 'upper_unit': 'g'}, 'heavy': {'value': 2.12, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Cannabis",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'strong': {'lower_value': 110, 'lower_unit': 'mg', 'upper_value': 1.03, 'upper_unit': 'g'}, 'heavy': {'value': 1.03, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Cannabis",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 30, 'unit': 'mg'}, 'light': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 155, 'upper_unit': 'mg'}, 'common': {'lower_value': 155, 'lower_unit': 'mg', 'upper_value': 340, 'upper_unit': 'mg'}, 'strong': {'lower_value': 340, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'heavy': {'value': 1.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Carisoprodol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 90, 'unit': 'mg'}, 'light': {'lower_value': 350, 'lower_unit': 'mg', 'upper_value': 385, 'upper_unit': 'mg'}, 'common': {'lower_value': 385, 'lower_unit': 'mg', 'upper_value': 700, 'upper_unit': 'mg'}, 'strong': {'lower_value': 700, 'lower_unit': 'mg', 'upper_value': 770, 'upper_unit': 'mg'}, 'heavy': {'value': 770, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Chlorpheniramine Maleate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'heavy': {'value': 65, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Citalopram",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'heavy': {'value': 40, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Clonazepam",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 0.25, 'lower_unit': 'mg', 'upper_value': 0.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'strong': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'heavy': {'value': 1.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Clonazepam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.25, 'unit': 'mg'}, 'light': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Clonazepam",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': {'value': 0.25, 'unit': 'mg'}, 'light': {'lower_value': 0.46, 'lower_unit': 'mg', 'upper_value': 0.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'strong': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'heavy': {'value': 1.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Clonidine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.02, 'unit': 'mg'}, 'light': {'lower_value': 0.07, 'lower_unit': 'mg', 'upper_value': 0.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.1, 'lower_unit': 'mg', 'upper_value': 0.1, 'upper_unit': 'mg'}, 'strong': {'lower_value': 0.1, 'lower_unit': 'mg', 'upper_value': 0.3, 'upper_unit': 'mg'}, 'heavy': {'value': 0.3, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Cocaine",
+    "method": "IV",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'common': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'strong': {'lower_value': 150, 'lower_unit': 'mg', 'upper_value': 295, 'upper_unit': 'mg'}, 'heavy': {'value': 295, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Codeine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 7.5, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'strong': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'heavy': {'value': 120, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Cyclobenzaprine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DHEA",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 9.9, 'upper_unit': 'mg'}, 'common': {'lower_value': 9.9, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DMAE",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'g'}, 'light': {'lower_value': 90, 'lower_unit': 'g', 'upper_value': 100, 'upper_unit': 'g'}, 'common': {'lower_value': 100, 'lower_unit': 'g', 'upper_value': 245, 'upper_unit': 'g'}, 'strong': {'lower_value': 245, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'heavy': {'value': 500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "DMT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'common': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 70, 'upper_unit': 'mg'}, 'strong': {'lower_value': 70, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DMT",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DOB",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.3, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.3, 'lower_unit': 'mg', 'upper_value': 1.5, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.5, 'lower_unit': 'mg', 'upper_value': 2.08, 'upper_unit': 'mg'}, 'heavy': {'value': 2.08, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DOC",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.1, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'heavy': {'value': 3.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DOI",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.2, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.2, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'heavy': {'value': 3.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DOM",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.2, 'unit': 'mg'}, 'light': {'lower_value': 2.41, 'lower_unit': 'mg', 'upper_value': 2.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 9.45, 'upper_unit': 'mg'}, 'heavy': {'value': 9.45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DPT",
+    "method": "IM",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'heavy': {'value': 60, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DPT",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'heavy': {'value': 60, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 195, 'upper_unit': 'mg'}, 'heavy': {'value': 195, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DPT",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DXM",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 7.5, 'unit': 'mg'}, 'light': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'common': {'lower_value': 120, 'lower_unit': 'mg', 'upper_value': 260, 'upper_unit': 'mg'}, 'strong': {'lower_value': 260, 'lower_unit': 'mg', 'upper_value': 480, 'upper_unit': 'mg'}, 'heavy': {'value': 480, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Damiana",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'g'}, 'light': {'lower_value': 6.0, 'lower_unit': 'g', 'upper_value': 740, 'upper_unit': 'g'}, 'common': {'lower_value': 740, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'strong': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 4200, 'upper_unit': 'g'}, 'heavy': {'value': 4200, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Deschloroketamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 6.0, 'unit': 'mg'}, 'light': {'lower_value': 8.8, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Deschloroketamine",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 8.8, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.8, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Dexmethylphenidate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 1.7, 'lower_unit': 'mg', 'upper_value': 2.4, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.4, 'lower_unit': 'mg', 'upper_value': 8.1, 'upper_unit': 'mg'}, 'strong': {'lower_value': 8.1, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Dextroamphetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "DiPT",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Diazepam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Dihydrocodeine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 8.8, 'upper_unit': 'mg'}, 'common': {'lower_value': 8.8, 'lower_unit': 'mg', 'upper_value': 9.68, 'upper_unit': 'mg'}, 'strong': {'lower_value': 9.68, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Dihydroergotamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.1, 'lower_unit': 'mg', 'upper_value': 1.21, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.21, 'lower_unit': 'mg', 'upper_value': 1.24, 'upper_unit': 'mg'}, 'heavy': {'value': 1.24, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Diphenhydramine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'heavy': {'value': 300, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Divalproex",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 250, 'unit': 'mg'}, 'light': {'lower_value': 255, 'lower_unit': 'mg', 'upper_value': 340, 'upper_unit': 'mg'}, 'common': {'lower_value': 340, 'lower_unit': 'mg', 'upper_value': 500, 'upper_unit': 'mg'}, 'strong': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'heavy': {'value': 1.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Dronabinol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 2.75, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.75, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Duloxetine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'strong': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'heavy': {'value': 65, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ephenidine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 40, 'unit': 'mg'}, 'light': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'common': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Escitalopram",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Esomeprazole",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Estradiol Enanthate",
+    "method": "injected",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Estradiol Undecylate",
+    "method": "injected",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Eszopiclone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.5, 'unit': 'mg'}, 'light': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 2.2, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.2, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'heavy': {'value': 6.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ethylphenidate",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 9.3, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'heavy': {'value': 35, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ethylphenidate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 7.7, 'upper_unit': 'mg'}, 'common': {'lower_value': 7.7, 'lower_unit': 'mg', 'upper_value': 8.47, 'upper_unit': 'mg'}, 'strong': {'lower_value': 8.47, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Etizolam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.25, 'unit': 'mg'}, 'light': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Etizolam",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.61, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.61, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "F-Phenibut",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 125, 'unit': 'mg'}, 'light': {'lower_value': 225, 'lower_unit': 'mg', 'upper_value': 250, 'upper_unit': 'mg'}, 'common': {'lower_value': 250, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'strong': {'lower_value': 300, 'lower_unit': 'mg', 'upper_value': 500, 'upper_unit': 'mg'}, 'heavy': {'value': 500, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "F-Phenibut",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': {'value': 500, 'unit': 'mg'}, 'light': {'lower_value': 600, 'lower_unit': 'mg', 'upper_value': 660, 'upper_unit': 'mg'}, 'common': {'lower_value': 660, 'lower_unit': 'mg', 'upper_value': 750, 'upper_unit': 'mg'}, 'strong': {'lower_value': 750, 'lower_unit': 'mg', 'upper_value': 1.5, 'upper_unit': 'g'}, 'heavy': {'value': 1.5, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Fluoxetine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "GBL",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.3, 'unit': 'mg'}, 'light': {'lower_value': 0.54, 'lower_unit': 'mg', 'upper_value': 0.82, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.82, 'lower_unit': 'mg', 'upper_value': 1.45, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.45, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "GHB",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 1.5, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'g', 'upper_value': 2.0, 'upper_unit': 'g'}, 'heavy': {'value': 2.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Gabapentin",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 300, 'lower_unit': 'mg', 'upper_value': 330, 'upper_unit': 'mg'}, 'common': {'lower_value': 330, 'lower_unit': 'mg', 'upper_value': 600, 'upper_unit': 'mg'}, 'strong': {'lower_value': 600, 'lower_unit': 'mg', 'upper_value': 1.2, 'upper_unit': 'g'}, 'heavy': {'value': 1.2, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Ginkgo biloba",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 40, 'unit': 'mg'}, 'light': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'common': {'lower_value': 65, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'strong': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'heavy': {'value': 120, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Harmala Alkaloids",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 50, 'unit': 'mg'}, 'light': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 70, 'upper_unit': 'mg'}, 'common': {'lower_value': 70, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 210, 'upper_unit': 'mg'}, 'heavy': {'value': 210, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Heimia salicifolia",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 200, 'unit': 'g'}, 'light': {'lower_value': 1750, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'common': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 5000, 'upper_unit': 'g'}, 'strong': {'lower_value': 5000, 'lower_unit': 'g', 'upper_value': 10000, 'upper_unit': 'g'}, 'heavy': {'value': 10000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Heroin",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 7.0, 'lower_unit': 'mg', 'upper_value': 7.7, 'upper_unit': 'mg'}, 'common': {'lower_value': 7.7, 'lower_unit': 'mg', 'upper_value': 9.18, 'upper_unit': 'mg'}, 'strong': {'lower_value': 9.18, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Heroin",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Hydrocodone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 2.5, 'lower_unit': 'mg', 'upper_value': 3.75, 'upper_unit': 'mg'}, 'common': {'lower_value': 3.75, 'lower_unit': 'mg', 'upper_value': 7.38, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.38, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Hydrocodone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 7.75, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.75, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Hydromorphone",
+    "method": "IV",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 1.1, 'upper_unit': 'mg'}, 'common': {'lower_value': 1.1, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 4.0, 'upper_unit': 'mg'}, 'heavy': {'value': 4.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Hydromorphone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 4.0, 'lower_unit': 'mg', 'upper_value': 4.4, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.4, 'lower_unit': 'mg', 'upper_value': 4.84, 'upper_unit': 'mg'}, 'strong': {'lower_value': 4.84, 'lower_unit': 'mg', 'upper_value': 5.32, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Hydromorphone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 1.7, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 2.2, 'upper_unit': 'mg'}, 'strong': {'lower_value': 2.2, 'lower_unit': 'mg', 'upper_value': 3.24, 'upper_unit': 'mg'}, 'heavy': {'value': 3.24, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Hydroxyzine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 6.25, 'unit': 'mg'}, 'light': {'lower_value': 6.69, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "IAP",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ibogaine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'g'}, 'light': {'lower_value': 60, 'lower_unit': 'g', 'upper_value': 100, 'upper_unit': 'g'}, 'common': {'lower_value': 100, 'lower_unit': 'g', 'upper_value': 300, 'upper_unit': 'g'}, 'strong': {'lower_value': 300, 'lower_unit': 'g', 'upper_value': 820, 'upper_unit': 'g'}, 'heavy': {'value': 820, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Ibuprofen",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 80, 'unit': 'mg'}, 'light': {'lower_value': 200, 'lower_unit': 'mg', 'upper_value': 220, 'upper_unit': 'mg'}, 'common': {'lower_value': 220, 'lower_unit': 'mg', 'upper_value': 400, 'upper_unit': 'mg'}, 'strong': {'lower_value': 400, 'lower_unit': 'mg', 'upper_value': 600, 'upper_unit': 'mg'}, 'heavy': {'value': 600, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Isopropylphenidate",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'heavy': {'value': 35, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "JWH-018",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 1.25, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 3.62, 'upper_unit': 'mg'}, 'strong': {'lower_value': 3.62, 'lower_unit': 'mg', 'upper_value': 8.5, 'upper_unit': 'mg'}, 'heavy': {'value': 8.5, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Kava",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'g'}, 'light': {'lower_value': 20, 'lower_unit': 'g', 'upper_value': 110, 'upper_unit': 'g'}, 'common': {'lower_value': 110, 'lower_unit': 'g', 'upper_value': 460, 'upper_unit': 'g'}, 'strong': {'lower_value': 460, 'lower_unit': 'g', 'upper_value': 1240, 'upper_unit': 'g'}, 'heavy': {'value': 1240, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Ketamine",
+    "method": "IM",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ketamine",
+    "method": "IV",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'common': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'heavy': {'value': 75, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ketamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'strong': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 70, 'upper_unit': 'mg'}, 'heavy': {'value': 70, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ketamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 40, 'unit': 'mg'}, 'light': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'strong': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Ketamine",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'strong': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Kratom",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'common': {'lower_value': 1.0, 'lower_unit': 'g', 'upper_value': 2.0, 'upper_unit': 'g'}, 'strong': {'lower_value': 2.0, 'lower_unit': 'g', 'upper_value': 5.0, 'upper_unit': 'g'}, 'heavy': {'value': 5.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "L-Ascorbic Acid",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 260, 'lower_unit': 'mg', 'upper_value': 285, 'upper_unit': 'mg'}, 'common': {'lower_value': 285, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'g', 'upper_value': 1.1, 'upper_unit': 'g'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "L-Theanine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 400, 'lower_unit': 'mg', 'upper_value': 440, 'upper_unit': 'mg'}, 'common': {'lower_value': 440, 'lower_unit': 'mg', 'upper_value': 485, 'upper_unit': 'mg'}, 'strong': {'lower_value': 485, 'lower_unit': 'mg', 'upper_value': 530, 'upper_unit': 'mg'}, 'heavy': {'value': 530, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Lamotrigine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Lisdexamfetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Lithium",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 90, 'unit': 'mg'}, 'light': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 240, 'upper_unit': 'mg'}, 'common': {'lower_value': 240, 'lower_unit': 'mg', 'upper_value': 600, 'upper_unit': 'mg'}, 'strong': {'lower_value': 600, 'lower_unit': 'mg', 'upper_value': 900, 'upper_unit': 'mg'}, 'heavy': {'value': 900, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Loperamide",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 3.8, 'lower_unit': 'mg', 'upper_value': 6.4, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.4, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Lorazepam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.3, 'unit': 'mg'}, 'light': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'heavy': {'value': 2.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Lotus/Lily - Nymphaea nouchali var caerulea",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 125, 'unit': 'g'}, 'light': {'lower_value': 525, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'common': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 2430, 'upper_unit': 'g'}, 'strong': {'lower_value': 2430, 'lower_unit': 'g', 'upper_value': 5000, 'upper_unit': 'g'}, 'heavy': {'value': 5000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "MDA",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 125, 'upper_unit': 'mg'}, 'heavy': {'value': 125, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "MDAI",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 90, 'upper_unit': 'mg'}, 'common': {'lower_value': 90, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 180, 'upper_unit': 'mg'}, 'heavy': {'value': 180, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "MDMA",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "MDMA",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'heavy': {'value': 120, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "MDPHP",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "MDPV",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 0.5, 'unit': 'mg'}, 'light': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "MDPV",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 4.5, 'lower_unit': 'mg', 'upper_value': 6.8, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.8, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Magnesium Glycinate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 1.6, 'lower_unit': 'g', 'upper_value': 1.76, 'upper_unit': 'g'}, 'common': {'lower_value': 1.76, 'lower_unit': 'g', 'upper_value': 1.94, 'upper_unit': 'g'}, 'strong': {'lower_value': 1.94, 'lower_unit': 'g', 'upper_value': 2.13, 'upper_unit': 'g'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Magnesium L-Threonate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 95, 'lower_unit': 'mg', 'upper_value': 105, 'upper_unit': 'mg'}, 'common': {'lower_value': 105, 'lower_unit': 'mg', 'upper_value': 115, 'upper_unit': 'mg'}, 'strong': {'lower_value': 115, 'lower_unit': 'mg', 'upper_value': 130, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Melatonin",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 1.23, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 2.0, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 3.0, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'heavy': {'value': 5.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Memantine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Mescaline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 85, 'lower_unit': 'mg', 'upper_value': 95, 'upper_unit': 'mg'}, 'common': {'lower_value': 95, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'strong': {'lower_value': 200, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'heavy': {'value': 300, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Metaxalone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 400, 'lower_unit': 'mg', 'upper_value': 440, 'upper_unit': 'mg'}, 'common': {'lower_value': 440, 'lower_unit': 'mg', 'upper_value': 800, 'upper_unit': 'mg'}, 'strong': {'lower_value': 800, 'lower_unit': 'mg', 'upper_value': 880, 'upper_unit': 'mg'}, 'heavy': {'value': 880, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methadone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methallylescaline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 6.4, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'heavy': {'value': 35, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methamphetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methamphetamine",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.87, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.87, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methamphetamine",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'g'}, 'light': {'lower_value': 20, 'lower_unit': 'g', 'upper_value': 50, 'upper_unit': 'g'}, 'common': {'lower_value': 50, 'lower_unit': 'g', 'upper_value': 175, 'upper_unit': 'g'}, 'strong': {'lower_value': 175, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'heavy': {'value': 500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Methocarbamol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 550, 'upper_unit': 'mg'}, 'common': {'lower_value': 550, 'lower_unit': 'mg', 'upper_value': 750, 'upper_unit': 'mg'}, 'strong': {'lower_value': 750, 'lower_unit': 'mg', 'upper_value': 2.25, 'upper_unit': 'g'}, 'heavy': {'value': 2.25, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Methoxetamine",
+    "method": "IM",
+    "dose_ranges": "{'threshold': {'value': 8.0, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methoxetamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 9.7, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methoxetamine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methoxetamine",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methoxphenidine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'strong': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methylone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 85, 'upper_unit': 'mg'}, 'heavy': {'value': 85, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methylone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 175, 'upper_unit': 'mg'}, 'heavy': {'value': 175, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methylphenidate",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Methylphenidate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'heavy': {'value': 55, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Mimosa tenuiflora",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 8.0, 'unit': 'g'}, 'light': {'lower_value': 275, 'lower_unit': 'g', 'upper_value': 2750, 'upper_unit': 'g'}, 'common': {'lower_value': 2750, 'lower_unit': 'g', 'upper_value': 7225, 'upper_unit': 'g'}, 'strong': {'lower_value': 7225, 'lower_unit': 'g', 'upper_value': 12000, 'upper_unit': 'g'}, 'heavy': {'value': 12000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mirtazapine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.5, 'unit': 'mg'}, 'light': {'lower_value': 7.5, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Moclobemide",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'common': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'strong': {'lower_value': 150, 'lower_unit': 'mg', 'upper_value': 165, 'upper_unit': 'mg'}, 'heavy': {'value': 165, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Modafinil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'common': {'lower_value': 110, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'strong': {'lower_value': 120, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Morning Glory",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 180, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'g'}, 'common': {'lower_value': 1.0, 'lower_unit': 'g', 'upper_value': 6.0, 'upper_unit': 'g'}, 'strong': {'lower_value': 6.0, 'lower_unit': 'g', 'upper_value': 9.0, 'upper_unit': 'g'}, 'heavy': {'value': 9.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Morphine",
+    "method": "IV",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 4.8, 'lower_unit': 'mg', 'upper_value': 5.6, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.6, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Morphine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 8.4, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'heavy': {'value': 30, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Morphine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'heavy': {'value': 60, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Mushrooms",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 875, 'unit': 'mg'}, 'light': {'lower_value': 900, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'common': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'strong': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 3500, 'upper_unit': 'g'}, 'heavy': {'value': 3500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 100, 'unit': 'g'}, 'light': {'lower_value': 195, 'lower_unit': 'g', 'upper_value': 350, 'upper_unit': 'g'}, 'common': {'lower_value': 350, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'strong': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'heavy': {'value': 1000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. cubensis",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.75, 'unit': 'g'}, 'light': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 1200, 'upper_unit': 'g'}, 'common': {'lower_value': 1200, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'strong': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 3500, 'upper_unit': 'g'}, 'heavy': {'value': 3500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. cyanescens",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.75, 'unit': 'g'}, 'light': {'lower_value': 650, 'lower_unit': 'g', 'upper_value': 890, 'upper_unit': 'g'}, 'common': {'lower_value': 890, 'lower_unit': 'g', 'upper_value': 1495, 'upper_unit': 'g'}, 'strong': {'lower_value': 1495, 'lower_unit': 'g', 'upper_value': 3500, 'upper_unit': 'g'}, 'heavy': {'value': 3500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. mexicana",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 500, 'unit': 'g'}, 'light': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 1500, 'upper_unit': 'g'}, 'common': {'lower_value': 1500, 'lower_unit': 'g', 'upper_value': 3300, 'upper_unit': 'g'}, 'strong': {'lower_value': 3300, 'lower_unit': 'g', 'upper_value': 6700, 'upper_unit': 'g'}, 'heavy': {'value': 6700, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. semilanceata",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 80, 'unit': 'mg'}, 'light': {'lower_value': 345, 'lower_unit': 'mg', 'upper_value': 860, 'upper_unit': 'mg'}, 'common': {'lower_value': 860, 'lower_unit': 'mg', 'upper_value': 1.5, 'upper_unit': 'g'}, 'strong': {'lower_value': 1.5, 'lower_unit': 'g', 'upper_value': 2.69, 'upper_unit': 'g'}, 'heavy': {'value': 2.69, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. subaeruginosa",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 400, 'lower_unit': 'g', 'upper_value': 640, 'upper_unit': 'g'}, 'common': {'lower_value': 640, 'lower_unit': 'g', 'upper_value': 1640, 'upper_unit': 'g'}, 'strong': {'lower_value': 1640, 'lower_unit': 'g', 'upper_value': 3000, 'upper_unit': 'g'}, 'heavy': {'value': 3000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Mushrooms - P. tampanensis",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2500, 'unit': 'g'}, 'light': {'lower_value': 2725, 'lower_unit': 'g', 'upper_value': 4300, 'upper_unit': 'g'}, 'common': {'lower_value': 4300, 'lower_unit': 'g', 'upper_value': 9590, 'upper_unit': 'g'}, 'strong': {'lower_value': 9590, 'lower_unit': 'g', 'upper_value': 15000, 'upper_unit': 'g'}, 'heavy': {'value': 15000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "N-Ethylpentedrone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'strong': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "N-acetylcysteine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 600, 'lower_unit': 'mg', 'upper_value': 660, 'upper_unit': 'mg'}, 'common': {'lower_value': 660, 'lower_unit': 'mg', 'upper_value': 725, 'upper_unit': 'mg'}, 'strong': {'lower_value': 725, 'lower_unit': 'mg', 'upper_value': 800, 'upper_unit': 'mg'}, 'heavy': {'value': 800, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Naloxone",
+    "method": "sublingual",
+    "dose_ranges": "{'threshold': 'Error: Unsupported conversion from µg to mg', 'heavy': 'Error: Unsupported conversion from µg to mg'}"
+  },
+  {
+    "drug": "Naproxen",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 440, 'unit': 'mg'}, 'light': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 550, 'upper_unit': 'mg'}, 'common': {'lower_value': 550, 'lower_unit': 'mg', 'upper_value': 605, 'upper_unit': 'mg'}, 'strong': {'lower_value': 605, 'lower_unit': 'mg', 'upper_value': 665, 'upper_unit': 'mg'}, 'heavy': {'value': 665, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "O-Desmethyltramadol",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "O-Desmethyltramadol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "O-Desmethyltramadol",
+    "method": "rectal",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Olanzapine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 7.83, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.83, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Oxycodone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Oxycodone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Oxymorphone",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 4.13, 'lower_unit': 'mg', 'upper_value': 5.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'heavy': {'value': 20, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Paracetamol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 550, 'upper_unit': 'mg'}, 'common': {'lower_value': 550, 'lower_unit': 'mg', 'upper_value': 605, 'upper_unit': 'mg'}, 'strong': {'lower_value': 605, 'lower_unit': 'mg', 'upper_value': 665, 'upper_unit': 'mg'}, 'heavy': {'value': 665, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Paroxetine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'strong': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'heavy': {'value': 25, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Passion Flower",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 35, 'unit': 'mg'}, 'light': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 130, 'upper_unit': 'mg'}, 'common': {'lower_value': 130, 'lower_unit': 'mg', 'upper_value': 625, 'upper_unit': 'mg'}, 'strong': {'lower_value': 625, 'lower_unit': 'mg', 'upper_value': 2.0, 'upper_unit': 'g'}, 'heavy': {'value': 2.0, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Phenibut",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 150, 'unit': 'g'}, 'light': {'lower_value': 300, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'common': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'strong': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 1800, 'upper_unit': 'g'}, 'heavy': {'value': 1800, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Phenylpiracetam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'common': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'strong': {'lower_value': 110, 'lower_unit': 'mg', 'upper_value': 300, 'upper_unit': 'mg'}, 'heavy': {'value': 300, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Piperazines - BZP",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 50, 'unit': 'mg'}, 'light': {'lower_value': 70, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'common': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Piperazines - TFMPP",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'common': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'heavy': {'value': 75, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Piracetam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 4.8, 'unit': 'g'}, 'light': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 800, 'upper_unit': 'g'}, 'common': {'lower_value': 800, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'strong': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 2110, 'upper_unit': 'g'}, 'heavy': {'value': 2110, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Prednisone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 8.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 60, 'upper_unit': 'mg'}, 'heavy': {'value': 60, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Pregabalin",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'common': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 160, 'upper_unit': 'mg'}, 'strong': {'lower_value': 160, 'lower_unit': 'mg', 'upper_value': 345, 'upper_unit': 'mg'}, 'heavy': {'value': 345, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Promethazine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 6.25, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Propoxyphene",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 50, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'common': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 160, 'upper_unit': 'mg'}, 'heavy': {'value': 160, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Propranolol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'heavy': {'value': 50, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Propylhexedrine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 125, 'lower_unit': 'mg', 'upper_value': 140, 'upper_unit': 'mg'}, 'common': {'lower_value': 140, 'lower_unit': 'mg', 'upper_value': 250, 'upper_unit': 'mg'}, 'strong': {'lower_value': 250, 'lower_unit': 'mg', 'upper_value': 275, 'upper_unit': 'mg'}, 'heavy': {'value': 275, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Pseudoephedrine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 30, 'unit': 'mg'}, 'light': {'lower_value': 60, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'common': {'lower_value': 65, 'lower_unit': 'mg', 'upper_value': 120, 'upper_unit': 'mg'}, 'strong': {'lower_value': 120, 'lower_unit': 'mg', 'upper_value': 130, 'upper_unit': 'mg'}, 'heavy': {'value': 130, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Psychotria viridis",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 500, 'unit': 'g'}, 'light': {'lower_value': 3550, 'lower_unit': 'g', 'upper_value': 5550, 'upper_unit': 'g'}, 'common': {'lower_value': 5550, 'lower_unit': 'g', 'upper_value': 25000, 'upper_unit': 'g'}, 'strong': {'lower_value': 25000, 'lower_unit': 'g', 'upper_value': 40840, 'upper_unit': 'g'}, 'heavy': {'value': 40840, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Pyrazolam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 0.38, 'lower_unit': 'mg', 'upper_value': 0.41, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.41, 'lower_unit': 'mg', 'upper_value': 0.75, 'upper_unit': 'mg'}, 'strong': {'lower_value': 0.75, 'lower_unit': 'mg', 'upper_value': 0.83, 'upper_unit': 'mg'}, 'heavy': {'value': 0.83, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Quetiapine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Risperidone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 0.5, 'lower_unit': 'mg', 'upper_value': 0.55, 'upper_unit': 'mg'}, 'common': {'lower_value': 0.55, 'lower_unit': 'mg', 'upper_value': 1.0, 'upper_unit': 'mg'}, 'strong': {'lower_value': 1.0, 'lower_unit': 'mg', 'upper_value': 3.0, 'upper_unit': 'mg'}, 'heavy': {'value': 3.0, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "S-Ketamine",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 25, 'upper_unit': 'mg'}, 'strong': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': {'value': 45, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Salvia divinorum",
+    "method": "smoked",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'g'}, 'light': {'lower_value': 40, 'lower_unit': 'g', 'upper_value': 50, 'upper_unit': 'g'}, 'common': {'lower_value': 50, 'lower_unit': 'g', 'upper_value': 100, 'upper_unit': 'g'}, 'strong': {'lower_value': 100, 'lower_unit': 'g', 'upper_value': 250, 'upper_unit': 'g'}, 'heavy': {'value': 250, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Sceletium tortuosum",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'g'}, 'light': {'lower_value': 10, 'lower_unit': 'g', 'upper_value': 10, 'upper_unit': 'g'}, 'common': {'lower_value': 10, 'lower_unit': 'g', 'upper_value': 80, 'upper_unit': 'g'}, 'strong': {'lower_value': 80, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'heavy': {'value': 500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Sertraline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'heavy': {'value': 110, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Sildenafil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 35, 'upper_unit': 'mg'}, 'common': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Syrian Rue",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 5.0, 'unit': 'g'}, 'light': {'lower_value': 400, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'common': {'lower_value': 1000, 'lower_unit': 'g', 'upper_value': 2000, 'upper_unit': 'g'}, 'strong': {'lower_value': 2000, 'lower_unit': 'g', 'upper_value': 3500, 'upper_unit': 'g'}, 'heavy': {'value': 3500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "TMA-2",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'heavy': {'value': 40, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Tabernanthe iboga",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 80, 'unit': 'g'}, 'light': {'lower_value': 200, 'lower_unit': 'g', 'upper_value': 220, 'upper_unit': 'g'}, 'common': {'lower_value': 220, 'lower_unit': 'g', 'upper_value': 500, 'upper_unit': 'g'}, 'strong': {'lower_value': 500, 'lower_unit': 'g', 'upper_value': 1500, 'upper_unit': 'g'}, 'heavy': {'value': 1500, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Tadalafil",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 6.0, 'upper_unit': 'mg'}, 'common': {'lower_value': 6.0, 'lower_unit': 'mg', 'upper_value': 7.5, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.5, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
+  },
+  {
+    "drug": "Tapentadol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Temazepam",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 20, 'upper_unit': 'mg'}, 'common': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'strong': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'heavy': {'value': 55, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Topiramate",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 90, 'upper_unit': 'mg'}, 'strong': {'lower_value': 90, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Tramadol",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 10, 'unit': 'mg'}, 'light': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Trazodone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 25, 'unit': 'mg'}, 'light': {'lower_value': 45, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'common': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'strong': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'heavy': {'value': 110, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Tryptophan",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 200, 'upper_unit': 'mg'}, 'heavy': {'value': 200, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Tryptophan - 5-HTP",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 55, 'upper_unit': 'mg'}, 'common': {'lower_value': 55, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 110, 'upper_unit': 'mg'}, 'heavy': {'value': 110, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Tyrosine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 500, 'lower_unit': 'mg', 'upper_value': 550, 'upper_unit': 'mg'}, 'common': {'lower_value': 550, 'lower_unit': 'mg', 'upper_value': 630, 'upper_unit': 'mg'}, 'strong': {'lower_value': 630, 'lower_unit': 'mg', 'upper_value': 1.37, 'upper_unit': 'g'}, 'heavy': {'value': 1.37, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Valerian",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.0, 'unit': 'mg'}, 'light': {'lower_value': 25, 'lower_unit': 'mg', 'upper_value': 345, 'upper_unit': 'mg'}, 'common': {'lower_value': 345, 'lower_unit': 'mg', 'upper_value': 530, 'upper_unit': 'mg'}, 'strong': {'lower_value': 530, 'lower_unit': 'mg', 'upper_value': 1.2, 'upper_unit': 'g'}, 'heavy': {'value': 1.2, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Venlafaxine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 20, 'unit': 'mg'}, 'light': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 75, 'upper_unit': 'mg'}, 'common': {'lower_value': 75, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'strong': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Vinpocetine",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Vitamin B-6",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 1.0, 'unit': 'mg'}, 'light': {'lower_value': 5.2, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'common': {'lower_value': 15, 'lower_unit': 'mg', 'upper_value': 50, 'upper_unit': 'mg'}, 'strong': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 95, 'upper_unit': 'mg'}, 'heavy': {'value': 95, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Vitamin C",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 100, 'unit': 'g'}, 'light': {'lower_value': 260, 'lower_unit': 'g', 'upper_value': 450, 'upper_unit': 'g'}, 'common': {'lower_value': 450, 'lower_unit': 'g', 'upper_value': 925, 'upper_unit': 'g'}, 'strong': {'lower_value': 925, 'lower_unit': 'g', 'upper_value': 1000, 'upper_unit': 'g'}, 'heavy': {'value': 1000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Vitamins - Choline",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 200, 'unit': 'g'}, 'light': {'lower_value': 250, 'lower_unit': 'g', 'upper_value': 275, 'upper_unit': 'g'}, 'common': {'lower_value': 275, 'lower_unit': 'g', 'upper_value': 310, 'upper_unit': 'g'}, 'strong': {'lower_value': 310, 'lower_unit': 'g', 'upper_value': 840, 'upper_unit': 'g'}, 'heavy': {'value': 840, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Voacanga africana",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3000, 'unit': 'g'}, 'light': {'lower_value': 3850, 'lower_unit': 'g', 'upper_value': 4000, 'upper_unit': 'g'}, 'common': {'lower_value': 4000, 'lower_unit': 'g', 'upper_value': 8440, 'upper_unit': 'g'}, 'strong': {'lower_value': 8440, 'lower_unit': 'g', 'upper_value': 10000, 'upper_unit': 'g'}, 'heavy': {'value': 10000, 'unit': 'g'}}"
+  },
+  {
+    "drug": "Zolpidem",
+    "method": "intranasal",
+    "dose_ranges": "{'threshold': {'value': 3.0, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Zolpidem",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 2.5, 'unit': 'mg'}, 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 5.5, 'upper_unit': 'mg'}, 'common': {'lower_value': 5.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "Zopiclone",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 3.75, 'unit': 'mg'}, 'light': {'lower_value': 3.79, 'lower_unit': 'mg', 'upper_value': 4.9, 'upper_unit': 'mg'}, 'common': {'lower_value': 4.9, 'lower_unit': 'mg', 'upper_value': 7.5, 'upper_unit': 'mg'}, 'strong': {'lower_value': 7.5, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'heavy': {'value': 10, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "bk-2C-B",
+    "method": "oral",
+    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 35, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'common': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 125, 'upper_unit': 'mg'}, 'heavy': {'value': 125, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "bk-MBDB",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 40, 'unit': 'mg'}, 'light': {'lower_value': 50, 'lower_unit': 'mg', 'upper_value': 65, 'upper_unit': 'mg'}, 'common': {'lower_value': 65, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'strong': {'lower_value': 100, 'lower_unit': 'mg', 'upper_value': 150, 'upper_unit': 'mg'}, 'heavy': {'value': 150, 'unit': 'mg'}}"
+  },
+  {
+    "drug": "bk-MDEA",
+    "method": "oral",
+    "dose_ranges": "{'threshold': {'value': 15, 'unit': 'mg'}, 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 80, 'upper_unit': 'mg'}, 'strong': {'lower_value': 80, 'lower_unit': 'mg', 'upper_value': 100, 'upper_unit': 'mg'}, 'heavy': {'value': 100, 'unit': 'mg'}}"
+  }
+]

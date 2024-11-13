@@ -1,7 +1,12 @@
 import { DoseStats } from "@/components/DoseStats";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { exportData, importData, importPWJournalData } from "@/lib/db";
+import {
+  exportData,
+  importData,
+  importPWJournalData,
+  importDataFromTextFile,
+} from "@/lib/db";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Loader2, Download, Upload, FileInput } from "lucide-react";
@@ -15,7 +20,29 @@ export default function HistoryPage() {
     if (!file) return;
 
     try {
-      await importData(file);
+      // Read the file content
+      const text = await file.text();
+
+      // Check if the content starts with '{' or '[', which indicates standard JSON
+      const trimmedText = text.trim();
+      if (trimmedText.startsWith("{") || trimmedText.startsWith("[")) {
+        // Likely a valid JSON object or array
+        await importData(file); // Call the standard import function
+      } else {
+        // Handle newline-separated JSON objects
+        const lines = trimmedText.split("\n").filter(line => line.trim()); // Remove empty lines
+        const doses = lines.map((line, index) => {
+          try {
+            return JSON.parse(line); // Parse each line as a JSON object
+          } catch (error) {
+            throw new Error(`Error parsing JSON on line ${index + 1}: ${error.message}`);
+          }
+        });
+
+        // Call the function to handle newline-separated JSON
+        await importDataFromTextFile(doses); // Pass parsed doses to the custom import function
+      }
+
       toast({
         title: "Data imported successfully",
         duration: 2000,
@@ -23,11 +50,12 @@ export default function HistoryPage() {
     } catch (error) {
       toast({
         title: "Error importing data",
-        description: "Please ensure the file is a valid JSON export",
+        description: error instanceof Error ? error.message : "Invalid file format",
         variant: "destructive",
       });
     }
   };
+
 
   const handlePWJournalImport = async (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -104,7 +132,7 @@ export default function HistoryPage() {
             <input
               id="import-input"
               type="file"
-              accept=".json"
+              accept=".json, .txt"
               className="hidden"
               onChange={handleImport}
             />

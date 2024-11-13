@@ -1,9 +1,9 @@
 export const ADMINISTRATION_METHODS = {
   oral: ["oral", "swallowed", "chewed", "@ate", "@drank"],
-  insufflation: ["insufflation", "snorted", "intranasal", "nasal", "@sniffed"],
-  inhalation: ["inhalation", "inhaled", "smoked", "vaporized"],
-  intravenous: ["intravenous-injection", "intra-arterial", "injected", "@injected"],
-  intramuscular: ["intramuscular-injection"],
+  intranasal: ["insufflation", "snorted", "intranasal", "nasal", "@sniffed"],
+  inhaled: ["inhalation", "inhaled", "smoked", "vaporized", "@smoked", "@vaped"],
+  intravenous: ["intravenous-injection", "intra-arterial", "injected", "@injected", "IV"],
+  intramuscular: ["intramuscular-injection", "IM"],
   subcutaneous: ["subcutaneous-injection", "intradermal"],
   rectal: ["rectal", "intrarectal", "plugged", "@boofed"],
   transdermal: ["transdermal", "dermal", "applied", "topical"],

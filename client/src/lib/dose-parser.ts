@@ -17,31 +17,33 @@ const UNIT_CONVERSIONS = {
 const MAX_REASONABLE_DOSE = 10000; // 10g in mg
 const MIN_REASONABLE_DOSE = 0.001; // 1ug in mg
 
-export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "timestamp"> {
+export function parseDoseString(
+  doseString: string,
+): Omit<DoseEntry, "id" | "timestamp"> {
   if (!doseString?.trim()) {
     throw new DoseParsingError("Dose string cannot be empty");
   }
 
   // Define regex patterns
-  const standardPattern = /^(\d+\.?\d*)(mg|ug|g|ml)\s+([a-zA-Z-]+)\s+([a-zA-Z-]+)$/;
-  const verbPattern = /^(@\w+)\s+(\d+\.?\d*)(mg|ug|g|ml)\s+([a-zA-Z-]+)$/;
+  const standardPattern = /^(\d+\.?\d*)(mg|ug|g|ml)\s+([\w-]+)\s+([\w-]+)$/;
+  const verbPattern = /^(@\w+)\s+(\d+\.?\d*)(mg|ug|g|ml)\s+([\w-]+)$/;
 
   const cleanString = doseString.trim().toLowerCase();
   let match = standardPattern.exec(cleanString);
-  
+
   let amount: number;
-  let unit: typeof UNITS[number];
+  let unit: (typeof UNITS)[number];
   let substance: string;
   let route: string;
 
   if (match) {
     [, amount, unit, substance, route] = match;
-    
+
     // Validate route
     if (!ROUTE_ALIASES[route]) {
       throw new DoseParsingError(
         `Unknown route of administration: ${route}\n` +
-        `Valid routes are: ${Object.keys(ROUTE_ALIASES).join(", ")}`
+          `Valid routes are: ${Object.keys(ROUTE_ALIASES).join(", ")}`,
       );
     }
   } else {
@@ -49,24 +51,24 @@ export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "tim
     if (!match) {
       throw new DoseParsingError(
         "Invalid dose format. Examples:\n" +
-        "• 20mg substance oral\n" +
-        "• 5ml substance oral\n" +
-        "• @ate 30mg substance"
+          "• 20mg substance oral\n" +
+          "• 5ml substance oral\n" +
+          "• @ate 30mg substance",
       );
     }
-    
+
     const [, verb, amt, u, subst] = match;
     amount = parseFloat(amt);
-    unit = u as typeof UNITS[number];
+    unit = u as (typeof UNITS)[number];
     substance = subst;
     route = verb;
-    
+
     if (!ROUTE_ALIASES[verb]) {
       throw new DoseParsingError(
         `Unknown verb command: ${verb}\n` +
-        `Valid verbs: ${Object.keys(ROUTE_ALIASES)
-          .filter(r => r.startsWith("@"))
-          .join(", ")}`
+          `Valid verbs: ${Object.keys(ROUTE_ALIASES)
+            .filter((r) => r.startsWith("@"))
+            .join(", ")}`,
       );
     }
   }
@@ -81,22 +83,23 @@ export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "tim
   }
 
   // Convert units and validate reasonable ranges
-  const conversion = UNIT_CONVERSIONS[unit as keyof typeof UNIT_CONVERSIONS]?.(amount);
+  const conversion =
+    UNIT_CONVERSIONS[unit as keyof typeof UNIT_CONVERSIONS]?.(amount);
   if (!conversion) {
     throw new DoseParsingError(`Invalid unit: ${unit}`);
   }
 
   // Validate converted amount is within reasonable range
-  if (conversion.unit === 'mg' && conversion.amount > MAX_REASONABLE_DOSE) {
+  if (conversion.unit === "mg" && conversion.amount > MAX_REASONABLE_DOSE) {
     throw new DoseParsingError(
       `Dose seems unusually high (${conversion.amount}mg). ` +
-      `Please verify the amount and units.`
+        `Please verify the amount and units.`,
     );
   }
-  if (conversion.unit === 'mg' && conversion.amount < MIN_REASONABLE_DOSE) {
+  if (conversion.unit === "mg" && conversion.amount < MIN_REASONABLE_DOSE) {
     throw new DoseParsingError(
       `Dose seems unusually low (${conversion.amount}mg). ` +
-      `Please verify the amount and units.`
+        `Please verify the amount and units.`,
     );
   }
 
@@ -112,6 +115,6 @@ export function parseDoseString(doseString: string): Omit<DoseEntry, "id" | "tim
     substance: substance.toLowerCase(),
     amount: conversion.amount,
     route: ROUTE_ALIASES[route],
-    unit: conversion.unit
+    unit: conversion.unit,
   };
 }

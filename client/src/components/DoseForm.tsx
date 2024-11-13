@@ -14,6 +14,54 @@ import { Loader2, AlertCircle, Check, Info, Clock, Star } from "lucide-react";
 import { useDoseContext } from "@/contexts/DoseContext";
 import { Badge } from "@/components/ui/badge";
 import { analyzePersonalPatterns } from "@/lib/analysis";
+import doseData from "@/lib/dose-tiers.json";
+import { analyzeDoseTier, getTierBadgeVariant } from "@/lib/dose-tiers.types";
+
+function normalizeSubstanceName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[-_\s]+/g, "") // Remove dashes, underscores, spaces
+    .replace(/[^a-z0-9]/g, ""); // Remove any other special characters
+}
+
+function findMatchingSubstance(
+  userSubstance: string,
+  doseData: any,
+): string | null {
+  const normalizedInput = normalizeSubstanceName(userSubstance);
+
+  // First try exact match
+  const exactMatch = Object.keys(doseData).find(
+    (substance) => normalizeSubstanceName(substance) === normalizedInput,
+  );
+  if (exactMatch) return exactMatch;
+
+  // Then try contains match
+  const containsMatch = Object.keys(doseData).find(
+    (substance) =>
+      normalizeSubstanceName(substance).includes(normalizedInput) ||
+      normalizedInput.includes(normalizeSubstanceName(substance)),
+  );
+  if (containsMatch) return containsMatch;
+
+  // No match found
+  return null;
+}
+
+export function tryGetTierAnalysis(
+  substance: string,
+  method: string,
+  dose: number,
+  unit: string,
+  doseData: SubstanceData[],
+): { tier: string; analysis: string; ranges?: any } | null {
+  try {
+    return analyzeDoseTier(substance, method, dose, unit, doseData);
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
 
 const formSchema = z.object({
   doseString: z.string().min(1, "Please enter a dose"),
@@ -39,21 +87,21 @@ interface ParseError {
 function fuzzyMatch(query: string, substance: string): number {
   query = query.toLowerCase();
   substance = substance.toLowerCase();
-  
+
   if (substance.startsWith(query)) return 2; // Prefix match gets highest priority
   if (substance.includes(query)) return 1; // Contains match gets medium priority
-  
+
   let score = 0;
-  const queryChars = query.split('');
+  const queryChars = query.split("");
   let lastFoundIndex = -1;
-  
+
   for (const char of queryChars) {
     const index = substance.indexOf(char, lastFoundIndex + 1);
     if (index === -1) return 0;
     score += 1 / (index - lastFoundIndex);
     lastFoundIndex = index;
   }
-  
+
   return score / queryChars.length;
 }
 
@@ -137,7 +185,7 @@ function getErrorDetails(error: Error, input: string): ParseError | null {
 
 interface SuggestionItem {
   text: string;
-  type: 'recent' | 'common' | 'frequent' | 'pattern';
+  type: "recent" | "common" | "frequent" | "pattern";
   icon?: React.ReactNode;
 }
 
@@ -159,6 +207,18 @@ export function DoseForm() {
   const { toast } = useToast();
   const { triggerUpdate } = useDoseContext();
 
+  const [tierAnalysis, setTierAnalysis] = useState<{
+    tier: string;
+    analysis: string;
+    ranges?: {
+      threshold?: number;
+      light?: { lower: number; upper: number };
+      common?: { lower: number; upper: number };
+      strong?: { lower: number; upper: number };
+      heavy?: number;
+    };
+  } | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -172,22 +232,30 @@ export function DoseForm() {
       try {
         const doses = await getDoses();
         const patterns = analyzePersonalPatterns(doses);
-        
+
         // Get recent substances (last 5 unique)
-        const recent = Array.from(new Set(
-          doses
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-            .map(d => d.substance)
-        )).slice(0, 5);
-        
+        const recent = Array.from(
+          new Set(
+            doses
+              .sort(
+                (a, b) =>
+                  new Date(b.timestamp).getTime() -
+                  new Date(a.timestamp).getTime(),
+              )
+              .map((d) => d.substance),
+          ),
+        ).slice(0, 5);
+
         // Get most frequent substances
         const frequent = patterns
-          .sort((a, b) => 
-            (b.recentTrends.avgDailyDose || 0) - (a.recentTrends.avgDailyDose || 0)
+          .sort(
+            (a, b) =>
+              (b.recentTrends.avgDailyDose || 0) -
+              (a.recentTrends.avgDailyDose || 0),
           )
-          .map(p => p.substance)
+          .map((p) => p.substance)
           .slice(0, 5);
-        
+
         setRecentSubstances(recent);
         setFrequentSubstances(frequent);
       } catch (error) {
@@ -245,27 +313,70 @@ export function DoseForm() {
     return /^\d+\.?\d*(mg|g|ug|ml)$/i.test(input);
   }
 
+  const getBasicParsePreview = (doseString: string) => {
+    try {
+      const parsed = parseDoseString(doseString);
+      // Always return parsed result if basic format is valid
+      return {
+        isValid: true,
+        parsed,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        isValid: false,
+        parsed: null,
+        error:
+          error instanceof Error ? getErrorDetails(error, doseString) : null,
+      };
+    }
+  };
+
   // Enhanced useEffect for smart suggestions
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
+    if (!doseString.trim()) {
+      setSuggestions([]);
+      setPreviewParse(null);
+      setTierAnalysis(null);
+      setParseError(null);
+      return;
+    }
+
     const words = doseString.trim().split(/\s+/);
     const lastWord = words[words.length - 1];
     const format = getDoseFormat(doseString);
 
-    setParseError(null);
+    // First check basic parsing - this should work for any valid format
+    const { isValid, parsed, error } = getBasicParsePreview(doseString);
 
-    if (!doseString.trim()) {
-      setSuggestions([]);
+    // If basic parsing succeeds, show preview and try tier analysis
+    if (isValid && parsed) {
+      setPreviewParse(parsed);
+      setParseError(null);
+
+      // Try tier analysis but don't let it affect validity
+      const analysis = tryGetTierAnalysis(
+        parsed.substance,
+        parsed.route,
+        parsed.amount,
+        parsed.unit,
+        doseData,
+      );
+
+      setTierAnalysis(analysis);
+      // The dose is valid even if tier analysis returns null
+    } else {
       setPreviewParse(null);
-      return;
+      setTierAnalysis(null);
+      setParseError(error);
     }
-
     if (format === "command") {
       if (words[0] === "@" && words.length === 1) {
         const methodSuggestions = Object.values(ADMINISTRATION_METHODS)
           .flat()
           .filter((r) => r.startsWith("@"))
-          .map(text => ({ text, type: 'common' as const }))
+          .map((text) => ({ text, type: "common" as const }))
           .slice(0, 5);
         setSuggestions(methodSuggestions);
       } else if (words.length === 2) {
@@ -284,16 +395,18 @@ export function DoseForm() {
         }
       } else if (words.length === 3 && lastWord.length > 1) {
         // Smart substance suggestions
-        const allSubstances = Array.from(new Set([
-          ...recentSubstances,
-          ...frequentSubstances,
-          ...BASE_SUBSTANCES
-        ]));
+        const allSubstances = Array.from(
+          new Set([
+            ...recentSubstances,
+            ...frequentSubstances,
+            ...BASE_SUBSTANCES,
+          ]),
+        );
 
         const matchedSubstances = allSubstances
-          .map(substance => ({
+          .map((substance) => ({
             substance,
-            score: fuzzyMatch(lastWord, substance)
+            score: fuzzyMatch(lastWord, substance),
           }))
           .filter(({ score }) => score > 0)
           .sort((a, b) => b.score - a.score)
@@ -301,15 +414,15 @@ export function DoseForm() {
           .map(({ substance }) => {
             const suggestionItem: SuggestionItem = {
               text: substance,
-              type: 'common',
-              icon: undefined
+              type: "common",
+              icon: undefined,
             };
 
             if (recentSubstances.includes(substance)) {
-              suggestionItem.type = 'recent';
+              suggestionItem.type = "recent";
               suggestionItem.icon = <Clock className="w-4 h-4" />;
             } else if (frequentSubstances.includes(substance)) {
-              suggestionItem.type = 'frequent';
+              suggestionItem.type = "frequent";
               suggestionItem.icon = <Star className="w-4 h-4" />;
             }
 
@@ -346,16 +459,18 @@ export function DoseForm() {
         }
       } else if (words.length === 2 && lastWord.length > 0) {
         // Enhanced substance suggestions with history
-        const allSubstances = Array.from(new Set([
-          ...recentSubstances,
-          ...frequentSubstances,
-          ...BASE_SUBSTANCES
-        ]));
+        const allSubstances = Array.from(
+          new Set([
+            ...recentSubstances,
+            ...frequentSubstances,
+            ...BASE_SUBSTANCES,
+          ]),
+        );
 
         const matchedSubstances = allSubstances
-          .map(substance => ({
+          .map((substance) => ({
             substance,
-            score: fuzzyMatch(lastWord, substance)
+            score: fuzzyMatch(lastWord, substance),
           }))
           .filter(({ score }) => score > 0)
           .sort((a, b) => b.score - a.score)
@@ -363,15 +478,15 @@ export function DoseForm() {
           .map(({ substance }) => {
             const suggestionItem: SuggestionItem = {
               text: substance,
-              type: 'common',
-              icon: undefined
+              type: "common",
+              icon: undefined,
             };
 
             if (recentSubstances.includes(substance)) {
-              suggestionItem.type = 'recent';
+              suggestionItem.type = "recent";
               suggestionItem.icon = <Clock className="w-4 h-4" />;
             } else if (frequentSubstances.includes(substance)) {
-              suggestionItem.type = 'frequent';
+              suggestionItem.type = "frequent";
               suggestionItem.icon = <Star className="w-4 h-4" />;
             }
 
@@ -383,7 +498,7 @@ export function DoseForm() {
         const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
           .flat()
           .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""))
-          .map(text => ({ text, type: 'common' as const }));
+          .map((text) => ({ text, type: "common" as const }));
 
         if (matchingRoutes.length > 0) {
           setSuggestions(matchingRoutes);
@@ -410,10 +525,29 @@ export function DoseForm() {
             const allRoutes = Object.values(ADMINISTRATION_METHODS)
               .flat()
               .filter((r) => !r.startsWith("@"))
-              .map(text => ({ text, type: 'common' as const }))
+              .map((text) => ({ text, type: "common" as const }))
               .slice(0, 5);
             setSuggestions(allRoutes);
             setParseError(null);
+          }
+        }
+
+        if (matchingRoutes.some((r) => r.text === lastWord)) {
+          try {
+            const parsed = parseDoseString(doseString);
+            setPreviewParse(parsed);
+            // Run tier analysis immediately after successful parse
+            const analysis = analyzeDoseTier(
+              parsed.substance,
+              parsed.route,
+              parsed.amount,
+              parsed.unit,
+              doseData,
+            );
+            setTierAnalysis(analysis);
+          } catch (error) {
+            setPreviewParse(null);
+            setTierAnalysis(null);
           }
         }
       }
@@ -425,6 +559,23 @@ export function DoseForm() {
     const words = doseString.split(" ");
     words[words.length - 1] = suggestion.text;
     form.setValue("doseString", words.join(" "));
+  };
+
+  const getTierBadgeVariant = (tier: string) => {
+    switch (tier) {
+      case "threshold":
+        return "secondary";
+      case "light":
+        return "outline";
+      case "common":
+        return "default";
+      case "strong":
+        return "warning";
+      case "heavy":
+        return "destructive";
+      default:
+        return "secondary";
+    }
   };
 
   return (
@@ -446,9 +597,16 @@ export function DoseForm() {
           >
             <h2 className="text-xl font-bold">Enter Dose</h2>
             {previewParse && (
-              <Badge variant="outline" className="animate-fadeIn">
-                Valid Format
-              </Badge>
+              <div className="flex gap-2">
+                <Badge variant="outline">Valid Format</Badge>
+                {tierAnalysis && (
+                  <Badge variant={getTierBadgeVariant(tierAnalysis.tier)}>
+                    {tierAnalysis.tier.charAt(0).toUpperCase() +
+                      tierAnalysis.tier.slice(1)}{" "}
+                    Dose
+                  </Badge>
+                )}
+              </div>
             )}
           </motion.div>
         </CardHeader>
@@ -557,6 +715,77 @@ export function DoseForm() {
                       <span className="text-muted-foreground">Route:</span>
                       <span className="font-medium">{previewParse.route}</span>
                     </div>
+                    {tierAnalysis ? (
+                      <div className="pt-2 mt-2 border-t border-border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-muted-foreground">
+                            Dose Level:
+                          </span>
+                          <Badge
+                            variant={getTierBadgeVariant(tierAnalysis.tier)}
+                          >
+                            {tierAnalysis.tier.charAt(0).toUpperCase() +
+                              tierAnalysis.tier.slice(1)}
+                          </Badge>
+                        </div>
+                        {tierAnalysis.ranges && (
+                          <div className="text-xs space-y-1 pt-1">
+                            {tierAnalysis.ranges.threshold && (
+                              <div className="flex justify-between">
+                                <span>Threshold:</span>
+                                <span>
+                                  {tierAnalysis.ranges.threshold}
+                                  {previewParse.unit}
+                                </span>
+                              </div>
+                            )}
+                            {tierAnalysis.ranges.light && (
+                              <div className="flex justify-between">
+                                <span>Light:</span>
+                                <span>
+                                  {tierAnalysis.ranges.light.lower}-
+                                  {tierAnalysis.ranges.light.upper}
+                                  {previewParse.unit}
+                                </span>
+                              </div>
+                            )}
+                            {tierAnalysis.ranges.common && (
+                              <div className="flex justify-between">
+                                <span>Common:</span>
+                                <span>
+                                  {tierAnalysis.ranges.common.lower}-
+                                  {tierAnalysis.ranges.common.upper}
+                                  {previewParse.unit}
+                                </span>
+                              </div>
+                            )}
+                            {tierAnalysis.ranges.strong && (
+                              <div className="flex justify-between">
+                                <span>Strong:</span>
+                                <span>
+                                  {tierAnalysis.ranges.strong.lower}-
+                                  {tierAnalysis.ranges.strong.upper}
+                                  {previewParse.unit}
+                                </span>
+                              </div>
+                            )}
+                            {tierAnalysis.ranges.heavy && (
+                              <div className="flex justify-between">
+                                <span>Heavy:</span>
+                                <span>
+                                  ≥{tierAnalysis.ranges.heavy}
+                                  {previewParse.unit}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="pt-2 mt-2 border-t border-border">
+                        <Badge variant="secondary">Valid Format</Badge>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -565,10 +794,13 @@ export function DoseForm() {
             <Button
               type="submit"
               className="w-full relative"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !previewParse} // Only check previewParse, not tierAnalysis
             >
               {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="flex items-center justify-center">
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Logging...
+                </span>
               ) : (
                 "Log Dose"
               )}

@@ -1,37 +1,57 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { DoseEntry } from "@/lib/constants";
-import { ADMINISTRATION_METHODS } from "@/lib/constants";
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { ADMINISTRATION_METHODS, UNITS } from '@/lib/constants';
 
-interface EditDoseDialogProps {
-  dose: DoseEntry;
+const allRoutes = Object.values(ADMINISTRATION_METHODS)
+  .flat()
+  .filter(route => !route.startsWith('@'))
+  .sort();
+
+export default function EditDoseDialog({ 
+  dose, 
+  open, 
+  onOpenChange,
+  onSave 
+}: { 
+  dose: { 
+    id: number;
+    substance: string;
+    amount: number;
+    unit: typeof UNITS[number];
+    route: string;
+    timestamp: string;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedDose: Partial<DoseEntry>) => Promise<void>;
-}
+  onSave: (id: number, updates: any) => Promise<void>;
+}) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    substance: dose.substance,
+    amount: dose.amount,
+    unit: dose.unit,
+    route: dose.route,
+  });
 
-export function EditDoseDialog({ dose, open, onOpenChange, onSave }: EditDoseDialogProps) {
-  const [amount, setAmount] = useState(dose.amount.toString());
-  const [unit, setUnit] = useState(dose.unit);
-  const [route, setRoute] = useState(dose.route);
-  const [saving, setSaving] = useState(false);
-
-  const handleSave = async () => {
-    setSaving(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
     try {
-      await onSave({
-        amount: parseFloat(amount),
-        unit,
-        route,
-      });
+      await onSave(dose.id, formData);
       onOpenChange(false);
     } catch (error) {
-      console.error("Failed to save dose:", error);
+      console.error('Failed to update dose:', error);
     } finally {
-      setSaving(false);
+      setIsLoading(false);
     }
   };
 
@@ -39,50 +59,83 @@ export function EditDoseDialog({ dose, open, onOpenChange, onSave }: EditDoseDia
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Dose - {dose.substance}</DialogTitle>
+          <DialogTitle>Edit Dose</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Substance</label>
             <Input
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              type="number"
-              min="0"
-              step="0.1"
-              className="w-24"
+              value={formData.substance}
+              onChange={(e) => setFormData(prev => ({ ...prev, substance: e.target.value }))}
+              required
             />
-            <Select value={unit} onValueChange={setUnit}>
-              <SelectTrigger className="w-24">
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Amount</label>
+              <Input
+                type="number"
+                step="any"
+                value={formData.amount}
+                onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) }))}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Unit</label>
+              <Select
+                value={formData.unit}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, unit: value as typeof UNITS[number] }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {UNITS.map((unit) => (
+                    <SelectItem key={unit} value={unit}>
+                      {unit}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Route</label>
+            <Select
+              value={formData.route}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, route: value }))}
+            >
+              <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="mg">mg</SelectItem>
-                <SelectItem value="ug">ug</SelectItem>
-                <SelectItem value="ml">ml</SelectItem>
+                {allRoutes.map((route) => (
+                  <SelectItem key={route} value={route}>
+                    {route}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
-          <Select value={route} onValueChange={setRoute}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ADMINISTRATION_METHODS.standard.map((method) => (
-                <SelectItem key={method} value={method}>
-                  {method}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save"}
-          </Button>
-        </DialogFooter>
+
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

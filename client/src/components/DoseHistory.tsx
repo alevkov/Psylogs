@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getDoses, deleteDose, editDose } from "@/lib/db";
+import { getDoses } from "@/lib/db";
 import type { DoseEntry } from "@/lib/constants";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { EditDoseDialog } from "@/components/EditDoseDialog";
 import {
   format,
   isToday,
@@ -15,12 +14,11 @@ import {
 import {
   Loader2,
   Filter,
+  ChevronDown,
+  ChevronUp,
   Calendar,
   Pill,
   Route,
-  MoreVertical,
-  Pencil,
-  Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -32,9 +30,22 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { deleteDose, updateDose } from "@/lib/db";
+import { MoreHorizontal, Pencil, Trash } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import EditDoseDialog from "./EditDoseDialog";
 
 // Generate consistent colors for substances
 const getSubstanceColor = (substance: string, isDarkMode: boolean) => {
@@ -58,16 +69,20 @@ interface GroupedDoses {
 export function DoseHistory() {
   const [doses, setDoses] = useState<DoseEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDose, setSelectedDose] = useState<DoseEntry | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [undoStack, setUndoStack] = useState<DoseEntry[]>([]);
   const [selectedSubstances, setSelectedSubstances] = useState<string[]>([]);
   const [selectedRoutes, setSelectedRoutes] = useState<string[]>([]);
-  const [groupBy, setGroupBy] = useState<"time" | "substance" | "route">("time");
+  const [selectedDose, setSelectedDose] = useState<DoseEntry | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [groupBy, setGroupBy] = useState<"time" | "substance" | "route">(
+    "time",
+  );
   const [isDarkMode, setIsDarkMode] = useState(
-    document.documentElement.classList.contains("dark")
+    document.documentElement.classList.contains("dark"),
   );
   const { toast } = useToast();
-  const { updateTrigger, triggerUpdate, lastDeletedDose, setLastDeletedDose } = useDoseContext();
+  const { updateTrigger } = useDoseContext();
 
   useEffect(() => {
     const loadDoses = async () => {
@@ -106,50 +121,62 @@ export function DoseHistory() {
     return () => observer.disconnect();
   }, []);
 
-  const handleDelete = async (dose: DoseEntry) => {
-    if (!dose.id) return;
-    
+  const handleUndo = async () => {
+    if (undoStack.length === 0) return;
+
+    const lastDose = undoStack[undoStack.length - 1];
     try {
-      await deleteDose(dose.id);
-      setLastDeletedDose(dose);
-      setDoses((prev) => prev.filter((d) => d.id !== dose.id));
-      triggerUpdate();
-      
+      setUndoStack((prev) => prev.slice(0, -1));
+      setDoses((prev) => prev.filter((d) => d.id !== lastDose.id));
+
       toast({
-        title: "Dose deleted",
-        description: "The dose has been deleted successfully",
+        title: "Dose removed",
+        description: "The last dose has been removed",
         duration: 3000,
       });
     } catch (error) {
       toast({
-        title: "Error deleting dose",
-        description: "Could not delete the dose",
+        title: "Error removing dose",
+        description: "Could not remove the dose",
         variant: "destructive",
       });
     }
   };
 
-  const handleEdit = async (updatedFields: Partial<DoseEntry>) => {
+  const handleDelete = async () => {
     if (!selectedDose?.id) return;
-    
     try {
-      await editDose(selectedDose.id, updatedFields);
+      await deleteDose(selectedDose.id);
+      setDoses((prev) => prev.filter((d) => d.id !== selectedDose.id));
+      toast({
+        title: "Dose deleted",
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting dose",
+        description: "Failed to delete the dose",
+        variant: "destructive",
+      });
+    }
+    setIsDeleteDialogOpen(false);
+    setSelectedDose(null);
+  };
+
+  const handleUpdate = async (id: number, updates: Partial<DoseEntry>) => {
+    try {
+      await updateDose(id, updates);
       setDoses((prev) =>
-        prev.map((d) =>
-          d.id === selectedDose.id ? { ...d, ...updatedFields } : d
-        )
+        prev.map((d) => (d.id === id ? { ...d, ...updates } : d)),
       );
-      triggerUpdate();
-      
       toast({
         title: "Dose updated",
-        description: "The dose has been updated successfully",
         duration: 3000,
       });
     } catch (error) {
       toast({
         title: "Error updating dose",
-        description: "Could not update the dose",
+        description: "Failed to update the dose",
         variant: "destructive",
       });
     }
@@ -337,16 +364,18 @@ export function DoseHistory() {
                         style={{
                           backgroundColor: getSubstanceColor(
                             dose.substance,
-                            isDarkMode
+                            isDarkMode,
                           ),
                           transition: "all 0.2s ease-in-out",
                         }}
                       >
-                        <CardContent className="p-3">
+                        <CardContent className="p-2">
                           <div className="flex justify-between items-start">
-                            <div className="space-y-1">
+                            <div className="space-y-3">
+                              <div className="p-3">
                               <h4 className="font-medium">{dose.substance}</h4>
-                              <div className="flex items-center gap-2">
+                              </div>
+                              <div className="flex items-center gap-3">
                                 <Badge variant="outline" className="text-xs">
                                   {dose.amount}
                                   {dose.unit}
@@ -354,49 +383,47 @@ export function DoseHistory() {
                                 <Badge variant="outline" className="text-xs">
                                   {dose.route}
                                 </Badge>
+                                <span className="text-xs text-foreground right-2">
+                                  {formatDistanceToNow(new Date(dose.timestamp), {
+                                    addSuffix: true,
+                                  })}
+                                </span>
                               </div>
-                              {!navigator.onLine && dose.id === undefined && (
-                                <Badge variant="secondary" className="text-xs">
-                                  Pending Sync
-                                </Badge>
-                              )}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-foreground">
-                                {formatDistanceToNow(new Date(dose.timestamp), {
-                                  addSuffix: true,
-                                })}
-                              </span>
+
+                     
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button
                                     variant="ghost"
-                                    size="sm"
                                     className="h-8 w-8 p-0"
                                   >
-                                    <MoreVertical className="h-4 w-4" />
+                                    <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setSelectedDose(dose);
-                                      setEditDialogOpen(true);
+                                      setIsEditDialogOpen(true);
                                     }}
                                   >
-                                    <Pencil className="h-4 w-4 mr-2" />
+                                    <Pencil className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
-                                    onClick={() => handleDelete(dose)}
                                     className="text-destructive"
+                                    onClick={() => {
+                                      setSelectedDose(dose);
+                                      setIsDeleteDialogOpen(true);
+                                    }}
                                   >
-                                    <Trash className="h-4 w-4 mr-2" />
+                                    <Trash className="mr-2 h-4 w-4" />
                                     Delete
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
-                            </div>
+ 
                           </div>
                         </CardContent>
                       </Card>
@@ -416,48 +443,44 @@ export function DoseHistory() {
           )}
         </ScrollArea>
 
-        {lastDeletedDose && (
+        {undoStack.length > 0 && (
           <div className="mt-4 flex justify-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={async () => {
-                if (lastDeletedDose) {
-                  try {
-                    await addDose({
-                      substance: lastDeletedDose.substance,
-                      amount: lastDeletedDose.amount,
-                      unit: lastDeletedDose.unit,
-                      route: lastDeletedDose.route,
-                    });
-                    setLastDeletedDose(null);
-                    triggerUpdate();
-                    toast({
-                      title: "Dose restored",
-                      description: "The last deleted dose has been restored",
-                    });
-                  } catch (error) {
-                    toast({
-                      title: "Error restoring dose",
-                      description: "Could not restore the dose",
-                      variant: "destructive",
-                    });
-                  }
-                }
-              }}
-            >
-              Undo Delete
+            <Button variant="ghost" size="sm" onClick={handleUndo}>
+              Undo Last Action
             </Button>
           </div>
         )}
       </CardContent>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              dose record.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {selectedDose && (
         <EditDoseDialog
           dose={selectedDose}
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
-          onSave={handleEdit}
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          onSave={handleUpdate}
         />
       )}
     </Card>
