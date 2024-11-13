@@ -19,6 +19,7 @@ import {
   Star,
   AlertTriangle,
   Activity,
+  ChevronDown,
 } from "lucide-react";
 import { useDoseContext } from "@/contexts/DoseContext";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,11 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { DoseRangeVisual } from "./DoseRangeVisual";
 
 function normalizeSubstanceName(name: string): string {
@@ -861,51 +867,84 @@ export function DoseForm() {
                       </div>
                     )}
 
-                    {/* Existing safety information */}
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Dosage Guidance</h4>
-                      <p className="text-sm">{safetyInfo.dosageGuidance}</p>
-                    </div>
+                    {/* Dosage Guidance Section */}
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full">
+                        <h4 className="font-medium">Dosage Guidance</h4>
+                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <Alert className="mt-2">
+                          <Info className="h-4 w-4" />
+                          <AlertDescription>
+                            {safetyInfo.dosageGuidance}
+                          </AlertDescription>
+                        </Alert>
+                      </CollapsibleContent>
+                    </Collapsible>
 
+                    {/* Safety Warnings Section */}
                     {safetyInfo.safetyWarnings.length > 0 && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Safety Warnings</h4>
-                        {safetyInfo.safetyWarnings.map((warning, index) => (
-                          <Alert key={index} variant="destructive">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertTitle>Warning</AlertTitle>
-                            <AlertDescription>{warning}</AlertDescription>
-                          </Alert>
-                        ))}
-                      </div>
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex items-center justify-between w-full">
+                          <h4 className="font-medium">Safety Warnings</h4>
+                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="space-y-2 mt-2">
+                            {safetyInfo.safetyWarnings.map((warning, index) => (
+                              <Alert key={index} variant="destructive">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertTitle>Warning</AlertTitle>
+                                <AlertDescription>{warning}</AlertDescription>
+                              </Alert>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     )}
 
-                    <div className="space-y-2">
-                      <h4 className="font-medium">Effects</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {safetyInfo.effects.map((effect, index) => (
-                          <Badge key={index} variant="secondary">
-                            {effect}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
+                    {/* Effects Section */}
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full">
+                        <h4 className="font-medium">Effects</h4>
+                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {safetyInfo.effects.map((effect, index) => (
+                            <Badge key={index} variant="secondary">
+                              {effect}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
 
+                    {/* Duration/Onset Section */}
                     {(safetyInfo.duration || safetyInfo.onset) && (
-                      <div className="flex gap-4">
-                        {safetyInfo.onset && (
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span className="text-sm">{safetyInfo.onset}</span>
+                      <Collapsible>
+                        <CollapsibleTrigger className="flex items-center justify-between w-full">
+                          <h4 className="font-medium">Timing Information</h4>
+                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="flex gap-4 mt-2">
+                            {safetyInfo.onset && (
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4" />
+                                <span className="text-sm">{safetyInfo.onset}</span>
+                              </div>
+                            )}
+                            {safetyInfo.duration && (
+                              <div className="flex items-center gap-2">
+                                <Activity className="h-4 w-4" />
+                                <span className="text-sm">{safetyInfo.duration}</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {safetyInfo.duration && (
-                          <div className="flex items-center gap-2">
-                            <Activity className="h-4 w-4" />
-                            <span className="text-sm">{safetyInfo.duration}</span>
-                          </div>
-                        )}
-                      </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     )}
                   </CardContent>
                 </Card>
@@ -913,14 +952,19 @@ export function DoseForm() {
 
               <Button
                 type="submit"
-                className="w-full relative"
-                disabled={isSubmitting || !previewParse} // Only check previewParse, not tierAnalysis
+                disabled={isSubmitting}
+                className="w-full mt-4"
               >
                 {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Logging...
-                  </span>
+                  </>
+                ) : submitStatus === "success" ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Logged
+                  </>
                 ) : (
                   "Log Dose"
                 )}
