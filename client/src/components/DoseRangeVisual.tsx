@@ -34,8 +34,8 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
     backgroundColor: color
   });
 
-  // Calculate current dose position
-  const dosePosition = getPosition(currentDose);
+  // Calculate capped dose position (never exceed 100%)
+  const dosePosition = Math.min(getPosition(currentDose), 100);
 
   return (
     <div className="space-y-2 w-full">
@@ -91,7 +91,10 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
 
         {/* Current dose indicator */}
         <div 
-          className="absolute w-1 h-full bg-foreground"
+          className={cn(
+            "absolute w-1 h-full bg-foreground transition-all duration-300",
+            currentDose >= (ranges.heavy || Infinity) && "animate-pulse"
+          )}
           style={{ left: `${dosePosition}%` }}
         />
       </div>
