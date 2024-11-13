@@ -34,8 +34,15 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
     backgroundColor: color
   });
 
-  // Calculate capped dose position (never exceed 100%)
-  const dosePosition = Math.min(getPosition(currentDose), 100);
+  // Update the dose position calculation to cap at slightly before heavy threshold
+  const dosePosition = Math.min(
+    getPosition(
+      currentDose >= (ranges.heavy || Infinity)
+        ? ranges.heavy * 0.99  // Cap at 99% of heavy threshold
+        : currentDose
+    ),
+    100
+  );
 
   return (
     <div className="space-y-2 w-full">
@@ -97,7 +104,10 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
               ? "bg-red-500 animate-pulse" 
               : "bg-foreground"
           )}
-          style={{ left: `${dosePosition}%` }}
+          style={{ 
+            left: `${dosePosition}%`,
+            zIndex: 10  // Ensure indicator is always visible
+          }}
         />
       </div>
 
