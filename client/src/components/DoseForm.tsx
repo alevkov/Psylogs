@@ -32,6 +32,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import { DoseRangeVisual } from "./DoseRangeVisual";
 
 function normalizeSubstanceName(name: string): string {
   return name
@@ -842,43 +843,72 @@ export function DoseForm() {
                 </AnimatePresence>
               </div>
 
-              {safetyInfo && (
-                <div className="space-y-3">
-                  <Alert>
-                    <Activity className="h-4 w-4" />
-                    <AlertTitle>Dosage Information</AlertTitle>
-                    <AlertDescription>
-                      {safetyInfo.dosageGuidance}
-                    </AlertDescription>
-                  </Alert>
+              {safetyInfo && previewParse && (
+                <Card className="mt-4">
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold">Safety Information</h3>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Dose Range Visual */}
+                    {tierAnalysis?.ranges && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Dose Range</h4>
+                        <DoseRangeVisual
+                          ranges={tierAnalysis.ranges}
+                          currentDose={previewParse.amount}
+                          unit={previewParse.unit}
+                        />
+                      </div>
+                    )}
 
-                  {safetyInfo.safetyWarnings.map((warning, index) => (
-                    <Alert variant="destructive" key={index}>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertTitle>Safety Warning</AlertTitle>
-                      <AlertDescription>{warning}</AlertDescription>
-                    </Alert>
-                  ))}
+                    {/* Existing safety information */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Dosage Guidance</h4>
+                      <p className="text-sm">{safetyInfo.dosageGuidance}</p>
+                    </div>
 
-                  {(safetyInfo.onset || safetyInfo.duration) && (
-                    <Alert variant="secondary">
-                      <Clock className="h-4 w-4" />
-                      <AlertTitle>Timing Information</AlertTitle>
-                      <AlertDescription className="space-y-1">
-                        {safetyInfo.onset && <p>{safetyInfo.onset}</p>}
-                        {safetyInfo.duration && <p>{safetyInfo.duration}</p>}
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                    {safetyInfo.safetyWarnings.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Safety Warnings</h4>
+                        {safetyInfo.safetyWarnings.map((warning, index) => (
+                          <Alert key={index} variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertTitle>Warning</AlertTitle>
+                            <AlertDescription>{warning}</AlertDescription>
+                          </Alert>
+                        ))}
+                      </div>
+                    )}
 
-                  <div className="flex flex-wrap gap-2">
-                    {safetyInfo.effects.map((effect, index) => (
-                      <Badge key={index} variant="secondary">
-                        {effect}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Effects</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {safetyInfo.effects.map((effect, index) => (
+                          <Badge key={index} variant="secondary">
+                            {effect}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {(safetyInfo.duration || safetyInfo.onset) && (
+                      <div className="flex gap-4">
+                        {safetyInfo.onset && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span className="text-sm">{safetyInfo.onset}</span>
+                          </div>
+                        )}
+                        {safetyInfo.duration && (
+                          <div className="flex items-center gap-2">
+                            <Activity className="h-4 w-4" />
+                            <span className="text-sm">{safetyInfo.duration}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               <Button
