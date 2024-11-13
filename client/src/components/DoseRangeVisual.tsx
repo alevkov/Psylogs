@@ -21,11 +21,8 @@ interface DoseRangeVisualProps {
 }
 
 export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualProps) {
-  // Calculate the maximum value for scaling
-  const maxValue = ranges.heavy || 
-    (ranges.strong?.upper || 
-    ranges.common?.upper || 
-    ranges.light?.upper || 0);
+  // Calculate the maximum value for scaling, extending 20% beyond heavy threshold
+  const maxValue = (ranges.heavy || 0) * 1.2;
 
   // Calculate percentage positions for the ranges
   const getPosition = (value: number) => (value / maxValue) * 100;
@@ -80,7 +77,7 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
           />
         )}
         
-        {/* Heavy indicator */}
+        {/* Heavy range */}
         {ranges.heavy && (
           <div
             className="absolute h-full opacity-30"
