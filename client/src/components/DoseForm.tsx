@@ -10,12 +10,28 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { ADMINISTRATION_METHODS } from "@/lib/constants";
-import { Loader2, AlertCircle, Check, Info, Clock, Star } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  Check,
+  Info,
+  Clock,
+  Star,
+  AlertTriangle,
+  Activity,
+} from "lucide-react";
 import { useDoseContext } from "@/contexts/DoseContext";
 import { Badge } from "@/components/ui/badge";
 import { analyzePersonalPatterns } from "@/lib/analysis";
 import doseData from "@/lib/dose-tiers.json";
 import { analyzeDoseTier, getTierBadgeVariant } from "@/lib/dose-tiers.types";
+import { getSubstanceSafetyInfo } from "@/lib/substance-safety";
+import substanceData from "@/lib/substance-data.json";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
 
 function normalizeSubstanceName(name: string): string {
   return name
@@ -219,6 +235,14 @@ export function DoseForm() {
     };
   } | null>(null);
 
+  const [safetyInfo, setSafetyInfo] = useState<{
+    dosageGuidance: string;
+    safetyWarnings: string[];
+    effects: string[];
+    duration?: string;
+    onset?: string;
+  } | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -340,7 +364,31 @@ export function DoseForm() {
       setPreviewParse(null);
       setTierAnalysis(null);
       setParseError(null);
+      setSafetyInfo(null);
       return;
+    }
+
+    try {
+      const parsed = parseDoseString(doseString);
+      setPreviewParse(parsed);
+      setParseError(null);
+
+      // Get safety information
+      const safety = getSubstanceSafetyInfo(
+        parsed.substance,
+        parsed.amount,
+        parsed.route,
+        substanceData
+      );
+      setSafetyInfo(safety);
+
+    } catch (error) {
+      setPreviewParse(null);
+      setSafetyInfo(null);
+      if (error instanceof Error) {
+        const errorDetails = getErrorDetails(error, doseString);
+        setParseError(errorDetails);
+      }
     }
 
     const words = doseString.trim().split(/\s+/);
@@ -611,201 +659,244 @@ export function DoseForm() {
           </motion.div>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <div className="relative">
-                <Input
-                  placeholder="e.g. 200mg caffeine oral"
-                  {...form.register("doseString")}
-                  className={`w-full pr-10 transition-all ${
-                    previewParse
-                      ? "border-green-500"
-                      : parseError
-                        ? "border-red-500"
-                        : ""
-                  }`}
-                  disabled={isSubmitting}
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {previewParse && <Check className="w-4 h-4 text-green-500" />}
-                  {parseError && (
-                    <AlertCircle className="w-4 h-4 text-destructive" />
-                  )}
+          <div className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <div className="relative">
+                  <Input
+                    placeholder="e.g. 200mg caffeine oral"
+                    {...form.register("doseString")}
+                    className={`w-full pr-10 transition-all ${
+                      previewParse
+                        ? "border-green-500"
+                        : parseError
+                          ? "border-red-500"
+                          : ""
+                    }`}
+                    disabled={isSubmitting}
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {previewParse && (
+                      <Check className="w-4 h-4 text-green-500" />
+                    )}
+                    {parseError && (
+                      <AlertCircle className="w-4 h-4 text-destructive" />
+                    )}
+                  </div>
                 </div>
+
+                <AnimatePresence mode="wait">
+                  {parseError && (
+                    <motion.div
+                      key="error"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="bg-destructive/5 rounded-lg p-3 text-sm space-y-2"
+                    >
+                      <div className="flex items-start gap-2">
+                        <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                        <div className="space-y-1 flex-grow">
+                          <p className="font-medium text-destructive">
+                            {parseError.message}
+                          </p>
+                          {parseError.suggestion && (
+                            <p className="text-muted-foreground">
+                              {parseError.suggestion}
+                            </p>
+                          )}
+                          {parseError.example && (
+                            <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                              {parseError.example}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {suggestions.length > 0 && !parseError && (
+                    <motion.div
+                      key="suggestions"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex flex-wrap gap-2"
+                    >
+                      {suggestions.map((suggestion) => (
+                        <Button
+                          key={suggestion.text}
+                          variant="outline"
+                          size="sm"
+                          type="button"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            applySuggestion(suggestion);
+                          }}
+                          className="hover:scale-105 transition-transform flex items-center gap-1"
+                        >
+                          {suggestion.icon}
+                          {suggestion.text}
+                        </Button>
+                      ))}
+                    </motion.div>
+                  )}
+
+                  {previewParse && (
+                    <motion.div
+                      key="preview"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="bg-muted rounded-lg p-3 text-sm space-y-1"
+                    >
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Substance:</span>
+                        <span className="font-medium">
+                          {previewParse.substance}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Amount:</span>
+                        <span className="font-medium">
+                          {previewParse.amount}
+                          {previewParse.unit}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Route:</span>
+                        <span className="font-medium">{previewParse.route}</span>
+                      </div>
+                      {tierAnalysis ? (
+                        <div className="pt-2 mt-2 border-t border-border">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-muted-foreground">
+                              Dose Level:
+                            </span>
+                            <Badge
+                              variant={getTierBadgeVariant(tierAnalysis.tier)}
+                            >
+                              {tierAnalysis.tier.charAt(0).toUpperCase() +
+                                tierAnalysis.tier.slice(1)}
+                            </Badge>
+                          </div>
+                          {tierAnalysis.ranges && (
+                            <div className="text-xs space-y-1 pt-1">
+                              {tierAnalysis.ranges.threshold && (
+                                <div className="flex justify-between">
+                                  <span>Threshold:</span>
+                                  <span>
+                                    {tierAnalysis.ranges.threshold}
+                                    {previewParse.unit}
+                                  </span>
+                                </div>
+                              )}
+                              {tierAnalysis.ranges.light && (
+                                <div className="flex justify-between">
+                                  <span>Light:</span>
+                                  <span>
+                                    {tierAnalysis.ranges.light.lower}-
+                                    {tierAnalysis.ranges.light.upper}
+                                    {previewParse.unit}
+                                  </span>
+                                </div>
+                              )}
+                              {tierAnalysis.ranges.common && (
+                                <div className="flex justify-between">
+                                  <span>Common:</span>
+                                  <span>
+                                    {tierAnalysis.ranges.common.lower}-
+                                    {tierAnalysis.ranges.common.upper}
+                                    {previewParse.unit}
+                                  </span>
+                                </div>
+                              )}
+                              {tierAnalysis.ranges.strong && (
+                                <div className="flex justify-between">
+                                  <span>Strong:</span>
+                                  <span>
+                                    {tierAnalysis.ranges.strong.lower}-
+                                    {tierAnalysis.ranges.strong.upper}
+                                    {previewParse.unit}
+                                  </span>
+                                </div>
+                              )}
+                              {tierAnalysis.ranges.heavy && (
+                                <div className="flex justify-between">
+                                  <span>Heavy:</span>
+                                  <span>
+                                    ≥{tierAnalysis.ranges.heavy}
+                                    {previewParse.unit}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="pt-2 mt-2 border-t border-border">
+                          <Badge variant="secondary">Valid Format</Badge>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
-              <AnimatePresence mode="wait">
-                {parseError && (
-                  <motion.div
-                    key="error"
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="bg-destructive/5 rounded-lg p-3 text-sm space-y-2"
-                  >
-                    <div className="flex items-start gap-2">
-                      <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
-                      <div className="space-y-1 flex-grow">
-                        <p className="font-medium text-destructive">
-                          {parseError.message}
-                        </p>
-                        {parseError.suggestion && (
-                          <p className="text-muted-foreground">
-                            {parseError.suggestion}
-                          </p>
-                        )}
-                        {parseError.example && (
-                          <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
-                            {parseError.example}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+              {safetyInfo && (
+                <div className="space-y-3">
+                  <Alert>
+                    <Activity className="h-4 w-4" />
+                    <AlertTitle>Dosage Information</AlertTitle>
+                    <AlertDescription>
+                      {safetyInfo.dosageGuidance}
+                    </AlertDescription>
+                  </Alert>
 
-                {suggestions.length > 0 && !parseError && (
-                  <motion.div
-                    key="suggestions"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex flex-wrap gap-2"
-                  >
-                    {suggestions.map((suggestion) => (
-                      <Button
-                        key={suggestion.text}
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          applySuggestion(suggestion);
-                        }}
-                        className="hover:scale-105 transition-transform flex items-center gap-1"
-                      >
-                        {suggestion.icon}
-                        {suggestion.text}
-                      </Button>
+                  {safetyInfo.safetyWarnings.map((warning, index) => (
+                    <Alert variant="destructive" key={index}>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Safety Warning</AlertTitle>
+                      <AlertDescription>{warning}</AlertDescription>
+                    </Alert>
+                  ))}
+
+                  {(safetyInfo.onset || safetyInfo.duration) && (
+                    <Alert variant="secondary">
+                      <Clock className="h-4 w-4" />
+                      <AlertTitle>Timing Information</AlertTitle>
+                      <AlertDescription className="space-y-1">
+                        {safetyInfo.onset && <p>{safetyInfo.onset}</p>}
+                        {safetyInfo.duration && <p>{safetyInfo.duration}</p>}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="flex flex-wrap gap-2">
+                    {safetyInfo.effects.map((effect, index) => (
+                      <Badge key={index} variant="secondary">
+                        {effect}
+                      </Badge>
                     ))}
-                  </motion.div>
-                )}
-
-                {previewParse && (
-                  <motion.div
-                    key="preview"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="bg-muted rounded-lg p-3 text-sm space-y-1"
-                  >
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Substance:</span>
-                      <span className="font-medium">
-                        {previewParse.substance}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Amount:</span>
-                      <span className="font-medium">
-                        {previewParse.amount}
-                        {previewParse.unit}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Route:</span>
-                      <span className="font-medium">{previewParse.route}</span>
-                    </div>
-                    {tierAnalysis ? (
-                      <div className="pt-2 mt-2 border-t border-border">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-muted-foreground">
-                            Dose Level:
-                          </span>
-                          <Badge
-                            variant={getTierBadgeVariant(tierAnalysis.tier)}
-                          >
-                            {tierAnalysis.tier.charAt(0).toUpperCase() +
-                              tierAnalysis.tier.slice(1)}
-                          </Badge>
-                        </div>
-                        {tierAnalysis.ranges && (
-                          <div className="text-xs space-y-1 pt-1">
-                            {tierAnalysis.ranges.threshold && (
-                              <div className="flex justify-between">
-                                <span>Threshold:</span>
-                                <span>
-                                  {tierAnalysis.ranges.threshold}
-                                  {previewParse.unit}
-                                </span>
-                              </div>
-                            )}
-                            {tierAnalysis.ranges.light && (
-                              <div className="flex justify-between">
-                                <span>Light:</span>
-                                <span>
-                                  {tierAnalysis.ranges.light.lower}-
-                                  {tierAnalysis.ranges.light.upper}
-                                  {previewParse.unit}
-                                </span>
-                              </div>
-                            )}
-                            {tierAnalysis.ranges.common && (
-                              <div className="flex justify-between">
-                                <span>Common:</span>
-                                <span>
-                                  {tierAnalysis.ranges.common.lower}-
-                                  {tierAnalysis.ranges.common.upper}
-                                  {previewParse.unit}
-                                </span>
-                              </div>
-                            )}
-                            {tierAnalysis.ranges.strong && (
-                              <div className="flex justify-between">
-                                <span>Strong:</span>
-                                <span>
-                                  {tierAnalysis.ranges.strong.lower}-
-                                  {tierAnalysis.ranges.strong.upper}
-                                  {previewParse.unit}
-                                </span>
-                              </div>
-                            )}
-                            {tierAnalysis.ranges.heavy && (
-                              <div className="flex justify-between">
-                                <span>Heavy:</span>
-                                <span>
-                                  ≥{tierAnalysis.ranges.heavy}
-                                  {previewParse.unit}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="pt-2 mt-2 border-t border-border">
-                        <Badge variant="secondary">Valid Format</Badge>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full relative"
-              disabled={isSubmitting || !previewParse} // Only check previewParse, not tierAnalysis
-            >
-              {isSubmitting ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Logging...
-                </span>
-              ) : (
-                "Log Dose"
+                  </div>
+                </div>
               )}
-            </Button>
-          </form>
+
+              <Button
+                type="submit"
+                className="w-full relative"
+                disabled={isSubmitting || !previewParse} // Only check previewParse, not tierAnalysis
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Logging...
+                  </span>
+                ) : (
+                  "Log Dose"
+                )}
+              </Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </motion.div>

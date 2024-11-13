@@ -1,0 +1,43 @@
+[
+  {
+    "name": "alprazolam",
+    "pretty_name": "Alprazolam",
+    "aliases": ["xanax", "prazolam", "ksalol", "niravam"],
+    "categories": ["benzodiazepine", "habit-forming", "depressant", "common"],
+    "dose_note": "Warning - higher doses increase the chances of blacking out",
+    "formatted_aftereffects": {
+      "_unit": "hours",
+      "value": "6-24"
+    },
+    "formatted_dose": {
+      "Oral": {
+        "Common": "0.5-1.5mg",
+        "Heavy": "2mg",
+        "Light": "0.25-0.5mg",
+        "Strong": "1.5-2mg"
+      }
+    },
+    "formatted_duration": {
+      "_unit": "hours",
+      "value": "5-8"
+    },
+    "formatted_effects": [
+      "Anxiolytic",
+      "Sedative",
+      "Muscle Relaxant",
+      "Amnesia",
+      "Dystaxia",
+      "Hiccups",
+      "Loss of time",
+      "Loss of motor skills"
+    ],
+    "formatted_onset": {
+      "_unit": "minutes",
+      "value": "15-40"
+    },
+    "properties": {
+      "avoid": "When taken for a long period of time, abrupt discontinuation is highly unadvised. Avoid combining other depressants such as Alcohol.",
+      "summary": "An extremely common benzodiazepine better known as Xanax, frequently prescribed for the treatment of anxiety and panic disorders. Alprazolam is short-lasting and primarily anxiolytic, though also possesses hypnotic properties. At high doses amnesia and loss of inhibition are common. Do not mix with other depressants."
+    }
+  }
+]
