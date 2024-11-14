@@ -10,6 +10,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ADMINISTRATION_METHODS, UNITS } from '@/lib/constants';
+import { format } from 'date-fns';
 
 const allRoutes = Object.values(ADMINISTRATION_METHODS)
   .flat()
@@ -29,6 +30,9 @@ export default function EditDoseDialog({
     unit: typeof UNITS[number];
     route: string;
     timestamp: string;
+    onsetAt?: string;
+    peakAt?: string;
+    offsetAt?: string;
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,13 +44,22 @@ export default function EditDoseDialog({
     amount: dose.amount,
     unit: dose.unit,
     route: dose.route,
+    onsetAt: dose.onsetAt || '',
+    peakAt: dose.peakAt || '',
+    offsetAt: dose.offsetAt || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await onSave(dose.id, formData);
+      const updates = { ...formData };
+      // Only include timestamps that have values
+      if (!updates.onsetAt) delete updates.onsetAt;
+      if (!updates.peakAt) delete updates.peakAt;
+      if (!updates.offsetAt) delete updates.offsetAt;
+      
+      await onSave(dose.id, updates);
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to update dose:', error);
@@ -120,6 +133,42 @@ export default function EditDoseDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Onset Time</label>
+            <Input
+              type="datetime-local"
+              value={formData.onsetAt ? formData.onsetAt.slice(0, 16) : ''}
+              onChange={(e) => {
+                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
+                setFormData(prev => ({ ...prev, onsetAt: value }));
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Peak Time</label>
+            <Input
+              type="datetime-local"
+              value={formData.peakAt ? formData.peakAt.slice(0, 16) : ''}
+              onChange={(e) => {
+                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
+                setFormData(prev => ({ ...prev, peakAt: value }));
+              }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Offset Time</label>
+            <Input
+              type="datetime-local"
+              value={formData.offsetAt ? formData.offsetAt.slice(0, 16) : ''}
+              onChange={(e) => {
+                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
+                setFormData(prev => ({ ...prev, offsetAt: value }));
+              }}
+            />
           </div>
 
           <DialogFooter>

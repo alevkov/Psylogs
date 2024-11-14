@@ -19,6 +19,9 @@ import {
   Calendar,
   Pill,
   Route,
+  MoreHorizontal,
+  Pencil,
+  Trash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +37,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deleteDose, updateDose } from "@/lib/db";
-import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +48,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import EditDoseDialog from "./EditDoseDialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // Generate consistent colors for substances
 const getSubstanceColor = (substance: string, isDarkMode: boolean) => {
@@ -389,6 +397,48 @@ export function DoseHistory() {
                                   })}
                                 </span>
                               </div>
+                              {(dose.onsetAt || dose.peakAt || dose.offsetAt) && (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <TooltipProvider>
+                                    {dose.onsetAt && (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Badge variant="secondary">
+                                            Onset: {format(new Date(dose.onsetAt), 'HH:mm')}
+                                          </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {format(new Date(dose.onsetAt), 'MMM d, yyyy HH:mm')}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {dose.peakAt && (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Badge variant="secondary">
+                                            Peak: {format(new Date(dose.peakAt), 'HH:mm')}
+                                          </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {format(new Date(dose.peakAt), 'MMM d, yyyy HH:mm')}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {dose.offsetAt && (
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Badge variant="secondary">
+                                            Offset: {format(new Date(dose.offsetAt), 'HH:mm')}
+                                          </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          {format(new Date(dose.offsetAt), 'MMM d, yyyy HH:mm')}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                  </TooltipProvider>
+                                </div>
+                              )}
                             </div>
 
                      
