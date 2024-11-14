@@ -11,6 +11,7 @@ import {
   isSameWeek,
   formatDistanceToNow,
   parseISO,
+  differenceInMinutes,
 } from "date-fns";
 import {
   Loader2,
@@ -23,6 +24,9 @@ import {
   MoreHorizontal,
   Pencil,
   Trash,
+  Clock,
+  Star,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -73,6 +77,82 @@ const getSubstanceColor = (substance: string, isDarkMode: boolean) => {
 
 interface GroupedDoses {
   [key: string]: DoseEntry[];
+}
+
+function DurationVisualizer({ dose }: { dose: DoseEntry }) {
+  if (!dose.onsetAt) return null;
+
+  const startTime = parseISO(dose.timestamp);
+  const onsetTime = parseISO(dose.onsetAt);
+  const peakTime = dose.peakAt ? parseISO(dose.peakAt) : null;
+  const offsetTime = dose.offsetAt ? parseISO(dose.offsetAt) : null;
+
+  const lastTime = offsetTime || peakTime || onsetTime;
+  const totalDuration = differenceInMinutes(lastTime, startTime);
+  
+  if (totalDuration <= 0) return null;
+
+  const onsetPercent = Math.max(0, Math.min(100, 
+    (differenceInMinutes(onsetTime, startTime) / totalDuration) * 100
+  ));
+  
+  const peakPercent = peakTime ? Math.max(0, Math.min(100,
+    (differenceInMinutes(peakTime, startTime) / totalDuration) * 100
+  )) : null;
+  
+  const offsetPercent = offsetTime ? Math.max(0, Math.min(100,
+    (differenceInMinutes(offsetTime, startTime) / totalDuration) * 100
+  )) : null;
+
+  return (
+    <div className="mt-2 space-y-1">
+      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+        <div
+          className="absolute h-full bg-primary/20 rounded-full"
+          style={{ width: `${onsetPercent}%` }}
+        />
+        {peakTime && (
+          <div
+            className="absolute h-full bg-primary/40 rounded-full"
+            style={{
+              left: `${onsetPercent}%`,
+              width: `${peakPercent - onsetPercent}%`
+            }}
+          />
+        )}
+        {offsetTime && peakTime && (
+          <div
+            className="absolute h-full bg-primary/20 rounded-full"
+            style={{
+              left: `${peakPercent}%`,
+              width: `${offsetPercent - peakPercent}%`
+            }}
+          />
+        )}
+        {/* Timeline markers */}
+        <div
+          className="absolute top-0 w-1 h-full bg-primary"
+          style={{ left: `${onsetPercent}%` }}
+        />
+        {peakTime && (
+          <div
+            className="absolute top-0 w-1 h-full bg-primary"
+            style={{ left: `${peakPercent}%` }}
+          />
+        )}
+        {offsetTime && (
+          <div
+            className="absolute top-0 w-1 h-full bg-primary"
+            style={{ left: `${offsetPercent}%` }}
+          />
+        )}
+      </div>
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>0m</span>
+        <span>{totalDuration}m</span>
+      </div>
+    </div>
+  );
 }
 
 export function DoseHistory() {
@@ -399,46 +479,49 @@ export function DoseHistory() {
                                 </span>
                               </div>
                               {(dose.onsetAt || dose.peakAt || dose.offsetAt) && (
-                                <div className="flex items-center gap-2 text-xs">
-                                  <TooltipProvider>
-                                    {dose.onsetAt && (
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Badge variant="secondary">
-                                            Onset: {format(parseISO(dose.onsetAt), 'HH:mm')}
-                                          </Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          {format(parseISO(dose.onsetAt), 'PPp')}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    )}
-                                    {dose.peakAt && (
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Badge variant="secondary">
-                                            Peak: {format(parseISO(dose.peakAt), 'HH:mm')}
-                                          </Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          {format(parseISO(dose.peakAt), 'PPp')}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    )}
-                                    {dose.offsetAt && (
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Badge variant="secondary">
-                                            Offset: {format(parseISO(dose.offsetAt), 'HH:mm')}
-                                          </Badge>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          {format(parseISO(dose.offsetAt), 'PPp')}
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    )}
-                                  </TooltipProvider>
-                                </div>
+                                <>
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <TooltipProvider>
+                                      {dose.onsetAt && (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Badge variant="secondary">
+                                              Onset: {format(parseISO(dose.onsetAt), 'HH:mm')}
+                                            </Badge>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            {format(parseISO(dose.onsetAt), 'PPp')}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )}
+                                      {dose.peakAt && (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Badge variant="secondary">
+                                              Peak: {format(parseISO(dose.peakAt), 'HH:mm')}
+                                            </Badge>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            {format(parseISO(dose.peakAt), 'PPp')}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )}
+                                      {dose.offsetAt && (
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <Badge variant="secondary">
+                                              Offset: {format(parseISO(dose.offsetAt), 'HH:mm')}
+                                            </Badge>
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            {format(parseISO(dose.offsetAt), 'PPp')}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )}
+                                    </TooltipProvider>
+                                  </div>
+                                  <DurationVisualizer dose={dose} />
+                                </>
                               )}
                             </div>
 
