@@ -10,12 +10,26 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ADMINISTRATION_METHODS, UNITS } from '@/lib/constants';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 const allRoutes = Object.values(ADMINISTRATION_METHODS)
   .flat()
   .filter(route => !route.startsWith('@'))
   .sort();
+
+// Helper function to convert UTC ISO string to local datetime-local format
+const utcToLocalDatetimeLocal = (utcIsoString: string | null | undefined): string => {
+  if (!utcIsoString) return '';
+  const date = parseISO(utcIsoString);
+  return format(date, "yyyy-MM-dd'T'HH:mm");
+};
+
+// Helper function to convert local datetime-local to UTC ISO string
+const localToUtcIsoString = (localDatetime: string): string => {
+  if (!localDatetime) return '';
+  const date = new Date(localDatetime);
+  return date.toISOString();
+};
 
 export default function EditDoseDialog({ 
   dose, 
@@ -53,8 +67,15 @@ export default function EditDoseDialog({
     e.preventDefault();
     setIsLoading(true);
     try {
-      const updates = { ...formData };
-      // Only include timestamps that have values
+      const updates = {
+        ...formData,
+        // Convert all timestamps to UTC before saving
+        onsetAt: formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : undefined,
+        peakAt: formData.peakAt ? localToUtcIsoString(formData.peakAt) : undefined,
+        offsetAt: formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : undefined,
+      };
+      
+      // Remove undefined timestamps
       if (!updates.onsetAt) delete updates.onsetAt;
       if (!updates.peakAt) delete updates.peakAt;
       if (!updates.offsetAt) delete updates.offsetAt;
@@ -139,10 +160,9 @@ export default function EditDoseDialog({
             <label className="text-sm font-medium">Onset Time</label>
             <Input
               type="datetime-local"
-              value={formData.onsetAt ? formData.onsetAt.slice(0, 16) : ''}
+              value={utcToLocalDatetimeLocal(formData.onsetAt)}
               onChange={(e) => {
-                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
-                setFormData(prev => ({ ...prev, onsetAt: value }));
+                setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
               }}
             />
           </div>
@@ -151,10 +171,9 @@ export default function EditDoseDialog({
             <label className="text-sm font-medium">Peak Time</label>
             <Input
               type="datetime-local"
-              value={formData.peakAt ? formData.peakAt.slice(0, 16) : ''}
+              value={utcToLocalDatetimeLocal(formData.peakAt)}
               onChange={(e) => {
-                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
-                setFormData(prev => ({ ...prev, peakAt: value }));
+                setFormData(prev => ({ ...prev, peakAt: e.target.value }));
               }}
             />
           </div>
@@ -163,10 +182,9 @@ export default function EditDoseDialog({
             <label className="text-sm font-medium">Offset Time</label>
             <Input
               type="datetime-local"
-              value={formData.offsetAt ? formData.offsetAt.slice(0, 16) : ''}
+              value={utcToLocalDatetimeLocal(formData.offsetAt)}
               onChange={(e) => {
-                const value = e.target.value ? new Date(e.target.value).toISOString() : '';
-                setFormData(prev => ({ ...prev, offsetAt: value }));
+                setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
               }}
             />
           </div>

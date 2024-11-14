@@ -10,6 +10,7 @@ import {
   isYesterday,
   isSameWeek,
   formatDistanceToNow,
+  parseISO,
 } from "date-fns";
 import {
   Loader2,
@@ -404,11 +405,11 @@ export function DoseHistory() {
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <Badge variant="secondary">
-                                            Onset: {format(new Date(dose.onsetAt), 'HH:mm')}
+                                            Onset: {format(parseISO(dose.onsetAt), 'HH:mm')}
                                           </Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          {format(new Date(dose.onsetAt), 'MMM d, yyyy HH:mm')}
+                                          {format(parseISO(dose.onsetAt), 'PPp')}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
@@ -416,11 +417,11 @@ export function DoseHistory() {
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <Badge variant="secondary">
-                                            Peak: {format(new Date(dose.peakAt), 'HH:mm')}
+                                            Peak: {format(parseISO(dose.peakAt), 'HH:mm')}
                                           </Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          {format(new Date(dose.peakAt), 'MMM d, yyyy HH:mm')}
+                                          {format(parseISO(dose.peakAt), 'PPp')}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
@@ -428,11 +429,11 @@ export function DoseHistory() {
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <Badge variant="secondary">
-                                            Offset: {format(new Date(dose.offsetAt), 'HH:mm')}
+                                            Offset: {format(parseISO(dose.offsetAt), 'HH:mm')}
                                           </Badge>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                          {format(new Date(dose.offsetAt), 'MMM d, yyyy HH:mm')}
+                                          {format(parseISO(dose.offsetAt), 'PPp')}
                                         </TooltipContent>
                                       </Tooltip>
                                     )}
