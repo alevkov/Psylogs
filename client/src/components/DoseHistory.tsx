@@ -354,25 +354,43 @@ export function DoseHistory() {
 
   const groupDoses = (doses: DoseEntry[]): GroupedDoses => {
     if (groupBy === "substance") {
-      return doses.reduce((groups: GroupedDoses, dose) => {
+      const groups = doses.reduce((groups: GroupedDoses, dose) => {
         const key = dose.substance;
         if (!groups[key]) groups[key] = [];
         groups[key].push(dose);
         return groups;
       }, {});
+
+      // Sort doses within each group by timestamp, newest first
+      Object.keys(groups).forEach(key => {
+        groups[key].sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      });
+
+      return groups;
     }
 
     if (groupBy === "route") {
-      return doses.reduce((groups: GroupedDoses, dose) => {
+      const groups = doses.reduce((groups: GroupedDoses, dose) => {
         const key = dose.route;
         if (!groups[key]) groups[key] = [];
         groups[key].push(dose);
         return groups;
       }, {});
+
+      // Sort doses within each group by timestamp, newest first
+      Object.keys(groups).forEach(key => {
+        groups[key].sort((a, b) => 
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      });
+
+      return groups;
     }
 
     // Default: group by time
-    return doses.reduce((groups: GroupedDoses, dose) => {
+    const groups = doses.reduce((groups: GroupedDoses, dose) => {
       let key = "Older";
       const doseDate = new Date(dose.timestamp);
       if (isToday(doseDate)) {
@@ -386,9 +404,39 @@ export function DoseHistory() {
       groups[key].push(dose);
       return groups;
     }, {});
+
+    // Sort doses within each group by timestamp, newest first
+    Object.keys(groups).forEach(key => {
+      groups[key].sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+    });
+
+    return groups;
   };
 
-  const groupedDoses = groupDoses(filteredDoses);
+  // Sort the filtered doses before grouping, newest first
+  const sortedAndFilteredDoses = filteredDoses
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  const groupedDoses = groupDoses(sortedAndFilteredDoses);
+
+  // Define the order for time-based groups
+  const timeGroupOrder = ["Today", "Yesterday", "This Week", "Older"];
+
+  // Get sorted group entries based on grouping type
+  const getSortedGroupEntries = () => {
+    const entries = Object.entries(groupedDoses);
+    if (groupBy === "time") {
+      return entries.sort((a, b) => {
+        const indexA = timeGroupOrder.indexOf(a[0]);
+        const indexB = timeGroupOrder.indexOf(b[0]);
+        return indexA - indexB;
+      });
+    }
+    // For substance and route grouping, sort alphabetically
+    return entries.sort((a, b) => a[0].localeCompare(b[0]));
+  };
 
   if (loading) {
     return (
@@ -416,6 +464,26 @@ export function DoseHistory() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Group By</DropdownMenuLabel>
+                <DropdownMenuCheckboxItem
+                  checked={groupBy === "time"}
+                  onCheckedChange={() => setGroupBy("time")}
+                >
+                  Time
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={groupBy === "substance"}
+                  onCheckedChange={() => setGroupBy("substance")}
+                >
+                  Substance
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuCheckboxItem
+                  checked={groupBy === "route"}
+                  onCheckedChange={() => setGroupBy("route")}
+                >
+                  Route
+                </DropdownMenuCheckboxItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Substances</DropdownMenuLabel>
                 {Array.from(new Set(doses.map((d) => d.substance))).map(
                   (substance) => (
@@ -458,7 +526,7 @@ export function DoseHistory() {
 
         <ScrollArea className="h-[400px] w-full">
           <AnimatePresence>
-            {Object.entries(groupedDoses).map(([group, groupDoses]) => (
+            {getSortedGroupEntries().map(([group, groupDoses]) => (
               <motion.div
                 key={group}
                 initial={{ opacity: 0, height: 0 }}
@@ -517,6 +585,7 @@ export function DoseHistory() {
                                   type="onset"
                                   value={dose.onsetAt}
                                   onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
+                                  disabled={getTimestampButtonState(dose, 'onset')}
                                 />
                                 <TimestampButton
                                   dose={dose}
@@ -534,9 +603,7 @@ export function DoseHistory() {
                                 />
                               </div>
 
-                              {(dose.onsetAt || dose.peakAt || dose.offsetAt) && (
-                                <DurationVisualizer dose={dose} />
-                              )}
+                              <DurationVisualizer dose={dose} />
                             </div>
 
                             <DropdownMenu>
@@ -556,11 +623,11 @@ export function DoseHistory() {
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
+                                  className="text-destructive"
                                   onClick={() => {
                                     setSelectedDose(dose);
                                     setIsDeleteDialogOpen(true);
                                   }}
-                                  className="text-destructive"
                                 >
                                   <Trash className="h-4 w-4 mr-2" />
                                   Delete
@@ -584,8 +651,7 @@ export function DoseHistory() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the dose
-              record.
+              This action cannot be undone. This dose entry will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
