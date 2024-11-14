@@ -69,11 +69,10 @@ const getSubstanceColor = (substance: string, isDarkMode: boolean) => {
   }
   const hue = hash % 360;
 
-  // Adjust saturation and lightness for dark mode
-  if (isDarkMode) {
-    return `hsl(${hue}, 70%, 45%)`; // Darker, more saturated colors
-  }
-  return `hsl(${hue}, 70%, 90%)`; // Original light mode colors
+  // Adjust saturation and lightness based on dark mode
+  return isDarkMode
+    ? `hsl(${hue}, 70%, 15%)` // Darker background
+    : `hsl(${hue}, 70%, 95%)`; // Lighter background
 };
 
 interface GroupedDoses {
@@ -482,7 +481,13 @@ export function DoseHistory() {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
                     >
-                      <Card>
+                      <Card 
+                        className="relative" 
+                        style={{
+                          backgroundColor: getSubstanceColor(dose.substance, isDarkMode),
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
                             <div className="space-y-3">
