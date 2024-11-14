@@ -47,15 +47,15 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
   return (
     <div className="space-y-2 w-full">
       {/* Range visualization */}
-      <div className="relative h-6 bg-muted rounded-lg overflow-hidden">
+      <div className="relative h-6 bg-muted/20 rounded-lg overflow-hidden">
         {/* Light range */}
         {ranges.light && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full bg-primary/60"
             style={getRangeStyle(
               ranges.threshold || 0,
               ranges.light.upper || 0,
-              'rgb(74, 222, 128)' // green
+              'hsl(var(--primary))' // Using theme primary color
             )}
           />
         )}
@@ -63,11 +63,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Common range */}
         {ranges.common && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full bg-secondary/70"
             style={getRangeStyle(
               ranges.common.lower || 0,
               ranges.common.upper || 0,
-              'rgb(34, 197, 94)' // darker green
+              'hsl(var(--secondary))' // Using theme secondary color
             )}
           />
         )}
@@ -75,11 +75,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Strong range */}
         {ranges.strong && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full bg-warning/80"
             style={getRangeStyle(
               ranges.strong.lower || 0,
               ranges.strong.upper || 0,
-              'rgb(234, 179, 8)' // yellow
+              'hsl(48 96% 53%)' // Warm warning color
             )}
           />
         )}
@@ -87,11 +87,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Heavy range */}
         {ranges.heavy && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full bg-destructive/90"
             style={getRangeStyle(
               ranges.heavy,
               maxValue,
-              'rgb(239, 68, 68)' // red
+              'hsl(var(--destructive))' // Using theme destructive color
             )}
           />
         )}
@@ -101,12 +101,12 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
           className={cn(
             "absolute w-1 h-full transition-all duration-300",
             currentDose >= (ranges.heavy || Infinity) 
-              ? "bg-red-500 animate-pulse" 
-              : "bg-foreground"
+              ? "bg-destructive animate-pulse shadow-lg shadow-destructive/50" 
+              : "bg-foreground shadow-md"
           )}
           style={{ 
             left: `${dosePosition}%`,
-            zIndex: 10  // Ensure indicator is always visible
+            zIndex: 10
           }}
         />
       </div>
@@ -121,7 +121,7 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
       </div>
 
       {/* Current dose label */}
-      <div className="text-sm text-center">
+      <div className="text-sm text-center font-medium">
         Current: {currentDose}{unit}
       </div>
     </div>
