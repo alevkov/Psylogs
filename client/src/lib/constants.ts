@@ -32,6 +32,9 @@ export interface DoseEntry {
   substance: string;
   amount: number;
   route: string;
-  timestamp: Date;
+  timestamp: string;
   unit: typeof UNITS[number];
+  onsetAt?: string;
+  peakAt?: string;
+  offsetAt?: string;
 }

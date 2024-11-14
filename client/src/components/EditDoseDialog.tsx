@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from '@/components/ui/select';
-import { ADMINISTRATION_METHODS, UNITS } from '@/lib/constants';
+} from './ui/select';
+import { ADMINISTRATION_METHODS, UNITS } from '../lib/constants';
 import { format, parseISO } from 'date-fns';
 
 const allRoutes = Object.values(ADMINISTRATION_METHODS)
