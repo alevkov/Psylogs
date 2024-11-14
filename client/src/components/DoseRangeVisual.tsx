@@ -51,11 +51,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Light range */}
         {ranges.light && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full opacity-40"
             style={getRangeStyle(
               ranges.threshold || 0,
               ranges.light.upper || 0,
-              'rgb(74, 222, 128)' // green
+              'hsl(142, 76%, 36%)' // Emerald green
             )}
           />
         )}
@@ -63,11 +63,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Common range */}
         {ranges.common && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full opacity-40"
             style={getRangeStyle(
               ranges.common.lower || 0,
               ranges.common.upper || 0,
-              'rgb(34, 197, 94)' // darker green
+              'hsl(142, 71%, 45%)' // Lighter emerald
             )}
           />
         )}
@@ -75,11 +75,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Strong range */}
         {ranges.strong && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full opacity-40"
             style={getRangeStyle(
               ranges.strong.lower || 0,
               ranges.strong.upper || 0,
-              'rgb(234, 179, 8)' // yellow
+              'hsl(48, 96%, 53%)' // Bright yellow
             )}
           />
         )}
@@ -87,11 +87,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
         {/* Heavy range */}
         {ranges.heavy && (
           <div
-            className="absolute h-full opacity-30"
+            className="absolute h-full opacity-40"
             style={getRangeStyle(
               ranges.heavy,
               maxValue,
-              'rgb(239, 68, 68)' // red
+              'hsl(0, 84%, 60%)' // Vibrant red
             )}
           />
         )}
