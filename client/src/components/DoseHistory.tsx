@@ -27,6 +27,9 @@ import {
   Clock,
   Star,
   Activity,
+  Timer,
+  WaveformIcon,
+  TrendingDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -152,6 +155,67 @@ function DurationVisualizer({ dose }: { dose: DoseEntry }) {
         <span>{totalDuration}m</span>
       </div>
     </div>
+  );
+}
+
+function TimestampButton({ 
+  dose,
+  type,
+  value,
+  onUpdate,
+  disabled = false
+}: { 
+  dose: DoseEntry;
+  type: 'onset' | 'peak' | 'offset';
+  value?: string;
+  onUpdate: (type: string, value: string) => Promise<void>;
+  disabled?: boolean;
+}) {
+  const getIcon = () => {
+    switch (type) {
+      case 'onset':
+        return <Clock className="h-4 w-4" />;
+      case 'peak':
+        return <WaveformIcon className="h-4 w-4" />;
+      case 'offset':
+        return <TrendingDown className="h-4 w-4" />;
+    }
+  };
+
+  const handleClick = async () => {
+    if (disabled || value) return;
+    const now = new Date().toISOString();
+    await onUpdate(type, now);
+  };
+
+  if (value) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Badge variant="secondary" className="cursor-default">
+              {type}: {format(parseISO(value), 'HH:mm')}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{format(parseISO(value), 'PPpp')}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleClick}
+      disabled={disabled}
+      className="flex items-center gap-1"
+    >
+      {getIcon()}
+      <span className="capitalize">{type}</span>
+    </Button>
   );
 }
 
@@ -314,6 +378,43 @@ export function DoseHistory() {
 
   const groupedDoses = groupDoses(filteredDoses);
 
+  const handleTimestampUpdate = async (dose: DoseEntry, type: string, value: string) => {
+    if (!dose.id) return;
+    
+    try {
+      const updates = {
+        [`${type}At`]: value
+      };
+      
+      await updateDose(dose.id, updates);
+      setDoses(prev =>
+        prev.map(d => d.id === dose.id ? { ...d, ...updates } : d)
+      );
+      
+      toast({
+        title: `${type} time set`,
+        duration: 3000,
+      });
+    } catch (error) {
+      toast({
+        title: `Error setting ${type} time`,
+        description: "Failed to update the dose",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getTimestampButtonState = (dose: DoseEntry, type: 'onset' | 'peak' | 'offset') => {
+    switch (type) {
+      case 'onset':
+        return false;
+      case 'peak':
+        return !dose.onsetAt;
+      case 'offset':
+        return !dose.peakAt || !dose.onsetAt;
+    }
+  };
+
   if (loading) {
     return (
       <Card className="w-full max-w-md mx-auto">
@@ -462,7 +563,7 @@ export function DoseHistory() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-3">
                               <div className="p-3">
-                              <h4 className="font-medium">{dose.substance}</h4>
+                                <h4 className="font-medium">{dose.substance}</h4>
                               </div>
                               <div className="flex items-center gap-3">
                                 <Badge variant="outline" className="text-xs">
@@ -478,50 +579,33 @@ export function DoseHistory() {
                                   })}
                                 </span>
                               </div>
+                              
+                              <div className="flex flex-wrap gap-2">
+                                <TimestampButton
+                                  dose={dose}
+                                  type="onset"
+                                  value={dose.onsetAt}
+                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
+                                  disabled={!!dose.offsetAt}
+                                />
+                                <TimestampButton
+                                  dose={dose}
+                                  type="peak"
+                                  value={dose.peakAt}
+                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
+                                  disabled={getTimestampButtonState(dose, 'peak') || !!dose.offsetAt}
+                                />
+                                <TimestampButton
+                                  dose={dose}
+                                  type="offset"
+                                  value={dose.offsetAt}
+                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
+                                  disabled={getTimestampButtonState(dose, 'offset')}
+                                />
+                              </div>
+
                               {(dose.onsetAt || dose.peakAt || dose.offsetAt) && (
-                                <>
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <TooltipProvider>
-                                      {dose.onsetAt && (
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Badge variant="secondary">
-                                              Onset: {format(parseISO(dose.onsetAt), 'HH:mm')}
-                                            </Badge>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            {format(parseISO(dose.onsetAt), 'PPp')}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      )}
-                                      {dose.peakAt && (
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Badge variant="secondary">
-                                              Peak: {format(parseISO(dose.peakAt), 'HH:mm')}
-                                            </Badge>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            {format(parseISO(dose.peakAt), 'PPp')}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      )}
-                                      {dose.offsetAt && (
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <Badge variant="secondary">
-                                              Offset: {format(parseISO(dose.offsetAt), 'HH:mm')}
-                                            </Badge>
-                                          </TooltipTrigger>
-                                          <TooltipContent>
-                                            {format(parseISO(dose.offsetAt), 'PPp')}
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      )}
-                                    </TooltipProvider>
-                                  </div>
-                                  <DurationVisualizer dose={dose} />
-                                </>
+                                <DurationVisualizer dose={dose} />
                               )}
                             </div>
 
