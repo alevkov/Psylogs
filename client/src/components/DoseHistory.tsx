@@ -288,15 +288,11 @@ export function DoseHistory() {
     setSelectedDose(null);
   };
 
-  const handleUpdate = async (id: number, updates: Partial<Omit<DoseEntry, 'id'>>) => {
+  const handleUpdate = async (id: number, updates: Partial<DoseEntry>) => {
     try {
-      const validUpdates: Partial<Omit<DoseEntry, 'id'>> = {
-        ...updates,
-        amount: typeof updates.amount === 'number' ? updates.amount : undefined
-      };
-      await updateDose(id, validUpdates);
+      await updateDose(id, updates);
       setDoses((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, ...validUpdates } : d)),
+        prev.map((d) => (d.id === id ? { ...d, ...updates } : d)),
       );
       toast({
         title: "Dose updated",
