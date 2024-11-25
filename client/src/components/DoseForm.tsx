@@ -76,7 +76,7 @@ export function tryGetTierAnalysis(
   method: string,
   dose: number,
   unit: string,
-  doseData: SubstanceData[],
+  doseData: any[],
 ): { tier: string; analysis: string; ranges?: any } | null {
   try {
     return analyzeDoseTier(substance, method, dose, unit, doseData);

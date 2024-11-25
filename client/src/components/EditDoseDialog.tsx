@@ -9,7 +9,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from './ui/select';
-import { ADMINISTRATION_METHODS, UNITS } from '../lib/constants';
+import { ADMINISTRATION_METHODS, UNITS, DoseEntry } from '../lib/constants';
 import { format, parseISO } from 'date-fns';
 
 const allRoutes = Object.values(ADMINISTRATION_METHODS)
@@ -50,7 +50,7 @@ export default function EditDoseDialog({
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (id: number, updates: any) => Promise<void>;
+  onSave: (id: number, updates: Partial<Omit<DoseEntry, 'id'>>) => Promise<void>;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -58,6 +58,7 @@ export default function EditDoseDialog({
     amount: dose.amount,
     unit: dose.unit,
     route: dose.route,
+    timestamp: dose.timestamp || '',
     onsetAt: dose.onsetAt || '',
     peakAt: dose.peakAt || '',
     offsetAt: dose.offsetAt || '',
@@ -70,6 +71,7 @@ export default function EditDoseDialog({
       const updates = {
         ...formData,
         // Convert all timestamps to UTC before saving
+        timestamp: formData.timestamp ? localToUtcIsoString(formData.timestamp) : undefined,
         onsetAt: formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : undefined,
         peakAt: formData.peakAt ? localToUtcIsoString(formData.peakAt) : undefined,
         offsetAt: formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : undefined,
@@ -157,11 +159,23 @@ export default function EditDoseDialog({
           </div>
 
           <div className="space-y-2">
+            <label className="text-sm font-medium">Start Time</label>
+            <Input
+              type="datetime-local"
+              value={utcToLocalDatetimeLocal(formData.timestamp)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                setFormData(prev => ({ ...prev, timestamp: e.target.value }));
+              }}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <label className="text-sm font-medium">Onset Time</label>
             <Input
               type="datetime-local"
               value={utcToLocalDatetimeLocal(formData.onsetAt)}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
               }}
             />
@@ -172,7 +186,7 @@ export default function EditDoseDialog({
             <Input
               type="datetime-local"
               value={utcToLocalDatetimeLocal(formData.peakAt)}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFormData(prev => ({ ...prev, peakAt: e.target.value }));
               }}
             />
@@ -183,7 +197,7 @@ export default function EditDoseDialog({
             <Input
               type="datetime-local"
               value={utcToLocalDatetimeLocal(formData.offsetAt)}
-              onChange={(e) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
               }}
             />
