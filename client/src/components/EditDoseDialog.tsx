@@ -58,12 +58,14 @@ export default function EditDoseDialog({
     amount: dose.amount,
     unit: dose.unit,
     route: dose.route,
+    timestamp: dose.timestamp,
     onsetAt: dose.onsetAt || '',
     peakAt: dose.peakAt || '',
     offsetAt: dose.offsetAt || '',
   });
   
   const [errors, setErrors] = useState<{
+    timestamp?: string;
     onsetAt?: string;
     peakAt?: string;
     offsetAt?: string;
@@ -71,15 +73,15 @@ export default function EditDoseDialog({
 
   // Validate timestamp sequence
   const validateTimestamps = (
+    creation: string,
     onset: string,
     peak: string,
-    offset: string,
-    baseTime: string
+    offset: string
   ) => {
     const newErrors: typeof errors = {};
-    const base = new Date(baseTime);
+    const creationTime = new Date(creation);
     
-    if (onset && new Date(onset) < base) {
+    if (onset && new Date(onset) < creationTime) {
       newErrors.onsetAt = "Onset time cannot be before dose time";
     }
     
@@ -152,6 +154,30 @@ export default function EditDoseDialog({
           <DialogTitle>Edit Dose</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Creation Time</label>
+            <div className="space-y-1">
+              <Input
+                type="datetime-local"
+                value={utcToLocalDatetimeLocal(formData.timestamp)}
+                onChange={(e) => {
+                  const newTimestamp = e.target.value;
+                  setFormData(prev => ({ ...prev, timestamp: localToUtcIsoString(newTimestamp) }));
+                  validateTimestamps(
+                    newTimestamp,
+                    formData.onsetAt || '',
+                    formData.peakAt || '',
+                    formData.offsetAt || ''
+                  );
+                }}
+                required
+              />
+              {errors.timestamp && (
+                <p className="text-sm text-destructive">{errors.timestamp}</p>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium">Substance</label>
             <Input
