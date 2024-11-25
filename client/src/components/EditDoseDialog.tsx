@@ -62,17 +62,73 @@ export default function EditDoseDialog({
     peakAt: dose.peakAt || '',
     offsetAt: dose.offsetAt || '',
   });
+  
+  const [errors, setErrors] = useState<{
+    onsetAt?: string;
+    peakAt?: string;
+    offsetAt?: string;
+  }>({});
+
+  // Validate timestamp sequence
+  const validateTimestamps = (
+    onset: string,
+    peak: string,
+    offset: string,
+    baseTime: string
+  ) => {
+    const newErrors: typeof errors = {};
+    const base = new Date(baseTime);
+    
+    if (onset && new Date(onset) < base) {
+      newErrors.onsetAt = "Onset time cannot be before dose time";
+    }
+    
+    if (peak) {
+      if (!onset) {
+        newErrors.peakAt = "Must set onset time before peak";
+      } else if (new Date(peak) < new Date(onset)) {
+        newErrors.peakAt = "Peak time must be after onset";
+      }
+    }
+    
+    if (offset) {
+      if (!peak) {
+        newErrors.offsetAt = "Must set peak time before offset";
+      } else if (new Date(offset) < new Date(peak)) {
+        newErrors.offsetAt = "Offset time must be after peak";
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const onsetTime = formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : undefined;
+      const peakTime = formData.peakAt ? localToUtcIsoString(formData.peakAt) : undefined;
+      const offsetTime = formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : undefined;
+
+      // Validate timestamp sequence
+      const isValid = validateTimestamps(
+        formData.onsetAt || '',
+        formData.peakAt || '',
+        formData.offsetAt || '',
+        dose.timestamp
+      );
+
+      if (!isValid) {
+        setIsLoading(false);
+        return;
+      }
+
       const updates = {
         ...formData,
-        // Convert all timestamps to UTC before saving
-        onsetAt: formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : undefined,
-        peakAt: formData.peakAt ? localToUtcIsoString(formData.peakAt) : undefined,
-        offsetAt: formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : undefined,
+        onsetAt: onsetTime,
+        peakAt: peakTime,
+        offsetAt: offsetTime,
       };
       
       // Remove undefined timestamps
@@ -158,35 +214,68 @@ export default function EditDoseDialog({
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Onset Time</label>
-            <Input
-              type="datetime-local"
-              value={utcToLocalDatetimeLocal(formData.onsetAt)}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
-              }}
-            />
+            <div className="space-y-1">
+              <Input
+                type="datetime-local"
+                value={utcToLocalDatetimeLocal(formData.onsetAt)}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
+                  validateTimestamps(
+                    e.target.value,
+                    formData.peakAt || '',
+                    formData.offsetAt || '',
+                    dose.timestamp
+                  );
+                }}
+              />
+              {errors.onsetAt && (
+                <p className="text-sm text-destructive">{errors.onsetAt}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Peak Time</label>
-            <Input
-              type="datetime-local"
-              value={utcToLocalDatetimeLocal(formData.peakAt)}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, peakAt: e.target.value }));
-              }}
-            />
+            <div className="space-y-1">
+              <Input
+                type="datetime-local"
+                value={utcToLocalDatetimeLocal(formData.peakAt)}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, peakAt: e.target.value }));
+                  validateTimestamps(
+                    formData.onsetAt || '',
+                    e.target.value,
+                    formData.offsetAt || '',
+                    dose.timestamp
+                  );
+                }}
+              />
+              {errors.peakAt && (
+                <p className="text-sm text-destructive">{errors.peakAt}</p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">Offset Time</label>
-            <Input
-              type="datetime-local"
-              value={utcToLocalDatetimeLocal(formData.offsetAt)}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
-              }}
-            />
+            <div className="space-y-1">
+              <Input
+                type="datetime-local"
+                value={utcToLocalDatetimeLocal(formData.offsetAt)}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
+                  validateTimestamps(
+                    formData.onsetAt || '',
+                    formData.peakAt || '',
+                    e.target.value,
+                    dose.timestamp
+                  );
+                }}
+              />
+              {errors.offsetAt && (
+                <p className="text-sm text-destructive">{errors.offsetAt}</p>
+              )}
+            </div>
           </div>
 
           <DialogFooter>
