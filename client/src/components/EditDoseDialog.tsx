@@ -74,40 +74,33 @@ export default function EditDoseDialog({
   // Validate timestamp sequence
   const validateTimestamps = (
     creation: string,
-    onset: string | null,
-    peak: string | null,
-    offset: string | null
+    onset: string,
+    peak: string,
+    offset: string
   ) => {
     const newErrors: typeof errors = {};
     const creationTime = new Date(creation);
     
-    // Convert strings to dates, handling null values
-    const onsetDate = onset ? new Date(onset) : null;
-    const peakDate = peak ? new Date(peak) : null;
-    const offsetDate = offset ? new Date(offset) : null;
-
-    // All timestamps must be after creation time if present
-    if (onsetDate && onsetDate < creationTime) {
-      newErrors.onsetAt = "Onset time must be after creation time";
+    if (onset && new Date(onset) < creationTime) {
+      newErrors.onsetAt = "Onset time cannot be before dose time";
     }
-    if (peakDate && peakDate < creationTime) {
-      newErrors.peakAt = "Peak time must be after creation time";
+    
+    if (peak) {
+      if (!onset) {
+        newErrors.peakAt = "Must set onset time before peak";
+      } else if (new Date(peak) < new Date(onset)) {
+        newErrors.peakAt = "Peak time must be after onset";
+      }
     }
-    if (offsetDate && offsetDate < creationTime) {
-      newErrors.offsetAt = "Offset time must be after creation time";
+    
+    if (offset) {
+      if (!peak) {
+        newErrors.offsetAt = "Must set peak time before offset";
+      } else if (new Date(offset) < new Date(peak)) {
+        newErrors.offsetAt = "Offset time must be after peak";
+      }
     }
-
-    // Validate sequence if timestamps exist
-    if (onsetDate && peakDate && peakDate < onsetDate) {
-      newErrors.peakAt = "Peak time must be after onset time";
-    }
-    if (peakDate && offsetDate && offsetDate < peakDate) {
-      newErrors.offsetAt = "Offset time must be after peak time";
-    }
-    if (!peakDate && onsetDate && offsetDate && offsetDate < onsetDate) {
-      newErrors.offsetAt = "Offset time must be after onset time";
-    }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -122,10 +115,10 @@ export default function EditDoseDialog({
 
       // Validate timestamp sequence
       const isValid = validateTimestamps(
-        formData.timestamp,
-        onsetTime || null,
-        peakTime || null,
-        offsetTime || null
+        formData.onsetAt || '',
+        formData.peakAt || '',
+        formData.offsetAt || '',
+        dose.timestamp
       );
 
       if (!isValid) {
@@ -172,9 +165,9 @@ export default function EditDoseDialog({
                   setFormData(prev => ({ ...prev, timestamp: localToUtcIsoString(newTimestamp) }));
                   validateTimestamps(
                     newTimestamp,
-                    formData.onsetAt || null,
-                    formData.peakAt || null,
-                    formData.offsetAt || null
+                    formData.onsetAt || '',
+                    formData.peakAt || '',
+                    formData.offsetAt || ''
                   );
                 }}
                 required
@@ -254,10 +247,10 @@ export default function EditDoseDialog({
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
                   validateTimestamps(
-                    formData.timestamp,
-                    e.target.value ? localToUtcIsoString(e.target.value) : null,
-                    formData.peakAt ? localToUtcIsoString(formData.peakAt) : null,
-                    formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : null
+                    e.target.value,
+                    formData.peakAt || '',
+                    formData.offsetAt || '',
+                    dose.timestamp
                   );
                 }}
               />
@@ -276,10 +269,10 @@ export default function EditDoseDialog({
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, peakAt: e.target.value }));
                   validateTimestamps(
-                    formData.timestamp,
-                    formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : null,
-                    e.target.value ? localToUtcIsoString(e.target.value) : null,
-                    formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : null
+                    formData.onsetAt || '',
+                    e.target.value,
+                    formData.offsetAt || '',
+                    dose.timestamp
                   );
                 }}
               />
@@ -298,10 +291,10 @@ export default function EditDoseDialog({
                 onChange={(e) => {
                   setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
                   validateTimestamps(
-                    formData.timestamp,
-                    formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : null,
-                    formData.peakAt ? localToUtcIsoString(formData.peakAt) : null,
-                    e.target.value ? localToUtcIsoString(e.target.value) : null
+                    formData.onsetAt || '',
+                    formData.peakAt || '',
+                    e.target.value,
+                    dose.timestamp
                   );
                 }}
               />
