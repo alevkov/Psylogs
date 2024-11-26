@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -63,6 +63,20 @@ export default function EditDoseDialog({
     peakAt: dose.peakAt || '',
     offsetAt: dose.offsetAt || '',
   });
+
+  // Reset form data when dose changes
+  useEffect(() => {
+    setFormData({
+      substance: dose.substance,
+      amount: dose.amount,
+      unit: dose.unit,
+      route: dose.route,
+      timestamp: dose.timestamp,
+      onsetAt: dose.onsetAt || '',
+      peakAt: dose.peakAt || '',
+      offsetAt: dose.offsetAt || '',
+    });
+  }, [dose]);
   
   const [errors, setErrors] = useState<{
     timestamp?: string;
