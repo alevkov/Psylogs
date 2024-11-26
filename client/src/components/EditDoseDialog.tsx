@@ -81,6 +81,10 @@ export default function EditDoseDialog({
     const newErrors: typeof errors = {};
     const creationTime = new Date(creation);
     
+    if (!creation) {
+      newErrors.timestamp = "Creation time is required";
+    }
+    
     if (onset && new Date(onset) < creationTime) {
       newErrors.onsetAt = "Onset time cannot be before dose time";
     }
@@ -115,10 +119,10 @@ export default function EditDoseDialog({
 
       // Validate timestamp sequence
       const isValid = validateTimestamps(
+        formData.timestamp,
         formData.onsetAt || '',
         formData.peakAt || '',
-        formData.offsetAt || '',
-        dose.timestamp
+        formData.offsetAt || ''
       );
 
       if (!isValid) {
@@ -164,10 +168,10 @@ export default function EditDoseDialog({
                   const newTimestamp = e.target.value;
                   setFormData(prev => ({ ...prev, timestamp: localToUtcIsoString(newTimestamp) }));
                   validateTimestamps(
-                    newTimestamp,
-                    formData.onsetAt || '',
-                    formData.peakAt || '',
-                    formData.offsetAt || ''
+                    localToUtcIsoString(newTimestamp),
+                    formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : '',
+                    formData.peakAt ? localToUtcIsoString(formData.peakAt) : '',
+                    formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : ''
                   );
                 }}
                 required
@@ -245,12 +249,13 @@ export default function EditDoseDialog({
                 type="datetime-local"
                 value={utcToLocalDatetimeLocal(formData.onsetAt)}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, onsetAt: e.target.value }));
+                  const newOnsetTime = e.target.value;
+                  setFormData(prev => ({ ...prev, onsetAt: newOnsetTime }));
                   validateTimestamps(
-                    e.target.value,
-                    formData.peakAt || '',
-                    formData.offsetAt || '',
-                    dose.timestamp
+                    formData.timestamp,
+                    localToUtcIsoString(newOnsetTime),
+                    formData.peakAt ? localToUtcIsoString(formData.peakAt) : '',
+                    formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : ''
                   );
                 }}
               />
@@ -267,12 +272,13 @@ export default function EditDoseDialog({
                 type="datetime-local"
                 value={utcToLocalDatetimeLocal(formData.peakAt)}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, peakAt: e.target.value }));
+                  const newPeakTime = e.target.value;
+                  setFormData(prev => ({ ...prev, peakAt: newPeakTime }));
                   validateTimestamps(
-                    formData.onsetAt || '',
-                    e.target.value,
-                    formData.offsetAt || '',
-                    dose.timestamp
+                    formData.timestamp,
+                    formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : '',
+                    localToUtcIsoString(newPeakTime),
+                    formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : ''
                   );
                 }}
               />
@@ -289,12 +295,13 @@ export default function EditDoseDialog({
                 type="datetime-local"
                 value={utcToLocalDatetimeLocal(formData.offsetAt)}
                 onChange={(e) => {
-                  setFormData(prev => ({ ...prev, offsetAt: e.target.value }));
+                  const newOffsetTime = e.target.value;
+                  setFormData(prev => ({ ...prev, offsetAt: newOffsetTime }));
                   validateTimestamps(
-                    formData.onsetAt || '',
-                    formData.peakAt || '',
-                    e.target.value,
-                    dose.timestamp
+                    formData.timestamp,
+                    formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : '',
+                    formData.peakAt ? localToUtcIsoString(formData.peakAt) : '',
+                    localToUtcIsoString(newOffsetTime)
                   );
                 }}
               />
