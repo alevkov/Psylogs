@@ -8,6 +8,9 @@ interface DoseEntry {
   route: string;
   timestamp: string; // ISO string format
   unit: 'mg' | 'ug' | 'ml';
+  onsetAt?: string;
+  peakAt?: string;
+  offsetAt?: string;
 }
 
 interface DoseLogDB extends DBSchema {
