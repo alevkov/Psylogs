@@ -28,27 +28,31 @@ initializeDarkMode();
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
-                <Link href="/">Home</Link>
+    <div className="app-base">
+      <div className="min-h-screen bg-background">
+        <nav className="border-b">
+          <div className="app-container">
+            <div className="flex h-16 items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  <Link href="/">Home</Link>
+                </div>
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  <Link href="/history">History</Link>
+                </div>
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                  <Link href="/settings">Settings</Link>
+                </div>
               </div>
-              <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
-                <Link href="/history">History</Link>
-              </div>
-              <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
-                <Link href="/settings">Settings</Link>
-              </div>
+              <ConnectionStatus />
             </div>
-            <ConnectionStatus />
           </div>
-        </div>
-      </nav>
-      {children}
-      <Toaster />
+        </nav>
+        <main className="app-container">
+          {children}
+        </main>
+        <Toaster />
+      </div>
     </div>
   );
 }

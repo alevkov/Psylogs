@@ -43,10 +43,6 @@ author = "agent"
 task = "workflow.run"
 args = "Psylogs"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Client"
-
 [[workflows.workflow]]
 name = "Psylogs"
 author = "agent"
@@ -61,18 +57,3 @@ task = "packager.installForAll"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Client"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd client && vite dev --host 0.0.0.0 --port 5173"
-waitForPort = 5173
