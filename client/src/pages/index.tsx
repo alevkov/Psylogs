@@ -1,5 +1,5 @@
-import { DoseForm } from '../components/DoseForm';
-import { DoseHistory } from '../components/DoseHistory';
+import { DoseForm } from '@/components/DoseForm';
+import { DoseHistory } from '@/components/DoseHistory';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {

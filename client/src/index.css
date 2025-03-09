@@ -1,15 +1,9 @@
-@import url('https://fonts.cdnfonts.com/css/jetbrains-mono-2');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --font-family: "JetBrains Mono", monospace;
-    --line-height: 1.20rem;
-    --border-thickness: 2px;
-
-    /* Theme colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -35,11 +29,6 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-
-    /* Font weights */
-    --font-weight-normal: 500;
-    --font-weight-medium: 600;
-    --font-weight-bold: 800;
   }
 
   .dark {
@@ -69,83 +58,16 @@
     --chart-5: 340 75% 55%;
   }
 
-  /* Base styles */
-  * {
-    box-sizing: border-box;
-  }
-
-  * + * {
-    margin-top: var(--line-height);
-  }
-
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-family);
-    font-optical-sizing: auto;
-    font-weight: var(--font-weight-normal);
-    font-style: normal;
-    font-variant-numeric: tabular-nums lining-nums;
-    font-size: 16px;
-    line-height: var(--line-height);
-    margin: 0;
-    padding: var(--line-height) 2ch;
   }
 
-  @media screen and (max-width: 480px) {
-    body {
-      font-size: 14px;
-      padding: var(--line-height) 1ch;
-    }
-  }
-
-  /* Typography */
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: var(--font-weight-bold);
-    margin: calc(var(--line-height) * 2) 0 var(--line-height);
-    line-height: var(--line-height);
-  }
-
-  h1 {
-    font-size: 2rem;
-    line-height: calc(2 * var(--line-height));
-    margin-bottom: calc(var(--line-height) * 2);
-    text-transform: uppercase;
-  }
-
-  h2 {
-    font-size: 1rem;
-    text-transform: uppercase;
-  }
-
-  /* Links */
-  a {
-    text-decoration-thickness: var(--border-thickness);
-    @apply text-foreground;
-  }
-
-  /* Forms */
-  input, button, textarea {
-    font-family: var(--font-family);
-    border: var(--border-thickness) solid hsl(var(--foreground));
-    padding: calc(var(--line-height) / 2 - var(--border-thickness)) calc(1ch - var(--border-thickness));
-    margin: 0;
-    height: calc(var(--line-height) * 2);
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
-    line-height: normal;
-  }
-
-  button:focus, input:focus {
-    --border-thickness: 3px;
-    outline: none;
-  }
-
-  /* Custom utility classes */
+  /* Apply class for the text interpreting the theme */
   .dose-text {
-    color: hsl(var(--card-foreground));
+    color: var(--card-foreground); /* Good for general elements */
   }
 
   .dark .dose-text {
-    color: hsl(var(--foreground));
+    color: var(--foreground); /* Ensures it's light if dark background */
   }
 }

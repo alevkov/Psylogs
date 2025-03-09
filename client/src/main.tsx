@@ -4,8 +4,9 @@ import { Switch, Route, Link } from "wouter";
 import "./index.css";
 import { SWRConfig } from "swr";
 import { fetcher } from "./lib/fetcher";
-import { ConnectionStatus } from "./components/ConnectionStatus";
-import { DoseProvider } from "./contexts/DoseContext";
+import { Toaster } from "@/components/ui/toaster";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { DoseProvider } from "@/contexts/DoseContext";
 
 // Pages
 import HomePage from "./pages/index";
@@ -47,6 +48,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
       {children}
+      <Toaster />
     </div>
   );
 }
