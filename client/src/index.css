@@ -1,9 +1,12 @@
+@import url('https://fonts.cdnfonts.com/css/jetbrains-mono-2');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Original Tailwind theme variables */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -24,11 +27,18 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+
+    /* Custom theme variables */
+    --font-family: "JetBrains Mono", monospace;
+    --line-height: 1.20rem;
+    --border-thickness: 2px;
+    --text-color: #000;
+    --text-color-alt: #666;
+    --background-color: #fff;
+    --background-color-alt: #eee;
+    --font-weight-normal: 500;
+    --font-weight-medium: 600;
+    --font-weight-bold: 800;
   }
 
   .dark {
@@ -51,23 +61,140 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+
+    /* Custom dark theme variables */
+    --text-color: #fff;
+    --text-color-alt: #aaa;
+    --background-color: #000;
+    --background-color-alt: #111;
+  }
+}
+
+@layer components {
+  .app-base {
+    @apply bg-bg text-text;
+    font-family: var(--font-family);
+    font-optical-sizing: auto;
+    font-weight: var(--font-weight-normal);
+    font-style: normal;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-size: 16px;
+    line-height: var(--line-height);
   }
 
-  body {
-    @apply bg-background text-foreground;
+  .app-container {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: var(--line-height) 2ch;
+    max-width: calc(min(80ch, round(down, 100%, 1ch)));
+    overflow-x: hidden;
   }
 
-  /* Apply class for the text interpreting the theme */
-  .dose-text {
-    color: var(--card-foreground); /* Good for general elements */
+  @media screen and (max-width: 480px) {
+    .app-base {
+      font-size: 14px;
+    }
+
+    .app-container {
+      padding: var(--line-height) 1ch;
+    }
   }
 
-  .dark .dose-text {
-    color: var(--foreground); /* Ensures it's light if dark background */
+  /* Typography */
+  .heading {
+    @apply font-bold;
+    margin: calc(var(--line-height) * 2) 0 var(--line-height);
+    line-height: var(--line-height);
+  }
+
+  .heading-1 {
+    @apply heading;
+    font-size: 2rem;
+    line-height: calc(2 * var(--line-height));
+    margin-bottom: calc(var(--line-height) * 2);
+    text-transform: uppercase;
+  }
+
+  .heading-2 {
+    @apply heading;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* Custom grid system */
+  .custom-grid {
+    --grid-cells: 0;
+    display: flex;
+    gap: 1ch;
+    width: calc(round(down, 100%, (1ch * var(--grid-cells)) - (1ch * var(--grid-cells) - 1)));
+    margin-bottom: var(--line-height);
+  }
+
+  .custom-grid>*,
+  .custom-grid>input {
+    flex: 0 0 calc(round(down, (100% - (1ch * (var(--grid-cells) - 1))) / var(--grid-cells), 1ch));
+  }
+
+  .custom-grid-1 {
+    --grid-cells: 1;
+  }
+
+  .custom-grid-2 {
+    --grid-cells: 2;
+  }
+
+  .custom-grid-3 {
+    --grid-cells: 3;
+  }
+
+  .custom-grid-4 {
+    --grid-cells: 4;
+  }
+
+  .custom-grid-5 {
+    --grid-cells: 5;
+  }
+
+  .custom-grid-6 {
+    --grid-cells: 6;
+  }
+
+  .custom-grid-7 {
+    --grid-cells: 7;
+  }
+
+  .custom-grid-8 {
+    --grid-cells: 8;
+  }
+
+  .custom-grid-9 {
+    --grid-cells: 9;
+  }
+}
+
+@layer utilities {
+  .custom-border {
+    border: var(--border-thickness) solid var(--text-color);
+  }
+
+  .custom-input {
+    @apply custom-border;
+    padding: calc(var(--line-height) / 2 - var(--border-thickness)) calc(1ch - var(--border-thickness));
+    height: calc(var(--line-height) * 2);
+    background: var(--background-color);
+    color: var(--text-color);
+  }
+
+  .custom-button {
+    @apply custom-input uppercase font-medium cursor-pointer;
+  }
+
+  .custom-button:hover {
+    background: var(--background-color-alt);
+  }
+
+  .custom-button:active {
+    transform: translate(2px, 2px);
   }
 }
