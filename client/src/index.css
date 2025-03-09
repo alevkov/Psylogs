@@ -1,3 +1,5 @@
+@import url('https://fonts.cdnfonts.com/css/jetbrains-mono-2');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,6 +31,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .dark {
@@ -60,14 +63,17 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'JetBrains Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Apply class for the text interpreting the theme */
   .dose-text {
-    color: var(--card-foreground); /* Good for general elements */
+    color: var(--card-foreground);
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .dark .dose-text {
-    color: var(--foreground); /* Ensures it's light if dark background */
+    color: var(--foreground);
   }
 }
