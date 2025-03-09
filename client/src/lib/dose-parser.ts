@@ -14,7 +14,7 @@ const UNIT_CONVERSIONS = {
   ml: (amount: number) => ({ amount, unit: "ml" as const }),
 };
 
-const MAX_REASONABLE_DOSE = 10000; // 10g in mg
+const MAX_REASONABLE_DOSE = 100000; // 10g in mg
 const MIN_REASONABLE_DOSE = 0.001; // 1ug in mg
 
 export function parseDoseString(
