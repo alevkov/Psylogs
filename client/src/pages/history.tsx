@@ -1,13 +1,13 @@
-import { DoseStats } from "@/components/DoseStats";
+import { DoseStats } from "../components/DoseStats";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import {
   exportData,
   importData,
   importPWJournalData,
   importDataFromTextFile,
-} from "@/lib/db";
-import { useToast } from "@/hooks/use-toast";
+} from "../lib/db";
+import { useToast } from "../hooks/use-toast";
 import { useState } from "react";
 import { Loader2, Download, Upload, FileInput } from "lucide-react";
 
