@@ -1,28 +1,34 @@
 import express from "express";
-import { setupVite, serveStatic } from "./vite";
-import { createServer } from "http";
+import path from "path";
+import { fileURLToPath } from "url";
+import { createServer } from "vite";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(express.json());
 
 (async () => {
   try {
     console.log("Starting server setup...");
-    const server = createServer(app);
 
-    // Setup Vite or static file serving based on environment
-    if (app.get("env") === "development") {
-      console.log("Setting up Vite middleware for development...");
-      await setupVite(app, server);
-    } else {
-      console.log("Setting up static file serving for production...");
-      serveStatic(app);
-    }
+    // In development, create and use Vite's dev server
+    const vite = await createServer({
+      root: path.resolve(__dirname, "..", "client"),
+      server: { 
+        middlewareMode: true,
+        hmr: true
+      },
+      appType: "spa"
+    });
 
-    // ALWAYS serve the app on port 5000
+    // Use vite's middleware
+    app.use(vite.middlewares);
+
+    // ALWAYS serve on port 5000
     const PORT = 5000;
-    server.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server started successfully on port ${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server started on port ${PORT} (${process.env.NODE_ENV} mode)`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
