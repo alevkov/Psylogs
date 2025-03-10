@@ -1,4 +1,4 @@
-const CACHE_NAME = "dose-logger-v1";
+const CACHE_NAME = "dose-logger-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",

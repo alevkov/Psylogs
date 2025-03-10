@@ -23,8 +23,8 @@ const initializeDarkMode = () => {
   }
 };
 
-// Call it before rendering
-initializeDarkMode();
+// // Call it before rendering
+// initializeDarkMode();
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
