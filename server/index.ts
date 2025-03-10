@@ -17,9 +17,12 @@ const app = express();
       root: path.resolve(__dirname, "..", "client"),
       server: { 
         middlewareMode: true,
-        hmr: true
+        hmr: {
+          port: 24678 // Use a different port for HMR
+        }
       },
-      appType: "spa"
+      appType: "spa",
+      configFile: path.resolve(__dirname, "..", "vite.config.ts")
     });
 
     // Use vite's middleware
