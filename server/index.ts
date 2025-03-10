@@ -12,6 +12,12 @@ const app = express();
   try {
     console.log("Starting server setup...");
 
+    // Add request logging middleware
+    app.use((req, _res, next) => {
+      console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+      next();
+    });
+
     // In development, create and use Vite's dev server
     const vite = await createServer({
       root: path.resolve(__dirname, "..", "client"),
@@ -23,7 +29,13 @@ const app = express();
       },
       appType: "spa",
       configFile: path.resolve(__dirname, "..", "vite.config.ts")
+    }).catch(err => {
+      console.error("Failed to create Vite server:", err);
+      throw err;
     });
+
+    console.log("Vite server created successfully");
+    console.log("Root directory:", path.resolve(__dirname, "..", "client"));
 
     // Use vite's middleware
     app.use(vite.middlewares);
