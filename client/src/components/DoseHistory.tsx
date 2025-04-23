@@ -562,24 +562,24 @@ export function DoseHistory() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
                               <div className="p-1 sm:p-2">
-                                <div className="flex justify-between items-start">
-                                  <div className="font-medium text-sm sm:text-base">
-                                    {dose.substance}
+                                <div className="font-medium text-sm sm:text-base">
+                                  {dose.substance}
+                                </div>
+                                <div className="flex items-center justify-between flex-wrap mt-0.5">
+                                  <div className="flex items-center gap-1">
+                                    <Badge variant="secondary" className="text-xs">
+                                      {dose.amount}
+                                      {dose.unit}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-xs py-0">
+                                      {dose.route}
+                                    </Badge>
                                   </div>
-                                  <span className="text-xs text-muted-foreground ml-2">
+                                  <span className="text-xs text-muted-foreground ml-auto">
                                     {formatDistanceToNow(new Date(dose.timestamp), {
                                       addSuffix: true,
                                     })}
                                   </span>
-                                </div>
-                                <div className="flex items-center flex-wrap gap-1 mt-0.5">
-                                  <Badge variant="secondary" className="text-xs">
-                                    {dose.amount}
-                                    {dose.unit}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs py-0">
-                                    {dose.route}
-                                  </Badge>
                                 </div>
                               </div>
 
