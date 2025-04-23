@@ -37,6 +37,7 @@ export default function SettingsPage() {
       toast({
         title: "Data cleared successfully",
         duration: 2000,
+        variant: "success",
       });
     }
   };

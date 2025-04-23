@@ -297,6 +297,7 @@ export function DoseHistory() {
       toast({
         title: "Dose updated",
         duration: 3000,
+        variant: "success",
       });
     } catch (error) {
       toast({
@@ -323,6 +324,7 @@ export function DoseHistory() {
       toast({
         title: `${type} time set`,
         duration: 3000,
+        variant: "success",
       });
     } catch (error) {
       toast({

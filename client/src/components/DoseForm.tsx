@@ -314,6 +314,7 @@ export function DoseForm() {
           ? undefined
           : "Will be synced when you're back online",
         duration: 2000,
+        variant: "success",
       });
     } catch (error) {
       setSubmitStatus("error");
