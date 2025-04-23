@@ -565,8 +565,8 @@ export function DoseHistory() {
                                 <div className="font-medium text-sm sm:text-base">
                                   {dose.substance}
                                 </div>
-                                <div className="flex items-center mt-0.5 w-full pr-1">
-                                  <div className="flex items-center gap-1">
+                                <div className="flex justify-between items-center mt-0.5">
+                                  <div className="flex gap-1">
                                     <Badge variant="secondary" className="text-xs">
                                       {dose.amount}
                                       {dose.unit}
@@ -575,13 +575,11 @@ export function DoseHistory() {
                                       {dose.route}
                                     </Badge>
                                   </div>
-                                  <div className="flex-1 flex justify-end">
-                                    <span className="text-xs text-muted-foreground">
-                                      {formatDistanceToNow(new Date(dose.timestamp), {
-                                        addSuffix: true,
-                                      })}
-                                    </span>
-                                  </div>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(dose.timestamp), {
+                                      addSuffix: true,
+                                    })}
+                                  </span>
                                 </div>
                               </div>
 
