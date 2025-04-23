@@ -561,27 +561,18 @@ export function DoseHistory() {
                         <CardContent className="p-2 sm:p-3">
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
-                              <div className="grid grid-cols-[1fr_auto] p-1 sm:p-2">
-                                <div className="col-span-1">
-                                  <div className="font-medium text-sm sm:text-base">
-                                    {dose.substance}
-                                  </div>
-                                  <div className="flex gap-1 mt-0.5">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {dose.amount}
-                                      {dose.unit}
-                                    </Badge>
-                                    <Badge variant="outline" className="text-xs py-0">
-                                      {dose.route}
-                                    </Badge>
-                                  </div>
+                              <div className="p-1 sm:p-2">
+                                <div className="font-medium text-sm sm:text-base">
+                                  {dose.substance}
                                 </div>
-                                <div className="col-span-1 flex items-center">
-                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                    {formatDistanceToNow(new Date(dose.timestamp), {
-                                      addSuffix: true,
-                                    })}
-                                  </span>
+                                <div className="flex gap-1 mt-0.5">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {dose.amount}
+                                    {dose.unit}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs py-0">
+                                    {dose.route}
+                                  </Badge>
                                 </div>
                               </div>
 
@@ -612,35 +603,42 @@ export function DoseHistory() {
                               <DurationVisualizer dose={dose} />
                             </div>
 
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                  <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="text-xs sm:text-sm">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedDose(dose);
-                                    setIsEditDialogOpen(true);
-                                  }}
-                                  className="text-xs sm:text-sm py-1 h-7 sm:h-8"
-                                >
-                                  <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive text-xs sm:text-sm py-1 h-7 sm:h-8"
-                                  onClick={() => {
-                                    setSelectedDose(dose);
-                                    setIsDeleteDialogOpen(true);
-                                  }}
-                                >
-                                  <Trash className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex flex-col items-end">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                    <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="text-xs sm:text-sm">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedDose(dose);
+                                      setIsEditDialogOpen(true);
+                                    }}
+                                    className="text-xs sm:text-sm py-1 h-7 sm:h-8"
+                                  >
+                                    <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive text-xs sm:text-sm py-1 h-7 sm:h-8"
+                                    onClick={() => {
+                                      setSelectedDose(dose);
+                                      setIsDeleteDialogOpen(true);
+                                    }}
+                                  >
+                                    <Trash className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              <span className="text-xs text-muted-foreground mt-1">
+                                {formatDistanceToNow(new Date(dose.timestamp), {
+                                  addSuffix: true,
+                                })}
+                              </span>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
