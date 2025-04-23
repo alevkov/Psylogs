@@ -82,6 +82,11 @@
     .app-container {
       padding: 0 0.75rem;
     }
+    
+    /* Prevent zoom on input focus */
+    input, select, textarea {
+      font-size: 16px !important; /* Minimum font size to prevent zoom on iOS */
+    }
   }
 
   .card {

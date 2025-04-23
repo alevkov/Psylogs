@@ -679,8 +679,9 @@ export function DoseForm() {
                         : parseError
                           ? "border-red-500"
                           : ""
-                    }`}
+                    } h-12 sm:h-10 px-4`}
                     disabled={isSubmitting}
+                    autoComplete="off"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {previewParse && (
@@ -953,7 +954,7 @@ export function DoseForm() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-4"
+                className="w-full mt-4 h-12 sm:h-10 text-base sm:text-sm"
               >
                 {isSubmitting ? (
                   <>
