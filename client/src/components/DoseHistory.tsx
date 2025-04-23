@@ -105,8 +105,8 @@ function DurationVisualizer({ dose }: { dose: DoseEntry }) {
   )) : null;
 
   return (
-    <div className="mt-2 space-y-1">
-      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+    <div className="mt-1 sm:mt-2 space-y-0.5 sm:space-y-1">
+      <div className="relative h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
         <div
           className="absolute h-full bg-primary/20 rounded-full"
           style={{ width: `${onsetPercent}%` }}
@@ -131,23 +131,23 @@ function DurationVisualizer({ dose }: { dose: DoseEntry }) {
         )}
         {/* Timeline markers */}
         <div
-          className="absolute top-0 w-1 h-full bg-primary"
+          className="absolute top-0 w-0.5 sm:w-1 h-full bg-primary"
           style={{ left: `${onsetPercent}%` }}
         />
         {peakTime && (
           <div
-            className="absolute top-0 w-1 h-full bg-primary"
+            className="absolute top-0 w-0.5 sm:w-1 h-full bg-primary"
             style={{ left: `${peakPercent}%` }}
           />
         )}
         {offsetTime && (
           <div
-            className="absolute top-0 w-1 h-full bg-primary"
+            className="absolute top-0 w-0.5 sm:w-1 h-full bg-primary"
             style={{ left: `${offsetPercent}%` }}
           />
         )}
       </div>
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
         <span>0m</span>
         <span>{totalDuration}m</span>
       </div>
@@ -171,11 +171,11 @@ function TimestampButton({
   const getIcon = () => {
     switch (type) {
       case 'onset':
-        return <Clock className="h-4 w-4" />;
+        return <Clock className="h-3 w-3 sm:h-4 sm:w-4" />;
       case 'peak':
-        return <Activity className="h-4 w-4" />;
+        return <Activity className="h-3 w-3 sm:h-4 sm:w-4" />;
       case 'offset':
-        return <TrendingDown className="h-4 w-4" />;
+        return <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />;
     }
   };
 
@@ -190,7 +190,7 @@ function TimestampButton({
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge variant="secondary" className="cursor-default">
+            <Badge variant="secondary" className="cursor-default text-xs h-6 px-1.5 sm:px-2">
               {type}: {format(parseISO(value), 'HH:mm')}
             </Badge>
           </TooltipTrigger>
@@ -208,7 +208,7 @@ function TimestampButton({
       size="sm"
       onClick={handleClick}
       disabled={disabled}
-      className="flex items-center gap-1"
+      className="flex items-center gap-0.5 sm:gap-1 h-6 sm:h-8 text-xs sm:text-sm px-1.5 sm:px-2"
     >
       {getIcon()}
       <span className="capitalize">{type}</span>
@@ -610,28 +610,29 @@ export function DoseHistory() {
 
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
+                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                  <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent align="end" className="text-xs sm:text-sm">
                                 <DropdownMenuItem
                                   onClick={() => {
                                     setSelectedDose(dose);
                                     setIsEditDialogOpen(true);
                                   }}
+                                  className="text-xs sm:text-sm py-1 h-7 sm:h-8"
                                 >
-                                  <Pencil className="h-4 w-4 mr-2" />
+                                  <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  className="text-destructive"
+                                  className="text-destructive text-xs sm:text-sm py-1 h-7 sm:h-8"
                                   onClick={() => {
                                     setSelectedDose(dose);
                                     setIsDeleteDialogOpen(true);
                                   }}
                                 >
-                                  <Trash className="h-4 w-4 mr-2" />
+                                  <Trash className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
                                   Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
