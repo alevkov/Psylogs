@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { getDoses } from "@/lib/db";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import React, { useEffect, useState } from "react";
+import { getDoses, getAllDosesForStats } from "../lib/db";
+import { DoseEntry } from "../lib/constants";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -24,7 +25,7 @@ import {
   isSameDay,
   subDays,
 } from "date-fns";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import {
   AlertTriangle,
   TrendingDown,
@@ -36,7 +37,8 @@ import {
   Activity,
   AlertOctagon,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
 import {
   calculateTimeCorrelations,
   analyzeUsagePatterns,
@@ -47,20 +49,8 @@ import {
   INTERACTION_THRESHOLDS,
   type CalendarDataPoint,
   analyzePersonalPatterns,
-} from "@/lib/analysis";
-
-const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#96CEB4",
-  "#FFEEAD",
-  "#D4A5A5",
-  "#9E9E9E",
-  "#58B19F",
-  "#FFD93D",
-  "#6C5B7B",
-];
+} from "../lib/analysis";
+import { DUTCH_COLORS } from "../lib/color-utils";
 
 const getTrendIcon = (trend: string) => {
   switch (trend) {
@@ -86,11 +76,18 @@ interface Stats {
   substanceDistribution: Array<{ name: string; value: number }>;
   routeDistribution: Array<{ name: string; value: number }>;
   timeDistribution: Array<{ name: string; count: number }>;
-  recentActivity: Array<{ name: string; amount: number }>;
+  recentActivity: Array<{
+    timestamp: string;
+    substance: string;
+    amount: number;
+    unit: string;
+    route: string;
+  }>;
 }
 
 export function DoseStats() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>({
     timeCorrelations: [],
     usagePatterns: [],
@@ -112,9 +109,10 @@ export function DoseStats() {
     const calculateStats = async () => {
       try {
         setLoading(true);
-        const doses = await getDoses();
+        // Use getAllDosesForStats to get all doses at once for statistics
+        const doses = await getAllDosesForStats();
 
-        console.log(doses);
+        console.log("Stats component loaded doses:", doses.length);
 
         // Calculate basic stats
         const substances = new Set(doses.map((d) => d.substance));
@@ -229,6 +227,7 @@ export function DoseStats() {
         });
       } catch (error) {
         console.error("Error calculating stats:", error);
+        setError("Failed to load statistics data. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -246,12 +245,51 @@ export function DoseStats() {
       </Card>
     );
   }
-
-  if (!stats.calendarData.length) {
+  
+  if (error) {
     return (
       <Card className="w-full">
-        <CardContent className="p-6 text-center text-muted-foreground">
-          No dose data available
+        <CardContent className="p-8 flex flex-col items-center justify-center space-y-4">
+          <div className="rounded-full bg-red-100 p-3 dark:bg-red-900/30">
+            <AlertOctagon className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h3 className="text-lg font-medium text-center">Error Loading Data</h3>
+          <p className="text-sm text-center text-muted-foreground">{error}</p>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              const calculateStats = async () => {
+                try {
+                  const doses = await getAllDosesForStats();
+                  // Process logic would go here
+                  setError(null);
+                } catch (err) {
+                  console.error("Error retrying stats load:", err);
+                  setError("Failed to load statistics data. Please try again later.");
+                } finally {
+                  setLoading(false);
+                }
+              };
+              calculateStats();
+            }}
+          >
+            Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Make sure stats.calendarData exists before checking length
+  if (!stats || !stats.calendarData || stats.calendarData.length === 0) {
+    return (
+      <Card className="w-full">
+        <CardContent className="p-8 flex flex-col items-center justify-center space-y-4">
+          <Activity className="h-12 w-12 text-muted-foreground opacity-50" />
+          <h3 className="text-lg font-medium text-center">No dose data available</h3>
+          <p className="text-sm text-center text-muted-foreground">Add a dose from the form on the home page to get started</p>
         </CardContent>
       </Card>
     );
@@ -433,7 +471,7 @@ export function DoseStats() {
                     {stats.substanceDistribution.map((_, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                        fill={DUTCH_COLORS[index % DUTCH_COLORS.length]}
                       />
                     ))}
                   </Pie>
@@ -565,13 +603,13 @@ export function DoseStats() {
                     </div>
                     <div className="flex gap-2">
                       {pattern.changeMetrics.monthOverMonthChange > 0.1 && (
-                        <Badge variant="warning">More frequent</Badge>
+                        <Badge variant="destructive">More frequent</Badge>
                       )}
                       {pattern.changeMetrics.monthOverMonthChange < -0.1 && (
                         <Badge variant="default">Less frequent</Badge>
                       )}
                       {pattern.changeMetrics.doseSizeTrend > 0.1 && (
-                        <Badge variant="warning">Doses increasing</Badge>
+                        <Badge variant="destructive">Doses increasing</Badge>
                       )}
                       {pattern.changeMetrics.doseSizeTrend < -0.1 && (
                         <Badge variant="default">Doses decreasing</Badge>
@@ -601,7 +639,7 @@ export function DoseStats() {
                       <div className="flex items-center gap-2">
                         <h4 className="font-medium">{pattern.substance}</h4>
                         {pattern.changeMetrics.doseSizeTrend > 0.1 && (
-                          <Badge variant="warning" className="h-5">
+                          <Badge variant="destructive" className="h-5">
                             Increasing
                           </Badge>
                         )}
@@ -732,7 +770,7 @@ export function DoseStats() {
                                 <Badge
                                   variant={
                                     pattern.changeMetrics.weekOverWeekChange > 0
-                                      ? "warning"
+                                      ? "destructive"
                                       : "default"
                                   }
                                   className="w-full justify-center"
@@ -752,7 +790,7 @@ export function DoseStats() {
                                   variant={
                                     pattern.changeMetrics.monthOverMonthChange >
                                     0
-                                      ? "warning"
+                                      ? "destructive"
                                       : "default"
                                   }
                                   className="w-full justify-center"
@@ -830,7 +868,7 @@ export function DoseStats() {
                   {stats.routeDistribution.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
+                      fill={DUTCH_COLORS[index % DUTCH_COLORS.length]}
                     />
                   ))}
                 </Bar>

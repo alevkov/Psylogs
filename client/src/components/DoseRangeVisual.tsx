@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from "@/lib/utils";
+import React from "react";
+import { cn } from "../lib/utils";
 
 interface DoseRange {
   lower?: number;
@@ -20,9 +20,14 @@ interface DoseRangeVisualProps {
   unit: string;
 }
 
-export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualProps) {
+export function DoseRangeVisual({
+  ranges,
+  currentDose,
+  unit,
+}: DoseRangeVisualProps) {
   // Calculate the maximum value for scaling, extending 20% beyond heavy threshold
-  const maxValue = (ranges.heavy || 0) * 1.2;
+  const heavyValue = ranges.heavy !== undefined ? ranges.heavy : 0;
+  const maxValue = heavyValue * 1.2;
 
   // Calculate percentage positions for the ranges
   const getPosition = (value: number) => (value / maxValue) * 100;
@@ -31,23 +36,23 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
   const getRangeStyle = (start: number, end: number, color: string) => ({
     left: `${getPosition(start)}%`,
     width: `${getPosition(end - start)}%`,
-    backgroundColor: color
+    backgroundColor: color,
   });
 
   // Update the dose position calculation to cap at slightly before heavy threshold
   const dosePosition = Math.min(
     getPosition(
-      currentDose >= (ranges.heavy || Infinity)
-        ? ranges.heavy * 0.99  // Cap at 99% of heavy threshold
-        : currentDose
+      currentDose >= heavyValue
+        ? heavyValue * 0.99 // Cap at 99% of heavy threshold
+        : currentDose,
     ),
-    100
+    100,
   );
 
   return (
-    <div className="space-y-2 w-full">
-      {/* Range visualization */}
-      <div className="relative h-6 bg-muted rounded-lg overflow-hidden">
+    <div className="w-full">
+      {/* Range visualization bar with indicator */}
+      <div className="relative h-4 bg-muted rounded-md overflow-hidden">
         {/* Light range */}
         {ranges.light && (
           <div
@@ -55,11 +60,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
             style={getRangeStyle(
               ranges.threshold || 0,
               ranges.light.upper || 0,
-              'hsl(142, 76%, 36%)' // Emerald green
+              "hsl(142, 76%, 36%)", // Emerald green
             )}
           />
         )}
-        
+
         {/* Common range */}
         {ranges.common && (
           <div
@@ -67,11 +72,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
             style={getRangeStyle(
               ranges.common.lower || 0,
               ranges.common.upper || 0,
-              'hsl(142, 71%, 45%)' // Lighter emerald
+              "hsl(142, 71%, 45%)", // Lighter emerald
             )}
           />
         )}
-        
+
         {/* Strong range */}
         {ranges.strong && (
           <div
@@ -79,11 +84,11 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
             style={getRangeStyle(
               ranges.strong.lower || 0,
               ranges.strong.upper || 0,
-              'hsl(48, 96%, 53%)' // Bright yellow
+              "hsl(48, 96%, 53%)", // Bright yellow
             )}
           />
         )}
-        
+
         {/* Heavy range */}
         {ranges.heavy && (
           <div
@@ -91,38 +96,33 @@ export function DoseRangeVisual({ ranges, currentDose, unit }: DoseRangeVisualPr
             style={getRangeStyle(
               ranges.heavy,
               maxValue,
-              'hsl(0, 84%, 60%)' // Vibrant red
+              "hsl(0, 84%, 60%)", // Vibrant red
             )}
           />
         )}
 
         {/* Current dose indicator */}
-        <div 
+        <div
           className={cn(
-            "absolute w-1 h-full transition-all duration-300",
-            currentDose >= (ranges.heavy || Infinity) 
-              ? "bg-red-500 animate-pulse" 
-              : "bg-foreground"
+            "absolute w-0.5 h-full transition-all duration-300",
+            currentDose >= heavyValue && heavyValue > 0
+              ? "bg-red-500 animate-pulse"
+              : "bg-foreground",
           )}
-          style={{ 
+          style={{
             left: `${dosePosition}%`,
-            zIndex: 10  // Ensure indicator is always visible
+            zIndex: 10, // Ensure indicator is always visible
           }}
         />
       </div>
 
-      {/* Labels */}
-      <div className="flex justify-between text-xs text-muted-foreground">
+      {/* Labels - tiny and more compact */}
+      <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5 px-1">
         <span>Threshold</span>
         <span>Light</span>
         <span>Common</span>
         <span>Strong</span>
         <span>Heavy</span>
-      </div>
-
-      {/* Current dose label */}
-      <div className="text-sm text-center">
-        Current: {currentDose}{unit}
       </div>
     </div>
   );

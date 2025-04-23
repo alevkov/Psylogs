@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { parseDoseString } from "@/lib/dose-parser";
-import { addDose, getDoses } from "@/lib/db";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { ADMINISTRATION_METHODS } from "@/lib/constants";
+import { parseDoseString } from "../lib/dose-parser";
+import { addDose, getDoses } from "../lib/db";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { useToast } from "../hooks/use-toast";
+import { Card, CardHeader, CardContent } from "./ui/card";
+import { ADMINISTRATION_METHODS, DoseEntry } from "../lib/constants";
 import {
   Loader2,
   AlertCircle,
@@ -21,51 +21,74 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react";
-import { useDoseContext } from "@/contexts/DoseContext";
-import { Badge } from "@/components/ui/badge";
-import { analyzePersonalPatterns } from "@/lib/analysis";
-import doseData from "@/lib/dose-tiers.json";
-import { analyzeDoseTier, getTierBadgeVariant } from "@/lib/dose-tiers.types";
-import { getSubstanceSafetyInfo } from "@/lib/substance-safety";
-import substanceData from "@/lib/substance-data.json";
+import { useDoseContext } from "../contexts/DoseContext";
+import { Badge } from "./ui/badge";
+import { analyzePersonalPatterns } from "../lib/analysis";
+import doseData from "../lib/dose_tiers_with_timelines.json";
 import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+  analyzeDoseTier,
+  getTierBadgeVariant,
+  SubstanceData,
+} from "../lib/dose-tiers.types";
+import { getSubstanceSafetyInfo } from "../lib/substance-safety";
+import { SubstanceData as SafetySubstanceData } from "../lib/substance-safety";
+// @ts-ignore - Ignoring type mismatch for this imported JSON data
+import substanceData from "../lib/substance-data.json";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "./ui/collapsible";
 import { DoseRangeVisual } from "./DoseRangeVisual";
+import { SafetyInfoDialog } from "./SafetyInfoDialog";
 
 function normalizeSubstanceName(name: string): string {
   return name
     .toLowerCase()
     .replace(/[-_\s]+/g, "") // Remove dashes, underscores, spaces
-    .replace(/[^a-z0-9]/g, ""); // Remove any other special characters
+    .replace(/[^a-z0-9,\.-]/g, ""); // Remove special characters except commas, periods, dashes and numbers
 }
 
 function findMatchingSubstance(
   userSubstance: string,
   doseData: any,
 ): string | null {
-  const normalizedInput = normalizeSubstanceName(userSubstance);
+  if (!userSubstance || userSubstance.length < 2 || !doseData) {
+    return null;
+  }
 
-  // First try exact match
+  const normalizedInput = normalizeSubstanceName(userSubstance);
+  if (!normalizedInput) return null;
+
+  // First try exact match - highest priority
   const exactMatch = Object.keys(doseData).find(
     (substance) => normalizeSubstanceName(substance) === normalizedInput,
   );
   if (exactMatch) return exactMatch;
 
-  // Then try contains match
-  const containsMatch = Object.keys(doseData).find(
-    (substance) =>
-      normalizeSubstanceName(substance).includes(normalizedInput) ||
-      normalizedInput.includes(normalizeSubstanceName(substance)),
-  );
-  if (containsMatch) return containsMatch;
+  // Try prefix match for abbreviated names (like "diaz" for "diazepam")
+  // This should be higher priority than general contains match
+  if (normalizedInput.length >= 3) {
+    const prefixMatch = Object.keys(doseData).find((substance) => {
+      const normalizedSubstance = normalizeSubstanceName(substance);
+      // Check if normalizedInput is the start of a substance name (prefix match)
+      return normalizedSubstance.startsWith(normalizedInput);
+    });
+    if (prefixMatch) return prefixMatch;
+  }
+
+  // Only do a contains match if the input is substantial (4+ chars)
+  // to avoid matching "am" to "amphetamine" or other false positives
+  if (normalizedInput.length >= 4) {
+    // Try a strict contains match (only match if the substance contains the input)
+    // We don't want to match if the input contains the substance (which can lead to bad matches)
+    const substanceContainsInput = Object.keys(doseData).find((substance) => {
+      const normalizedSubstance = normalizeSubstanceName(substance);
+      return normalizedSubstance.includes(normalizedInput);
+    });
+    if (substanceContainsInput) return substanceContainsInput;
+  }
 
   // No match found
   return null;
@@ -161,7 +184,8 @@ function getErrorDetails(error: Error, input: string): ParseError | null {
       message: "Format not recognized",
       suggestion:
         "Use either: amount + unit + substance + route OR @action + amount + substance",
-      example: "Examples:\n200mg caffeine oral\n@ate 30mg adderall",
+      example:
+        "Examples:\n200mg caffeine oral\n4mg diaz oral\n20mg 4-mph nasal\n@ate 30mg 1,4-bdo",
     };
   }
 
@@ -261,19 +285,20 @@ export function DoseForm() {
   useEffect(() => {
     const loadHistoricalData = async () => {
       try {
-        const doses = await getDoses();
-        const patterns = analyzePersonalPatterns(doses);
+        const dosesData = await getDoses();
+        const dosesArray = dosesData.doses || [];
+        const patterns = analyzePersonalPatterns(dosesArray);
 
         // Get recent substances (last 5 unique)
         const recent = Array.from(
           new Set(
-            doses
+            dosesArray
               .sort(
-                (a, b) =>
+                (a: DoseEntry, b: DoseEntry) =>
                   new Date(b.timestamp).getTime() -
                   new Date(a.timestamp).getTime(),
               )
-              .map((d) => d.substance),
+              .map((d: DoseEntry) => d.substance),
           ),
         ).slice(0, 5);
 
@@ -287,7 +312,7 @@ export function DoseForm() {
           .map((p) => p.substance)
           .slice(0, 5);
 
-        setRecentSubstances(recent);
+        setRecentSubstances(recent as string[]);
         setFrequentSubstances(frequent);
       } catch (error) {
         console.error("Error loading historical data:", error);
@@ -314,6 +339,7 @@ export function DoseForm() {
           ? undefined
           : "Will be synced when you're back online",
         duration: 2000,
+        variant: "success",
       });
     } catch (error) {
       setSubmitStatus("error");
@@ -366,6 +392,8 @@ export function DoseForm() {
   // Enhanced useEffect for smart suggestions
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
+
+    // Clear all state if input is empty
     if (!doseString.trim()) {
       setSuggestions([]);
       setPreviewParse(null);
@@ -375,20 +403,46 @@ export function DoseForm() {
       return;
     }
 
+    // Process the input string once
+    const words = doseString.trim().split(/\s+/);
+    const lastWord = words[words.length - 1];
+    const format = getDoseFormat(doseString);
+
+    // Always clear safety info when input is incomplete (less than 3 words)
+    // or when the substance is very short (to prevent showing safety data for "am" when typing "amphetamine")
+    if (words.length < 3) {
+      setSafetyInfo(null);
+    }
+
+    // Try to parse the dose string
     try {
       const parsed = parseDoseString(doseString);
       setPreviewParse(parsed);
       setParseError(null);
 
-      // Get safety information
-      const safety = getSubstanceSafetyInfo(
-        parsed.substance,
-        parsed.amount,
-        parsed.route,
-        substanceData
-      );
-      setSafetyInfo(safety);
-
+      // Only show safety info when we have a complete valid dose (all three components)
+      // AND the substance name is substantial (at least 4 chars)
+      // This prevents showing safety data for incomplete entries or very short substance names
+      if (
+        parsed.substance &&
+        parsed.amount &&
+        parsed.route &&
+        parsed.substance.length >= 4 &&
+        // Make sure we're seeing a complete dose string, not a partial one
+        words.length === 3
+      ) {
+        // Get safety information
+        const safety = getSubstanceSafetyInfo(
+          parsed.substance,
+          parsed.amount,
+          parsed.route,
+          // @ts-ignore - Casting JSON data to the expected interface
+          substanceData,
+        );
+        setSafetyInfo(safety);
+      } else {
+        setSafetyInfo(null);
+      }
     } catch (error) {
       setPreviewParse(null);
       setSafetyInfo(null);
@@ -397,10 +451,6 @@ export function DoseForm() {
         setParseError(errorDetails);
       }
     }
-
-    const words = doseString.trim().split(/\s+/);
-    const lastWord = words[words.length - 1];
-    const format = getDoseFormat(doseString);
 
     // First check basic parsing - this should work for any valid format
     const { isValid, parsed, error } = getBasicParsePreview(doseString);
@@ -550,22 +600,55 @@ export function DoseForm() {
 
         setSuggestions(matchedSubstances);
       } else if (words.length === 3) {
+        // For route suggestions, if lastWord is very short (1-2 chars) or empty, 
+        // show all routes instead of only matching ones
+        const showAllRoutes = !lastWord || lastWord.length <= 2;
+        
+        // If the lastWord is short or empty, show all routes
+        // Otherwise, filter routes that match the prefix
         const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
           .flat()
-          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""))
+          .filter((r) => !r.startsWith("@") && (
+            showAllRoutes || 
+            r.startsWith(lastWord) ||
+            r.includes(lastWord)
+          ))
           .map((text) => ({ text, type: "common" as const }));
 
         if (matchingRoutes.length > 0) {
-          setSuggestions(matchingRoutes);
+          // Sort routes: exact matches first, then by length (shorter routes first)
+          const sortedRoutes = matchingRoutes.sort((a, b) => {
+            // Exact matches come first
+            if (a.text === lastWord) return -1;
+            if (b.text === lastWord) return 1;
+            
+            // Then sort by whether it starts with the lastWord
+            const aStartsWithLastWord = a.text.startsWith(lastWord);
+            const bStartsWithLastWord = b.text.startsWith(lastWord);
+            if (aStartsWithLastWord && !bStartsWithLastWord) return -1;
+            if (!aStartsWithLastWord && bStartsWithLastWord) return 1;
+            
+            // Then sort by length (shorter first)
+            return a.text.length - b.text.length;
+          });
+          
+          // Limit number of suggestions to 6 to prevent UI overflow
+          setSuggestions(sortedRoutes.slice(0, 6));
           setParseError(null);
 
-          if (matchingRoutes.some((r) => r.text === lastWord)) {
+          // Only attempt to parse if there's an exact match AND it's not just a short input
+          // This prevents "o" from matching "oral" automatically
+          const hasExactMatch = matchingRoutes.some((r) => r.text === lastWord);
+          if (hasExactMatch && lastWord.length > 2) {
             try {
               const parsed = parseDoseString(doseString);
               setPreviewParse(parsed);
             } catch (error) {
               setPreviewParse(null);
             }
+          } else {
+            // Reset preview parse when user is still selecting a route
+            setPreviewParse(null);
           }
         } else {
           if (lastWord && lastWord.length > 0) {
@@ -577,17 +660,27 @@ export function DoseForm() {
               example: "Common routes: oral, nasal, inhaled, injected",
             });
           } else {
-            const allRoutes = Object.values(ADMINISTRATION_METHODS)
+            // Show common, easy-to-understand routes first
+            const commonRoutes = ["oral", "sublingual", "nasal", "inhaled", "injected"];
+            const remainingRoutes = Object.values(ADMINISTRATION_METHODS)
               .flat()
-              .filter((r) => !r.startsWith("@"))
-              .map((text) => ({ text, type: "common" as const }))
-              .slice(0, 5);
+              .filter((r) => !r.startsWith("@") && !commonRoutes.includes(r));
+            
+            const allRoutes = [
+              ...commonRoutes.map((text) => ({ text, type: "common" as const })),
+              ...remainingRoutes
+                .map((text) => ({ text, type: "common" as const }))
+            ]
+            .slice(0, 6); // Limit to 6 choices
             setSuggestions(allRoutes);
             setParseError(null);
           }
         }
 
-        if (matchingRoutes.some((r) => r.text === lastWord)) {
+        // Only attempt to parse if there's an exact match AND it's not just a short input
+        // This prevents "o" from matching "oral" automatically
+        const hasExactMatch = matchingRoutes.some((r) => r.text === lastWord);
+        if (hasExactMatch && lastWord.length > 2) {
           try {
             const parsed = parseDoseString(doseString);
             setPreviewParse(parsed);
@@ -639,33 +732,26 @@ export function DoseForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <motion.div
-            className="flex items-center justify-between"
-            initial={false}
-            animate={submitStatus}
-            variants={{
-              success: { scale: [1, 1.02, 1] },
-              error: { x: [0, -10, 10, -10, 10, 0] },
-            }}
-          >
-            <h2 className="text-xl font-bold">Enter Dose</h2>
-            {previewParse && (
-              <div className="flex gap-2">
-                <Badge variant="outline">Valid Format</Badge>
-                {tierAnalysis && (
-                  <Badge variant={getTierBadgeVariant(tierAnalysis.tier)}>
-                    {tierAnalysis.tier.charAt(0).toUpperCase() +
-                      tierAnalysis.tier.slice(1)}{" "}
-                    Dose
-                  </Badge>
-                )}
+      <Card className="w-full max-w-md mx-auto shadow-md border-0 overflow-hidden bg-gradient-to-br from-white to-secondary/20 dark:from-background dark:to-secondary/5">
+       {previewParse && (
+          <CardHeader className="pb-0">
+            <motion.div
+              className="flex items-center justify-between"
+              initial={false}
+              animate={submitStatus}
+              variants={{
+                success: { scale: [1, 1.02, 1] },
+                error: { x: [0, -10, 10, -10, 10, 0] },
+              }}
+            >
+              <div className="flex pt-5 gap-2">
+              
+                
               </div>
-            )}
-          </motion.div>
-        </CardHeader>
-        <CardContent>
+            </motion.div>
+          </CardHeader>
+        )} 
+        <CardContent className={!previewParse ? "pt-6" : ""}>
           <div className="space-y-4">
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -673,14 +759,15 @@ export function DoseForm() {
                   <Input
                     placeholder="e.g. 200mg caffeine oral"
                     {...form.register("doseString")}
-                    className={`w-full pr-10 transition-all ${
+                    className={`w-full pr-10 transition-all placeholder:text-xs placeholder:text-muted-foreground/40 ${
                       previewParse
-                        ? "border-green-500"
+                        ? "border-green-500 shadow-md ring-1 ring-green-200"
                         : parseError
-                          ? "border-red-500"
-                          : ""
-                    }`}
+                          ? "border-red-500 shadow-md ring-1 ring-red-200"
+                          : "shadow-sm hover:shadow focus:shadow-md transition-shadow"
+                    } h-12 sm:h-10 px-4 rounded-lg`}
                     disabled={isSubmitting}
+                    autoComplete="off"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {previewParse && (
@@ -722,7 +809,7 @@ export function DoseForm() {
                     </motion.div>
                   )}
 
-                  {suggestions.length > 0 && !parseError && (
+                  {suggestions.length > 0 && !parseError && !previewParse && (
                     <motion.div
                       key="suggestions"
                       initial={{ opacity: 0, y: -10 }}
@@ -757,7 +844,9 @@ export function DoseForm() {
                       className="bg-muted rounded-lg p-3 text-sm space-y-1"
                     >
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Substance:</span>
+                        <span className="text-muted-foreground">
+                          Substance:
+                        </span>
                         <span className="font-medium">
                           {previewParse.substance}
                         </span>
@@ -771,9 +860,11 @@ export function DoseForm() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Route:</span>
-                        <span className="font-medium">{previewParse.route}</span>
+                        <span className="font-medium">
+                          {previewParse.route}
+                        </span>
                       </div>
-                      {tierAnalysis ? (
+                      {tierAnalysis && tierAnalysis.tier ? (
                         <div className="pt-2 mt-2 border-t border-border">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-muted-foreground">
@@ -840,7 +931,7 @@ export function DoseForm() {
                           )}
                         </div>
                       ) : (
-                        <div className="pt-2 mt-2 border-t border-border">
+                        <div className="pt-2 mt-2 border-t border-border text-center">
                           <Badge variant="secondary">Valid Format</Badge>
                         </div>
                       )}
@@ -849,111 +940,72 @@ export function DoseForm() {
                 </AnimatePresence>
               </div>
 
-              {safetyInfo && previewParse && (
-                <Card className="mt-4">
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold">Safety Information</h3>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Dose Range Visual */}
-                    {tierAnalysis?.ranges && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Dose Range</h4>
+              {previewParse &&
+                safetyInfo &&
+                // Only show this card if we have actual safety information
+                (safetyInfo.effects.length > 0 ||
+                safetyInfo.safetyWarnings.length > 0 ||
+                safetyInfo.duration ||
+                safetyInfo.onset ? (
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-3">
+                      {/* Dose Information and Range Visual */}
+                      <div className="flex items-center gap-1 mb-2">
+                        <span className="text-xs text-muted-foreground">
+                          Dose:
+                        </span>
+                        <span className="text-xs font-medium">
+                          {previewParse.amount}
+                          {previewParse.unit}
+                        </span>
+
+                        {tierAnalysis?.tier && (
+                          <Badge
+                            variant={getTierBadgeVariant(tierAnalysis.tier)}
+                            className="ml-auto"
+                          >
+                            {tierAnalysis.tier.charAt(0).toUpperCase() +
+                              tierAnalysis.tier.slice(1)}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {tierAnalysis?.ranges ? (
                         <DoseRangeVisual
                           ranges={tierAnalysis.ranges}
                           currentDose={previewParse.amount}
                           unit={previewParse.unit}
                         />
-                      </div>
-                    )}
-
-                    {/* Dosage Guidance Section */}
-                    <Collapsible>
-                      <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <h4 className="font-medium">Dosage Guidance</h4>
-                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <Alert className="mt-2">
-                          <Info className="h-4 w-4" />
-                          <AlertDescription>
-                            {safetyInfo.dosageGuidance}
-                          </AlertDescription>
-                        </Alert>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Safety Warnings Section */}
-                    {safetyInfo.safetyWarnings.length > 0 && (
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full">
-                          <h4 className="font-medium">Safety Warnings</h4>
-                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="space-y-2 mt-2">
-                            {safetyInfo.safetyWarnings.map((warning, index) => (
-                              <Alert key={index} variant="destructive">
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>Warning</AlertTitle>
-                                <AlertDescription>{warning}</AlertDescription>
-                              </Alert>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-
-                    {/* Effects Section */}
-                    <Collapsible>
-                      <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <h4 className="font-medium">Effects</h4>
-                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {safetyInfo.effects.map((effect, index) => (
-                            <Badge key={index} variant="secondary">
-                              {effect}
-                            </Badge>
-                          ))}
+                      ) : (
+                        <div className="text-xs text-muted-foreground p-1 border-t border-border pt-2">
+                          <Info className="w-4 h-4 inline mr-1" />
+                          No dose level information available for{" "}
+                          {previewParse.substance}
                         </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                      )}
 
-                    {/* Duration/Onset Section */}
-                    {(safetyInfo.duration || safetyInfo.onset) && (
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full">
-                          <h4 className="font-medium">Timing Information</h4>
-                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="flex gap-4 mt-2">
-                            {safetyInfo.onset && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                <span className="text-sm">{safetyInfo.onset}</span>
-                              </div>
-                            )}
-                            {safetyInfo.duration && (
-                              <div className="flex items-center gap-2">
-                                <Activity className="h-4 w-4" />
-                                <span className="text-sm">{safetyInfo.duration}</span>
-                              </div>
-                            )}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                      {/* Safety Info Dialog - only show when safetyInfo exists */}
+                      {safetyInfo && (
+                        <SafetyInfoDialog
+                          safetyInfo={safetyInfo}
+                          substance={previewParse.substance}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                ) : null)}
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full mt-4"
+                className="w-full mt-4 h-12 sm:h-10 text-base sm:text-sm"
+                style={{
+                  backgroundColor:
+                    "#9b19f5" /* Dutch fields vibrant purple/violet */,
+                  color: "white",
+                  boxShadow: "0 2px 8px rgba(155, 25, 245, 0.3)",
+                  border: "none",
+                }}
               >
                 {isSubmitting ? (
                   <>

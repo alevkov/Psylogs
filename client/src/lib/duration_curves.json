@@ -1,0 +1,40 @@
+[
+  {
+    "drug": "Amphetamine",
+    "method": "oral",
+    "duration_curve": {
+      "reference": "Julien, R. M., Advokat, C. D., & Comaty, J. E. (2010). A Primer of Drug Action. 12th Edition. Pages 301-304; United States Drug Enforcement Administration (2023) – Drug Fact Sheet: Amphetamine.",
+      "units": "hours",
+      "total_duration": {
+        "min": 4,
+        "max": 8,
+        "iso": ["PT4H", "PT8H"],
+        "note": "Active effects vary with individual metabolism, dose, and prior use; some may report durations up to 12 hours at high doses."
+      },
+      "onset": {
+        "start": 0.5,
+        "end": 1.5,
+        "iso_start": ["PT30M"],
+        "iso_end": ["PT1H30M"]
+      },
+      "peak": {
+        "start": 2,
+        "end": 4,
+        "iso_start": ["PT2H"],
+        "iso_end": ["PT4H"]
+      },
+      "offset": {
+        "start": 4,
+        "end": 8,
+        "iso_start": ["PT4H"],
+        "iso_end": ["PT8H"]
+      },
+      "after_effects": {
+        "start": 8,
+        "end": 12,
+        "iso_start": ["PT8H"],
+        "iso_end": ["PT12H"]
+      }
+    }
+  }
+]

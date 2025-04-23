@@ -1,16 +1,20 @@
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { clearDoses } from "@/lib/db";
-import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Switch } from "../components/ui/switch";
+import { clearDoses } from "../lib/db";
+import { useToast } from "../hooks/use-toast";
 
 export default function SettingsPage() {
   const { toast } = useToast();
 
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem("darkMode") === "true",
+  );
+  
+  const [hideTimestampButtons, setHideTimestampButtons] = useState(
+    () => localStorage.getItem("hideTimestampButtons") === "true",
   );
 
   // Ensure the theme is set correctly on initial load
@@ -26,7 +30,13 @@ export default function SettingsPage() {
     const newDarkMode = !darkMode;
     setDarkMode(newDarkMode);
     document.documentElement.classList.toggle("dark");
-    localStorage.setItem("darkMode", newDarkMode);
+    localStorage.setItem("darkMode", String(newDarkMode));
+  };
+  
+  const toggleTimestampButtons = () => {
+    const newHideTimestampButtons = !hideTimestampButtons;
+    setHideTimestampButtons(newHideTimestampButtons);
+    localStorage.setItem("hideTimestampButtons", String(newHideTimestampButtons));
   };
 
   const handleClearData = async () => {
@@ -37,6 +47,7 @@ export default function SettingsPage() {
       toast({
         title: "Data cleared successfully",
         duration: 2000,
+        variant: "success",
       });
     }
   };
@@ -45,26 +56,38 @@ export default function SettingsPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-8"
+      className="w-full"
     >
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Settings</h1>
 
         <div className="space-y-4">
           <Card>
-            <CardHeader>Appearance</CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span>Dark Mode</span>
-                <Switch checked={darkMode} onCheckedChange={toggleTheme} />
+            <CardHeader className="p-4 sm:p-6">Appearance</CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span>Dark Mode</span>
+                  <Switch checked={darkMode} onCheckedChange={toggleTheme} />
+                </div>
+                <div className="flex items-center justify-between">
+             
+                  <span className="text-sm">Hide (Onset) (Peak) (Offset) Buttons</span>
+         
+                  <Switch checked={hideTimestampButtons} onCheckedChange={toggleTimestampButtons} />
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader>Data Management</CardHeader>
-            <CardContent>
-              <Button variant="destructive" onClick={handleClearData}>
+            <CardHeader className="p-4 sm:p-6">Data Management</CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <Button 
+                variant="destructive" 
+                onClick={handleClearData}
+                className="w-full sm:w-auto"
+              >
                 Clear All Data
               </Button>
             </CardContent>

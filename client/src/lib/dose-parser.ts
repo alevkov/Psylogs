@@ -24,9 +24,10 @@ export function parseDoseString(
     throw new DoseParsingError("Dose string cannot be empty");
   }
 
-  // Define regex patterns
-  const standardPattern = /^(\d+\.?\d*)(mg|ug|g|ml)\s+([\w-]+)\s+([\w-]+)$/;
-  const verbPattern = /^(@\w+)\s+(\d+\.?\d*)(mg|ug|g|ml)\s+([\w-]+)$/;
+  // Define regex patterns - allow more complex substance names with abbreviated names, numbers, dashes, commas, periods
+  // Improved patterns with more strict checking for amount+unit and more flexible substance names
+  const standardPattern = /^(\d+\.?\d*)\s*(mg|ug|g|ml)\s+([\w\d\-\,\.\s\/\(\)]+?)\s+([\w\-]+)$/i;
+  const verbPattern = /^(@\w+)\s+(\d+\.?\d*)\s*(mg|ug|g|ml)\s+([\w\d\-\,\.\s\/\(\)]+?)$/i;
 
   const cleanString = doseString.trim().toLowerCase();
   let match = standardPattern.exec(cleanString);
@@ -37,49 +38,110 @@ export function parseDoseString(
   let route: string;
 
   if (match) {
-    [, amount, unit, substance, route] = match;
+    let amountStr;
+    let unitStr;
+    [, amountStr, unitStr, substance, route] = match;
+    amount = parseFloat(amountStr);
+    unit = unitStr as (typeof UNITS)[number];
+    substance = substance.trim(); // Trim any extra spaces
 
-    // Validate route
+    // Validate and normalize route
+    route = route.toLowerCase().trim();
+    
+    // If route is not found, try to find a close match
     if (!ROUTE_ALIASES[route]) {
-      throw new DoseParsingError(
-        `Unknown route of administration: ${route}\n` +
-          `Valid routes are: ${Object.keys(ROUTE_ALIASES).join(", ")}`,
+      // Try to find the closest route by checking if any valid route contains this string
+      const closestRoute = Object.keys(ROUTE_ALIASES).find(r => 
+        r.toLowerCase().includes(route) || route.includes(r.toLowerCase())
       );
+      
+      if (closestRoute) {
+        // Use the closest match
+        route = closestRoute;
+      } else {
+        // Provide helpful error message with common routes
+        const commonRoutes = ["oral", "nasal", "smoked", "IV", "IM", "rectal", "sublingual"];
+        throw new DoseParsingError(
+          `Unknown route of administration: ${route}\n` +
+          `Common routes are: ${commonRoutes.join(", ")}\n` +
+          `Full list: ${Object.keys(ROUTE_ALIASES).slice(0, 15).join(", ")}...`,
+        );
+      }
     }
   } else {
     match = verbPattern.exec(cleanString);
     if (!match) {
       throw new DoseParsingError(
         "Invalid dose format. Examples:\n" +
-          "• 20mg substance oral\n" +
-          "• 5ml substance oral\n" +
-          "• @ate 30mg substance",
+          "• 20mg diazepam oral\n" +
+          "• 5ml 2m2b oral\n" + 
+          "• 150mg 4-mph nasal\n" + 
+          "• @ate 30mg 3-meo-pcp",
       );
     }
 
-    const [, verb, amt, u, subst] = match;
+    const [, rawVerb, amt, u, subst] = match;
     amount = parseFloat(amt);
     unit = u as (typeof UNITS)[number];
-    substance = subst;
-    route = verb;
-
-    if (!ROUTE_ALIASES[verb]) {
-      throw new DoseParsingError(
-        `Unknown verb command: ${verb}\n` +
+    substance = subst.trim(); // Trim any extra spaces
+    
+    // Normalize and validate verb
+    let normalizedVerb = rawVerb.toLowerCase().trim();
+    
+    if (!ROUTE_ALIASES[normalizedVerb]) {
+      // Check if it's a malformed @ command
+      if (normalizedVerb.startsWith('@')) {
+        // Try to find a close match among @ commands
+        const verbCommands = Object.keys(ROUTE_ALIASES).filter(r => r.startsWith('@'));
+        const closestVerb = verbCommands.find(v => 
+          v.slice(1).includes(normalizedVerb.slice(1)) || normalizedVerb.slice(1).includes(v.slice(1))
+        );
+        
+        if (closestVerb) {
+          // Use the closest match
+          normalizedVerb = closestVerb;
+        } else {
+          throw new DoseParsingError(
+            `Unknown verb command: ${normalizedVerb}\n` +
+            `Valid verbs: ${Object.keys(ROUTE_ALIASES)
+              .filter((r) => r.startsWith("@"))
+              .join(", ")}`,
+          );
+        }
+      } else {
+        throw new DoseParsingError(
+          `Unknown verb command: ${normalizedVerb}\n` +
           `Valid verbs: ${Object.keys(ROUTE_ALIASES)
             .filter((r) => r.startsWith("@"))
             .join(", ")}`,
-      );
+        );
+      }
     }
+    
+    // Set the route to the normalized verb
+    route = normalizedVerb;
   }
 
-  // Validate amount
+  // Validate amount with more thorough checks
   amount = parseFloat(amount as unknown as string);
   if (isNaN(amount)) {
     throw new DoseParsingError("Amount must be a number");
   }
   if (amount <= 0) {
     throw new DoseParsingError("Amount must be greater than 0");
+  }
+  
+  // Prevent unreasonably large values right away before unit conversion
+  if (amount > 1000000) {
+    throw new DoseParsingError(`Dose amount is unreasonably high (${amount}). Please check your input.`);
+  }
+
+  // Make sure the unit is valid before attempting conversion
+  unit = unit.toLowerCase() as (typeof UNITS)[number];
+  if (!UNITS.includes(unit as any)) {
+    throw new DoseParsingError(
+      `Invalid unit: ${unit}. Valid units are: ${UNITS.join(', ')}`
+    );
   }
 
   // Convert units and validate reasonable ranges

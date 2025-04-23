@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useState } from 'react';
+import { useToast } from '../hooks/use-toast';
+import { cn } from '../lib/utils';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export function ConnectionStatus() {
@@ -56,14 +56,14 @@ export function ConnectionStatus() {
           <WifiOff className="w-4 h-4 text-destructive" />
         )}
         <span className={cn(
-          "text-sm",
+          "hidden sm:inline-block text-sm",
           isOnline ? "text-green-500" : "text-destructive"
         )}>
           {isOnline ? "Online" : "Offline"}
         </span>
       </div>
       {isSyncing && (
-        <span className="text-sm text-muted-foreground animate-pulse">
+        <span className="text-sm text-muted-foreground animate-pulse hidden sm:inline-block">
           Syncing...
         </span>
       )}

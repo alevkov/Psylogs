@@ -1,52 +1,68 @@
+// server/index.ts
 import express from "express";
+import http from "http";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer } from "vite";
+import { createServer as createViteServer } from "vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Create express app and HTTP server
 const app = express();
+const server = http.createServer(app);
 
-(async () => {
+// Add request logging middleware
+app.use((req, _res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+async function startServer() {
   try {
-    console.log("Starting server setup...");
+    console.log("Starting dev server...");
 
-    // Add request logging middleware
-    app.use((req, _res, next) => {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-      next();
-    });
-
-    // In development, create and use Vite's dev server
-    const vite = await createServer({
+    // Create Vite server in middleware mode
+    const vite = await createViteServer({
       root: path.resolve(__dirname, "..", "client"),
-      server: { 
+      server: {
         middlewareMode: true,
-        hmr: {
-          port: 24678 // Use a different port for HMR
-        }
+        hmr: true // Disable HMR to prevent loops for now
       },
-      appType: "spa",
-      configFile: path.resolve(__dirname, "..", "vite.config.ts")
-    }).catch(err => {
-      console.error("Failed to create Vite server:", err);
-      throw err;
+      appType: "custom",
+      clearScreen: false,
     });
 
-    console.log("Vite server created successfully");
-    console.log("Root directory:", path.resolve(__dirname, "..", "client"));
-
-    // Use vite's middleware
+    // Use Vite's middleware
     app.use(vite.middlewares);
 
-    // ALWAYS serve on port 5000
-    const PORT = 5000;
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server started on port ${PORT} (${process.env.NODE_ENV} mode)`);
+    // Serve index.html for all requests
+    app.use("*", (req, res) => {
+      const indexPath = path.resolve(__dirname, "..", "client", "index.html");
+      fs.readFile(indexPath, "utf-8", (err, html) => {
+        if (err) {
+          console.error("Error reading index.html:", err);
+          res.status(500).send("Server error");
+          return;
+        }
+
+        // Send the HTML without Vite transformations for now
+        res.status(200).set({ "Content-Type": "text/html" }).send(html);
+      });
     });
+
+    // Start the server
+    const PORT = 5000;
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`Dev server running at http://localhost:${PORT}`);
+    });
+
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
-})();
+}
+
+// Start the server
+startServer();

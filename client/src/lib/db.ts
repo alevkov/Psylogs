@@ -1,13 +1,15 @@
 import { openDB, DBSchema, IDBPDatabase } from "idb";
 
 // Define the stored dose entry type
+import { UNITS } from './constants';
+
 interface DoseEntry {
   id?: number;
   substance: string;
   amount: number;
   route: string;
   timestamp: string; // ISO string format
-  unit: 'mg' | 'ug' | 'ml';
+  unit: typeof UNITS[number];
 }
 
 interface DoseLogDB extends DBSchema {
@@ -71,8 +73,10 @@ export async function addDose(dose: Omit<DoseEntry, "id" | "timestamp">) {
     if ("serviceWorker" in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        if ("sync" in registration) {
-          await registration.sync.register("sync-doses");
+        // Need to use type assertion because TypeScript doesn't recognize the sync property
+        const syncManager = 'sync' in registration ? (registration as any).sync : null;
+        if (syncManager) {
+          await syncManager.register("sync-doses");
         }
       } catch (err) {
         console.error("Background sync registration failed:", err);
@@ -86,30 +90,127 @@ export async function addDose(dose: Omit<DoseEntry, "id" | "timestamp">) {
   }
 }
 
-export async function getDoses(): Promise<DoseEntry[]> {
+export async function getDoses(
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ doses: DoseEntry[], total: number }> {
   const db = await getDB();
-  return db.getAllFromIndex("doses", "by-date");
+  const tx = db.transaction("doses", "readonly");
+  const store = tx.objectStore("doses");
+  
+  // Get total count
+  const total = await store.count();
+  
+  // Get all doses first for sorting (we'll paginate after sorting)
+  const allDoses = await db.getAllFromIndex("doses", "by-date");
+  
+  // Sort by timestamp, newest first
+  allDoses.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // Extract the requested slice
+  const doses = allDoses.slice(offset, offset + limit);
+  
+  return { doses, total };
 }
 
-export async function getDosesBySubstance(substance: string): Promise<DoseEntry[]> {
-  const db = await getDB();
-  return db.getAllFromIndex("doses", "by-substance", substance);
+/**
+ * Get all doses for statistics purposes without pagination
+ * This function should only be used for analytics/stats where all data is needed
+ */
+export async function getAllDosesForStats(): Promise<DoseEntry[]> {
+  try {
+    console.log("Getting all doses for statistics");
+    const db = await getDB();
+    // Get all doses
+    const allDoses = await db.getAll("doses");
+    
+    // Sort by timestamp, newest first
+    allDoses.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    console.log(`Loaded ${allDoses.length} doses for statistics`);
+    return allDoses;
+  } catch (error) {
+    console.error("Error fetching all doses for stats:", error);
+    return [];
+  }
 }
 
-export async function getDosesByRoute(route: string): Promise<DoseEntry[]> {
+export async function getDosesBySubstance(
+  substance: string,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ doses: DoseEntry[], total: number }> {
   const db = await getDB();
-  return db.getAllFromIndex("doses", "by-route", route);
+  const tx = db.transaction("doses", "readonly");
+  const index = tx.store.index("by-substance");
+  
+  // Get total count for this substance
+  const keyRange = IDBKeyRange.only(substance);
+  const total = await index.count(keyRange);
+  
+  // Get all matching doses
+  const allDoses = await db.getAllFromIndex("doses", "by-substance", substance);
+  
+  // Sort the doses by timestamp (newest first)
+  allDoses.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // Get the requested page
+  const doses = allDoses.slice(offset, offset + limit);
+  
+  return { doses, total };
 }
 
-export async function getDosesByDateRange(startDate: Date, endDate: Date): Promise<DoseEntry[]> {
+export async function getDosesByRoute(
+  route: string,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ doses: DoseEntry[], total: number }> {
   const db = await getDB();
-  const doses = await db.getAllFromIndex("doses", "by-date");
+  const tx = db.transaction("doses", "readonly");
+  const index = tx.store.index("by-route");
+  
+  // Get total count for this route
+  const keyRange = IDBKeyRange.only(route);
+  const total = await index.count(keyRange);
+  
+  // Get all matching doses
+  const allDoses = await db.getAllFromIndex("doses", "by-route", route);
+  
+  // Sort the doses by timestamp (newest first)
+  allDoses.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // Get the requested page
+  const doses = allDoses.slice(offset, offset + limit);
+  
+  return { doses, total };
+}
+
+export async function getDosesByDateRange(
+  startDate: Date, 
+  endDate: Date,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ doses: DoseEntry[], total: number }> {
+  const db = await getDB();
+  const allDoses = await db.getAllFromIndex("doses", "by-date");
   const startIso = startDate.toISOString();
   const endIso = endDate.toISOString();
 
-  return doses.filter(dose =>
+  // Filter doses in the date range
+  const filteredDoses = allDoses.filter(dose =>
     dose.timestamp >= startIso && dose.timestamp <= endIso
   );
+  
+  // Sort the doses by timestamp (newest first)
+  filteredDoses.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  
+  // Get the total count
+  const total = filteredDoses.length;
+  
+  // Get the requested page
+  const doses = filteredDoses.slice(offset, offset + limit);
+  
+  return { doses, total };
 }
 
 export async function clearDoses(): Promise<void> {
@@ -163,8 +264,11 @@ export async function updateDose(id: number, updates: Partial<Omit<DoseEntry, "i
 
 export async function exportData(): Promise<void> {
   try {
-    const doses = await getDoses();
-    const blob = new Blob([JSON.stringify(doses, null, 2)], {
+    // For export, we need all doses with no pagination
+    const db = await getDB();
+    const allDoses = await db.getAll("doses");
+    
+    const blob = new Blob([JSON.stringify(allDoses, null, 2)], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -199,7 +303,7 @@ export async function importData(file: File): Promise<void> {
         throw new Error(`Invalid timestamp format at index ${index}`);
       }
       // Validate unit
-      if (!['mg', 'ug', 'ml'].includes(dose.unit)) {
+      if (!(UNITS as readonly string[]).includes(dose.unit)) {
         throw new Error(`Invalid unit at index ${index}: ${dose.unit}`);
       }
     });
@@ -233,7 +337,10 @@ export async function importDataFromTextFile(file: File): Promise<void> {
         }
 
         const amount = units === 'g' ? parseFloat(dose) * 1000 : parseFloat(dose);
-        const unit = units === 'g' ? 'mg' : units.toLowerCase() as 'mg' | 'ug' | 'ml';
+        // Normalize unit to match what's in UNITS
+        let normalizedUnit = units.toLowerCase();
+        // Special case for 'g' since we want to convert to mg but keep 'g' in UNITS
+        const unit = (normalizedUnit === 'g' && amount > 0) ? 'mg' : normalizedUnit as typeof UNITS[number];
         const timestamp = new Date(created).toISOString();
         const route = "oral"; // Default to 'oral', adjust based on your needs
 
@@ -248,7 +355,8 @@ export async function importDataFromTextFile(file: File): Promise<void> {
           route,
           timestamp
         };
-      } catch (error) {
+      } catch (err) {
+        const error = err as Error;
         throw new Error(`Error parsing line ${index + 1}: ${error.message}`);
       }
     });
@@ -278,16 +386,24 @@ const routeMap: Record<string, string> = {
   'VAPORIZED': 'inhaled',
 };
 
-interface PWJournalData {
-  experiences: Array<{
-    ingestions: Array<{
-      substanceName: string;
-      dose: number;
-      units: string;
-      administrationRoute: string;
-      time: number;
-    }>;
+interface PWJournalExperience {
+  title?: string;
+  text?: string;
+  ingestions?: Array<{
+    substanceName: string;
+    dose: number;
+    units: string;
+    administrationRoute: string;
+    time: number;
   }>;
+  timedNotes?: Array<{
+    note: string;
+    time: number;
+  }>;
+}
+
+interface PWJournalData {
+  experiences: Array<PWJournalExperience>;
 }
 
 export async function importPWJournalData(file: File) {
@@ -295,28 +411,80 @@ export async function importPWJournalData(file: File) {
     const text = await file.text();
     const data: PWJournalData = JSON.parse(text);
 
-    if (!data?.experiences?.length) {
-      throw new Error("Invalid PW Journal data format");
+    if (!data?.experiences) {
+      throw new Error("Invalid PW Journal data format: No experiences array found");
     }
 
-    const doses = data.experiences.flatMap(experience =>
-      experience.ingestions
+    // Make sure experiences is an array (even if empty)
+    const experiences = Array.isArray(data.experiences) ? data.experiences : [];
+    
+    if (experiences.length === 0) {
+      throw new Error("No experiences found in journal data");
+    }
+
+    // Count experiences without ingestions for user feedback
+    const experiencesWithoutIngestions = experiences.filter(exp => 
+      !exp.ingestions || !Array.isArray(exp.ingestions) || exp.ingestions.length === 0
+    ).length;
+    
+    if (experiencesWithoutIngestions > 0) {
+      console.log(`Found ${experiencesWithoutIngestions} experiences without ingestions`);
+    }
+
+    const doses = experiences.flatMap(experience => {
+      // Check if experience has ingestions array before processing
+      if (!experience.ingestions || !Array.isArray(experience.ingestions)) {
+        console.log("Experience without ingestions:", experience.title || "Untitled");
+        return []; // Skip this experience and return empty array for flatMap
+      }
+      
+      return experience.ingestions
         .filter(ing => ing && ing.dose > 0 && ing.substanceName && ing.time)
-        .map(ingestion => ({
-          substance: ingestion.substanceName.toLowerCase(),
-          amount: ingestion.units === 'g' ? ingestion.dose * 1000 : ingestion.dose,
-          unit: ingestion.units === 'g' ? 'mg' : ingestion.units as 'mg' | 'ug' | 'ml',
-          route: routeMap[ingestion.administrationRoute] || 'oral',
-          timestamp: new Date(ingestion.time).toISOString()
-        }))
-    ).filter(dose =>
+        .map(ingestion => {
+          // Normalize units to ensure they match our system
+          let unit = ingestion.units?.toLowerCase() || 'mg';
+          let amount = ingestion.dose;
+          
+          // Handle common unit conversions
+          if (unit === 'g') {
+            amount = amount * 1000;
+            unit = 'mg';
+          } else if (unit.includes('mg')) {
+            unit = 'mg';
+          } else if (unit.includes('ug') || unit.includes('µg') || unit.includes('mcg')) {
+            unit = 'ug';
+          } else if (unit.includes('ml') || unit.includes('cc')) {
+            unit = 'ml';
+          } else {
+            // For other units, default to mg
+            console.log(`Unknown unit '${ingestion.units}' for ${ingestion.substanceName}, defaulting to mg`);
+            unit = 'mg';
+          }
+          
+          return {
+            substance: ingestion.substanceName.toLowerCase(),
+            amount: amount,
+            unit: unit as typeof UNITS[number],
+            route: routeMap[ingestion.administrationRoute] || 'oral',
+            timestamp: new Date(ingestion.time).toISOString()
+          };
+        });
+    }).filter(dose =>
       dose.substance &&
       dose.amount > 0 &&
-      ['mg', 'ug', 'ml'].includes(dose.unit)
+      (UNITS as readonly string[]).includes(dose.unit)
     );
 
+    // Check if we have valid doses to import
     if (!doses.length) {
-      throw new Error("No valid doses found in PW Journal data");
+      const experiencesWithoutIngestions = experiences.filter(exp => !exp.ingestions || !Array.isArray(exp.ingestions)).length;
+      const totalExperiences = experiences.length;
+      
+      if (experiencesWithoutIngestions > 0) {
+        throw new Error(`No valid doses found in PW Journal data. Found ${experiencesWithoutIngestions} out of ${totalExperiences} experiences without ingestions data. This issue has been fixed, please try importing again.`);
+      } else {
+        throw new Error("No valid doses found in PW Journal data");
+      }
     }
 
     // Sort by timestamp
@@ -340,12 +508,22 @@ export async function importPWJournalData(file: File) {
       throw error;
     }
 
-  } catch (error) {
-    console.error('Error importing PW Journal data:', error);
-    throw new Error(
-      error instanceof Error
-        ? error.message
-        : 'Failed to import PW Journal data'
-    );
+  } catch (err) {
+    console.error('Error importing PW Journal data:', err);
+    
+    // Format a more helpful error message
+    let errorMessage = 'Failed to import PW Journal data';
+    
+    if (err instanceof Error) {
+      if (err.message.includes('experience.ingestions')) {
+        errorMessage = 'Journal file contains experiences without ingestion data. This has been fixed, please try again.';
+      } else if (err.message.includes('JSON')) {
+        errorMessage = 'Invalid JSON format in the journal file.';
+      } else {
+        errorMessage = err.message;
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 }

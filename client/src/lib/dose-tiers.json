@@ -679,11 +679,7 @@
     "method": "oral",
     "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 5.0, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'common': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 10, 'upper_unit': 'mg'}, 'strong': {'lower_value': 10, 'lower_unit': 'mg', 'upper_value': 15, 'upper_unit': 'mg'}, 'heavy': {'value': 15, 'unit': 'mg'}}"
   },
-  {
-    "drug": "Esomeprazole",
-    "method": "oral",
-    "dose_ranges": "{'threshold': 'No data', 'light': {'lower_value': 20, 'lower_unit': 'mg', 'upper_value': 30, 'upper_unit': 'mg'}, 'common': {'lower_value': 30, 'lower_unit': 'mg', 'upper_value': 40, 'upper_unit': 'mg'}, 'strong': {'lower_value': 40, 'lower_unit': 'mg', 'upper_value': 45, 'upper_unit': 'mg'}, 'heavy': 'No data'}"
-  },
+
   {
     "drug": "Estradiol Enanthate",
     "method": "injected",

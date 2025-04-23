@@ -8,28 +8,21 @@ channel = "stable-24_05"
 [deployment]
 deploymentTarget = "cloudrun"
 build = ["npm", "run", "build"]
-run = ["sh", "-c", "NODE_ENV=development tsx watch server/index.ts"]
+run = ["npm", "run", "start"]
 
-[[ports]]
-localPort = 5000
-externalPort = 80
-
-[[ports]]
-localPort = 24678
-externalPort = 3000
 
 [packager]
 language = "nodejs"
-  [packager.features]
-  packageSearch = true
-  guessImports = true
-  enabledForHosting = false
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledForHosting = false
 
 [languages]
-  [languages.javascript]
-  pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
-    [languages.javascript.languageServer]
-    start = "typescript-language-server --stdio"
+[languages.javascript]
+pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
+[languages.javascript.languageServer]
+start = "typescript-language-server --stdio"
 
 [workflows]
 runButton = "Project"
@@ -55,5 +48,13 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "NODE_ENV=development tsx watch server/index.ts"
+args = "tsx watch server/index.ts"
 waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 24678
+externalPort = 3000
