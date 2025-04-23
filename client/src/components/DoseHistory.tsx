@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDoses, updateDose, deleteDose } from "../lib/db";
 import type { DoseEntry } from "../lib/constants";

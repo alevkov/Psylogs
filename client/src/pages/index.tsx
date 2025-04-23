@@ -1,3 +1,4 @@
+import React from 'react';
 import { DoseForm } from '../components/DoseForm';
 import { DoseHistory } from '../components/DoseHistory';
 import { motion } from 'framer-motion';
