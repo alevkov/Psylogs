@@ -3,13 +3,13 @@ import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { parseDoseString } from "@/lib/dose-parser";
-import { addDose, getDoses } from "@/lib/db";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { ADMINISTRATION_METHODS } from "@/lib/constants";
+import { parseDoseString } from "../lib/dose-parser";
+import { addDose, getDoses } from "../lib/db";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { useToast } from "../hooks/use-toast";
+import { Card, CardHeader, CardContent } from "./ui/card";
+import { ADMINISTRATION_METHODS } from "../lib/constants";
 import {
   Loader2,
   AlertCircle,
@@ -21,23 +21,23 @@ import {
   Activity,
   ChevronDown,
 } from "lucide-react";
-import { useDoseContext } from "@/contexts/DoseContext";
-import { Badge } from "@/components/ui/badge";
-import { analyzePersonalPatterns } from "@/lib/analysis";
-import doseData from "@/lib/dose-tiers.json";
-import { analyzeDoseTier, getTierBadgeVariant } from "@/lib/dose-tiers.types";
-import { getSubstanceSafetyInfo } from "@/lib/substance-safety";
-import substanceData from "@/lib/substance-data.json";
+import { useDoseContext } from "../contexts/DoseContext";
+import { Badge } from "./ui/badge";
+import { analyzePersonalPatterns } from "../lib/analysis";
+import doseData from "../lib/dose-tiers.json";
+import { analyzeDoseTier, getTierBadgeVariant } from "../lib/dose-tiers.types";
+import { getSubstanceSafetyInfo } from "../lib/substance-safety";
+import substanceData from "../lib/substance-data.json";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert";
+} from "./ui/alert";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "./ui/collapsible";
 import { DoseRangeVisual } from "./DoseRangeVisual";
 
 function normalizeSubstanceName(name: string): string {

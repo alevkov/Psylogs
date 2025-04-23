@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getDoses } from "@/lib/db";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDoses } from "../lib/db";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -24,7 +24,7 @@ import {
   isSameDay,
   subDays,
 } from "date-fns";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import {
   AlertTriangle,
   TrendingDown,
@@ -36,7 +36,7 @@ import {
   Activity,
   AlertOctagon,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "../components/ui/badge";
 import {
   calculateTimeCorrelations,
   analyzeUsagePatterns,
@@ -47,7 +47,7 @@ import {
   INTERACTION_THRESHOLDS,
   type CalendarDataPoint,
   analyzePersonalPatterns,
-} from "@/lib/analysis";
+} from "../lib/analysis";
 
 const COLORS = [
   "#FF6B6B",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { useToast } from '../hooks/use-toast';
+import { cn } from '../lib/utils';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export function ConnectionStatus() {

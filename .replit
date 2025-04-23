@@ -49,6 +49,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "tsx watch server/index.ts"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000

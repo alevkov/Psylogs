@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { clearDoses } from "@/lib/db";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
+import { Switch } from "../components/ui/switch";
+import { clearDoses } from "../lib/db";
+import { useToast } from "../hooks/use-toast";
 import { useState, useEffect } from "react";
 
 export default function SettingsPage() {
