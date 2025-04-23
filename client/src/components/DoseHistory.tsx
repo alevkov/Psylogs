@@ -454,14 +454,14 @@ export function DoseHistory() {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Recent Doses</h2>
-          <div className="flex gap-2">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg sm:text-xl font-bold">Recent Doses</h2>
+          <div className="flex gap-1 sm:gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Filters
                 </Button>
               </DropdownMenuTrigger>
@@ -526,7 +526,7 @@ export function DoseHistory() {
           </div>
         </div>
 
-        <ScrollArea className="h-[400px] w-full">
+        <ScrollArea className="h-[350px] sm:h-[400px] w-full">
           <AnimatePresence>
             {getSortedGroupEntries().map(([group, groupDoses]) => (
               <motion.div
@@ -534,16 +534,16 @@ export function DoseHistory() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="mb-4"
+                className="mb-2 sm:mb-3"
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-semibold text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 mb-1">
+                  <h3 className="font-semibold text-xs sm:text-sm text-muted-foreground">
                     {group}
                   </h3>
-                  <Badge variant="secondary">{groupDoses.length}</Badge>
+                  <Badge variant="secondary" className="text-xs px-1">{groupDoses.length}</Badge>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:space-y-2">
                   {groupDoses.map((dose, index) => (
                     <motion.div
                       key={dose.id || index}
@@ -558,19 +558,19 @@ export function DoseHistory() {
                           transition: 'background-color 0.2s'
                         }}
                       >
-                        <CardContent className="p-4">
+                        <CardContent className="p-2 sm:p-3">
                           <div className="flex justify-between items-start">
-                            <div className="space-y-3">
-                              <div className="p-3">
-                                <div className="font-semibold">
+                            <div className="space-y-2">
+                              <div className="p-1 sm:p-2">
+                                <div className="font-medium text-sm sm:text-base">
                                   {dose.substance}
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge variant="secondary">
+                                <div className="flex items-center flex-wrap gap-1 mt-0.5">
+                                  <Badge variant="secondary" className="text-xs">
                                     {dose.amount}
                                     {dose.unit}
                                   </Badge>
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className="text-xs py-0">
                                     {dose.route}
                                   </Badge>
                                   <span className="text-xs text-muted-foreground">
@@ -581,7 +581,7 @@ export function DoseHistory() {
                                 </div>
                               </div>
 
-                              <div className="flex flex-wrap gap-2">
+                              <div className="flex flex-wrap gap-1 sm:gap-2">
                                 <TimestampButton
                                   dose={dose}
                                   type="onset"
