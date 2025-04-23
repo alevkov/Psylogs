@@ -562,7 +562,7 @@ export function DoseHistory() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
                               <div className="p-1 sm:p-2">
-                                <div className="font-medium text-sm sm:text-base">
+                                <div className="font-medium text-sm sm:text-base px-0.5 py-0.5">
                                   {dose.substance}
                                 </div>
                                 <div className="flex gap-1 mt-0.5">
