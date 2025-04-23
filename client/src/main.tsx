@@ -29,17 +29,17 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-base">
       <div className="min-h-screen bg-background">
-        <nav className="border-b">
+        <nav className="border-b sticky top-0 bg-background z-50">
           <div className="app-container">
             <div className="flex h-16 items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+              <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer px-2 py-1">
                   <Link href="/">Home</Link>
                 </div>
-                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer px-2 py-1">
                   <Link href="/history">History</Link>
                 </div>
-                <div className="font-semibold hover:text-primary transition-colors cursor-pointer">
+                <div className="font-semibold hover:text-primary transition-colors cursor-pointer px-2 py-1">
                   <Link href="/settings">Settings</Link>
                 </div>
               </div>
@@ -47,7 +47,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
-        <main className="app-container">{children}</main>
+        <main className="app-container py-4">{children}</main>
       </div>
     </div>
   );

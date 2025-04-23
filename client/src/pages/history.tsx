@@ -87,48 +87,53 @@ export default function HistoryPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-8"
+      className="w-full"
     >
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold">History & Stats</h1>
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-            <Button
-              onClick={exportData}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export Data
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => document.getElementById("import-input")?.click()}
-              disabled={isImporting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-            >
-              <Upload className="h-4 w-4" />
-              Import Data
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                document.getElementById("pw-journal-import")?.click()
-              }
-              disabled={isImporting}
-              className="w-full sm:w-auto flex items-center justify-center gap-2"
-            >
-              {isImporting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Importing...
-                </>
-              ) : (
-                <>
-                  <FileInput className="h-4 w-4" />
-                  Import PW Journal
-                </>
-              )}
-            </Button>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">History & Stats</h1>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <div className="grid grid-cols-2 sm:flex gap-2">
+              <Button
+                onClick={exportData}
+                className="flex items-center justify-center gap-1 text-sm h-9"
+                size="sm"
+              >
+                <Download className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Export</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById("import-input")?.click()}
+                disabled={isImporting}
+                className="flex items-center justify-center gap-1 text-sm h-9"
+                size="sm"
+              >
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span>Import</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  document.getElementById("pw-journal-import")?.click()
+                }
+                disabled={isImporting}
+                className="flex items-center justify-center gap-1 text-sm h-9 col-span-2 sm:col-span-1"
+                size="sm"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                    <span>Importing...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileInput className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span>PW Journal</span>
+                  </>
+                )}
+              </Button>
+            </div>
             <input
               id="import-input"
               type="file"

@@ -71,6 +71,19 @@
 
 /* Custom component styles */
 @layer components {
+  .app-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  @media screen and (max-width: 640px) {
+    .app-container {
+      padding: 0 0.75rem;
+    }
+  }
+
   .card {
     border: var(--border-thickness) solid hsl(var(--border));
     padding: calc(var(--line-height) - var(--border-thickness)) 1ch;

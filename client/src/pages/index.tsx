@@ -8,10 +8,10 @@ export default function HomePage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-8"
+      className="w-full"
     >
-      <h1 className="text-4xl font-bold text-center mb-8 text-foreground">Psylo.gs</h1>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 sm:mb-6 md:mb-8 text-foreground">Psylo.gs</h1>
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
         <DoseForm />
         <DoseHistory />
       </div>

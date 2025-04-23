@@ -45,15 +45,15 @@ export default function SettingsPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="container mx-auto px-4 py-8"
+      className="w-full"
     >
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">Settings</h1>
 
         <div className="space-y-4">
           <Card>
-            <CardHeader>Appearance</CardHeader>
-            <CardContent>
+            <CardHeader className="p-4 sm:p-6">Appearance</CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <div className="flex items-center justify-between">
                 <span>Dark Mode</span>
                 <Switch checked={darkMode} onCheckedChange={toggleTheme} />
@@ -62,9 +62,13 @@ export default function SettingsPage() {
           </Card>
 
           <Card>
-            <CardHeader>Data Management</CardHeader>
-            <CardContent>
-              <Button variant="destructive" onClick={handleClearData}>
+            <CardHeader className="p-4 sm:p-6">Data Management</CardHeader>
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <Button 
+                variant="destructive" 
+                onClick={handleClearData}
+                className="w-full sm:w-auto"
+              >
                 Clear All Data
               </Button>
             </CardContent>
