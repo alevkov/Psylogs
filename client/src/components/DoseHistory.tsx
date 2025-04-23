@@ -4,6 +4,7 @@ import { getDoses, updateDose, deleteDose } from "../lib/db";
 import type { DoseEntry } from "../lib/constants";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
+import { useIsMobile } from "../hooks/use-mobile";
 import {
   format,
   isToday,
@@ -230,6 +231,7 @@ export function DoseHistory() {
   );
   const { toast } = useToast();
   const { updateTrigger } = useDoseContext();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const loadDoses = async () => {
@@ -453,8 +455,8 @@ export function DoseHistory() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardContent className="p-3 sm:p-4">
+    <Card className="w-full max-w-md mx-auto h-full flex flex-col">
+      <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg sm:text-xl font-bold">Recent Doses</h2>
           <div className="flex gap-1 sm:gap-2">
@@ -526,7 +528,7 @@ export function DoseHistory() {
           </div>
         </div>
 
-        <ScrollArea className="h-[350px] sm:h-[400px] w-full">
+        <ScrollArea className={`${isMobile ? 'flex-1 min-h-0' : 'h-[350px] sm:h-[400px]'} w-full`}>
           <AnimatePresence>
             {getSortedGroupEntries().map(([group, groupDoses]) => (
               <motion.div
@@ -562,7 +564,7 @@ export function DoseHistory() {
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
                               <div className="p-1 sm:p-2">
-                                <div className="font-medium text-sm sm:text-base px-1.5 py-1 mb-1.5">
+                                <div className="font-medium text-sm sm:text-base px-2.5 py-1.5 mb-2 rounded">
                                   {dose.substance}
                                 </div>
                                 <div className="flex gap-1 mt-0.5">
