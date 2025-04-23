@@ -4,7 +4,6 @@ import { Switch, Route, Link } from "wouter";
 import "./index.css";
 import { SWRConfig } from "swr";
 import { fetcher } from "./lib/fetcher";
-import { Toaster } from "./components/ui/toaster";
 import { ConnectionStatus } from "./components/ConnectionStatus";
 import { DoseProvider } from "./contexts/DoseContext";
 
@@ -22,6 +21,9 @@ const initializeDarkMode = () => {
     document.documentElement.classList.remove("dark");
   }
 };
+
+// // Call it before rendering
+// initializeDarkMode();
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -45,10 +47,7 @@ function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
-        <main className="app-container">
-          {children}
-        </main>
-        <Toaster />
+        <main className="app-container">{children}</main>
       </div>
     </div>
   );
