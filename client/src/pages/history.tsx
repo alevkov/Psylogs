@@ -9,10 +9,12 @@ import {
   importDataFromTextFile,
 } from "../lib/db";
 import { useToast } from "../hooks/use-toast";
+import { useDoseContext } from "../contexts/DoseContext";
 import { Loader2, Download, Upload, FileInput } from "lucide-react";
 
 export default function HistoryPage() {
   const { toast } = useToast();
+  const { triggerUpdate } = useDoseContext();
   const [isImporting, setIsImporting] = useState(false);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,9 +45,12 @@ export default function HistoryPage() {
         await importDataFromTextFile(doses); // Pass parsed doses to the custom import function
       }
 
+      setIsImporting(false);
+      triggerUpdate();
       toast({
-        title: "Data imported successfully",
-        duration: 2000,
+        title: "✅ Data imported successfully",
+        description: "Your dose history has been updated",
+        duration: 3000,
       });
     } catch (error) {
       toast({
@@ -66,8 +71,9 @@ export default function HistoryPage() {
     setIsImporting(true);
     try {
       const result = await importPWJournalData(file);
+      triggerUpdate();
       toast({
-        title: "PW Journal data imported successfully",
+        title: "✅ PW Journal data imported successfully",
         description: result.message,
         duration: 3000,
       });
