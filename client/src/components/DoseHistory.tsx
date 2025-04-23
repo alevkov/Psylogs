@@ -561,12 +561,12 @@ export function DoseHistory() {
                         <CardContent className="p-2 sm:p-3">
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
-                              <div className="p-1 sm:p-2">
-                                <div className="font-medium text-sm sm:text-base">
-                                  {dose.substance}
-                                </div>
-                                <div className="flex justify-between items-center mt-0.5">
-                                  <div className="flex gap-1">
+                              <div className="grid grid-cols-[1fr_auto] p-1 sm:p-2">
+                                <div className="col-span-1">
+                                  <div className="font-medium text-sm sm:text-base">
+                                    {dose.substance}
+                                  </div>
+                                  <div className="flex gap-1 mt-0.5">
                                     <Badge variant="secondary" className="text-xs">
                                       {dose.amount}
                                       {dose.unit}
@@ -575,7 +575,9 @@ export function DoseHistory() {
                                       {dose.route}
                                     </Badge>
                                   </div>
-                                  <span className="text-xs text-muted-foreground">
+                                </div>
+                                <div className="col-span-1 flex items-center">
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap">
                                     {formatDistanceToNow(new Date(dose.timestamp), {
                                       addSuffix: true,
                                     })}
