@@ -8,25 +8,25 @@
   :root {
     --font-family: "JetBrains Mono", monospace;
     --line-height: 1.20rem;
-    --border-thickness: 2px;
+    --border-thickness: 1px;
 
-    /* Preserve shadcn variables but update with our new technical aesthetic */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    /* Updated variables for a less boxy, more modern design */
+    --background: 210 20% 98%;
+    --foreground: 224 71% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --border: 0 0% 0%;
-    --input: 0 0% 90%;
-    --primary: 0 0% 9%;
+    --card-foreground: 224 71% 4%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 4%;
+    --accent: 262 83% 95%;
+    --accent-foreground: 262 83% 58%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 0 0% 0%;
-    --radius: 0;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
   }
 
   * {
