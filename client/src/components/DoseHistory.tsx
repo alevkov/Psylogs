@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDoses, updateDose, deleteDose } from "../lib/db";
-import type { DoseEntry } from "../lib/constants";
+import { UNITS, type DoseEntry } from "../lib/constants";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { useIsMobile } from "../hooks/use-mobile";
 import { FixedSizeList as List } from 'react-window';
@@ -752,9 +752,19 @@ export function DoseHistory() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {selectedDose && (
+      {selectedDose && selectedDose.id && (
         <EditDoseDialog
-          dose={selectedDose}
+          dose={{
+            id: selectedDose.id,
+            substance: selectedDose.substance,
+            amount: selectedDose.amount,
+            unit: selectedDose.unit,
+            route: selectedDose.route,
+            timestamp: selectedDose.timestamp,
+            onsetAt: selectedDose.onsetAt,
+            peakAt: selectedDose.peakAt,
+            offsetAt: selectedDose.offsetAt
+          }}
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           onSave={handleUpdate}
