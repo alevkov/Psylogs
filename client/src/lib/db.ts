@@ -306,11 +306,27 @@ export async function importPWJournalData(file: File) {
     const text = await file.text();
     const data: PWJournalData = JSON.parse(text);
 
-    if (!data?.experiences?.length) {
-      throw new Error("Invalid PW Journal data format");
+    if (!data?.experiences) {
+      throw new Error("Invalid PW Journal data format: No experiences array found");
     }
 
-    const doses = data.experiences.flatMap(experience => {
+    // Make sure experiences is an array (even if empty)
+    const experiences = Array.isArray(data.experiences) ? data.experiences : [];
+    
+    if (experiences.length === 0) {
+      throw new Error("No experiences found in journal data");
+    }
+
+    // Count experiences without ingestions for user feedback
+    const experiencesWithoutIngestions = experiences.filter(exp => 
+      !exp.ingestions || !Array.isArray(exp.ingestions) || exp.ingestions.length === 0
+    ).length;
+    
+    if (experiencesWithoutIngestions > 0) {
+      console.log(`Found ${experiencesWithoutIngestions} experiences without ingestions`);
+    }
+
+    const doses = experiences.flatMap(experience => {
       // Check if experience has ingestions array before processing
       if (!experience.ingestions || !Array.isArray(experience.ingestions)) {
         console.log("Experience without ingestions:", experience.title || "Untitled");
@@ -356,11 +372,11 @@ export async function importPWJournalData(file: File) {
 
     // Check if we have valid doses to import
     if (!doses.length) {
-      const experiencesWithoutIngestions = data.experiences.filter(exp => !exp.ingestions || !Array.isArray(exp.ingestions)).length;
-      const totalExperiences = data.experiences.length;
+      const experiencesWithoutIngestions = experiences.filter(exp => !exp.ingestions || !Array.isArray(exp.ingestions)).length;
+      const totalExperiences = experiences.length;
       
       if (experiencesWithoutIngestions > 0) {
-        throw new Error(`No valid doses found in PW Journal data. Found ${experiencesWithoutIngestions} out of ${totalExperiences} experiences without ingestions data.`);
+        throw new Error(`No valid doses found in PW Journal data. Found ${experiencesWithoutIngestions} out of ${totalExperiences} experiences without ingestions data. This issue has been fixed, please try importing again.`);
       } else {
         throw new Error("No valid doses found in PW Journal data");
       }
