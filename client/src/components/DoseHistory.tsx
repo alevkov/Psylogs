@@ -4,7 +4,7 @@ import { getDoses, updateDose, deleteDose } from "../lib/db";
 import { UNITS, type DoseEntry } from "../lib/constants";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { useIsMobile } from "../hooks/use-mobile";
-import { FixedSizeList as List } from 'react-window';
+import { VariableSizeList as List } from 'react-window';
 import {
   format,
   isToday,
@@ -352,7 +352,7 @@ const VirtualizedDoseItem = React.memo(({ index, style, data }: {
   const dose = item.content as DoseEntry;
   
   return (
-    <div style={{...style, paddingBottom: '8px'}}>
+    <div style={{...style, paddingBottom: '4px'}}>
       <DoseCard 
         dose={dose}
         isDarkMode={data.isDarkMode}
@@ -371,6 +371,7 @@ VirtualizedDoseItem.displayName = 'VirtualizedDoseItem';
 export function DoseHistory() {
   const [doses, setDoses] = useState<DoseEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const listRef = useRef<List>(null);
   const [selectedDose, setSelectedDose] = useState<DoseEntry | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -723,10 +724,8 @@ export function DoseHistory() {
                 height={isMobile ? 500 : 600}
                 width="100%"
                 itemCount={flattenedDoses.length}
-                itemSize={(index) => {
-                  // Headers are smaller than dose cards
-                  return flattenedDoses[index].type === 'header' ? 40 : 200;
-                }}
+                itemSize={(index: number) => flattenedDoses[index].type === 'header' ? 40 : 130}
+                ref={listRef}
                 itemData={{
                   items: flattenedDoses,
                   isDarkMode,
