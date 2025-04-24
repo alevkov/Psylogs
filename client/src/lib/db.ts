@@ -299,8 +299,14 @@ export async function importPWJournalData(file: File) {
       throw new Error("Invalid PW Journal data format");
     }
 
-    const doses = data.experiences.flatMap(experience =>
-      experience.ingestions
+    const doses = data.experiences.flatMap(experience => {
+      // Check if experience has ingestions array before processing
+      if (!experience.ingestions || !Array.isArray(experience.ingestions)) {
+        console.log("Experience without ingestions:", experience.title || "Untitled");
+        return []; // Skip this experience and return empty array for flatMap
+      }
+      
+      return experience.ingestions
         .filter(ing => ing && ing.dose > 0 && ing.substanceName && ing.time)
         .map(ingestion => ({
           substance: ingestion.substanceName.toLowerCase(),
@@ -308,15 +314,23 @@ export async function importPWJournalData(file: File) {
           unit: ingestion.units === 'g' ? 'mg' : ingestion.units as 'mg' | 'ug' | 'ml',
           route: routeMap[ingestion.administrationRoute] || 'oral',
           timestamp: new Date(ingestion.time).toISOString()
-        }))
-    ).filter(dose =>
+        }));
+    }).filter(dose =>
       dose.substance &&
       dose.amount > 0 &&
       ['mg', 'ug', 'ml'].includes(dose.unit)
     );
 
+    // Check if we have valid doses to import
     if (!doses.length) {
-      throw new Error("No valid doses found in PW Journal data");
+      const experiencesWithoutIngestions = data.experiences.filter(exp => !exp.ingestions || !Array.isArray(exp.ingestions)).length;
+      const totalExperiences = data.experiences.length;
+      
+      if (experiencesWithoutIngestions > 0) {
+        throw new Error(`No valid doses found in PW Journal data. Found ${experiencesWithoutIngestions} out of ${totalExperiences} experiences without ingestions data.`);
+      } else {
+        throw new Error("No valid doses found in PW Journal data");
+      }
     }
 
     // Sort by timestamp
