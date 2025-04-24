@@ -640,8 +640,8 @@ export function DoseForm() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
+      <Card className="w-full max-w-md mx-auto shadow-md border-0 overflow-hidden bg-gradient-to-br from-white to-secondary/20 dark:from-background dark:to-secondary/5">
+        <CardHeader className="pb-2">
           <motion.div
             className="flex items-center justify-between"
             initial={false}
@@ -651,12 +651,12 @@ export function DoseForm() {
               error: { x: [0, -10, 10, -10, 10, 0] },
             }}
           >
-            <h2 className="text-xl font-bold">Enter Dose</h2>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Enter Dose</h2>
             {previewParse && (
               <div className="flex gap-2">
-                <Badge variant="outline">Valid Format</Badge>
+                <Badge variant="outline" className="bg-secondary/50 border-0 shadow-sm">Valid Format</Badge>
                 {tierAnalysis && (
-                  <Badge variant={getTierBadgeVariant(tierAnalysis.tier)}>
+                  <Badge variant={getTierBadgeVariant(tierAnalysis.tier)} className="border-0 shadow-sm">
                     {tierAnalysis.tier.charAt(0).toUpperCase() +
                       tierAnalysis.tier.slice(1)}{" "}
                     Dose
@@ -676,11 +676,11 @@ export function DoseForm() {
                     {...form.register("doseString")}
                     className={`w-full pr-10 transition-all ${
                       previewParse
-                        ? "border-green-500"
+                        ? "border-green-500 shadow-md ring-1 ring-green-200"
                         : parseError
-                          ? "border-red-500"
-                          : ""
-                    } h-12 sm:h-10 px-4`}
+                          ? "border-red-500 shadow-md ring-1 ring-red-200"
+                          : "shadow-sm hover:shadow focus:shadow-md transition-shadow"
+                    } h-12 sm:h-10 px-4 rounded-lg`}
                     disabled={isSubmitting}
                     autoComplete="off"
                   />

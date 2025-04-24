@@ -455,14 +455,14 @@ export function DoseHistory() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto h-full flex flex-col">
+    <Card className="w-full max-w-md mx-auto h-full flex flex-col shadow-md border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm">
       <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg sm:text-xl font-bold">Recent Doses</h2>
+          <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Recent Doses</h2>
           <div className="flex gap-1 sm:gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="rounded-lg shadow-sm border-0 bg-secondary/30 hover:bg-secondary/50">
                   <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   Filters
                 </Button>
@@ -528,7 +528,7 @@ export function DoseHistory() {
           </div>
         </div>
 
-        <ScrollArea className={`${isMobile ? 'flex-1 min-h-0' : 'h-[350px] sm:h-[400px]'} w-full`}>
+        <ScrollArea className="flex-1 min-h-0 w-full overflow-y-auto pr-2">
           <AnimatePresence>
             {getSortedGroupEntries().map(([group, groupDoses]) => (
               <motion.div
@@ -554,25 +554,25 @@ export function DoseHistory() {
                       exit={{ opacity: 0, x: 20 }}
                     >
                       <Card 
-                        className="relative" 
+                        className="relative overflow-hidden shadow-sm hover:shadow transition-all transform hover:translate-y-[-2px] rounded-xl border-0" 
                         style={{
                           backgroundColor: getSubstanceColor(dose.substance, isDarkMode),
-                          transition: 'background-color 0.2s'
+                          transition: 'all 0.2s ease-in-out'
                         }}
                       >
                         <CardContent className="p-2 sm:p-3">
                           <div className="flex justify-between items-start">
                             <div className="space-y-2">
                               <div className="p-1 sm:p-2">
-                                <div className="font-medium text-sm sm:text-base px-2.5 py-1.5 mb-2 rounded">
+                                <div className="font-medium text-sm sm:text-base px-2.5 py-1.5 mb-2 rounded bg-white/30 dark:bg-black/10 backdrop-blur-sm shadow-sm">
                                   {dose.substance}
                                 </div>
                                 <div className="flex gap-1 mt-0.5">
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge variant="secondary" className="text-xs shadow-sm border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm">
                                     {dose.amount}
                                     {dose.unit}
                                   </Badge>
-                                  <Badge variant="outline" className="text-xs py-0">
+                                  <Badge variant="outline" className="text-xs py-0 border-0 shadow-sm bg-white/30 dark:bg-background/30 backdrop-blur-sm">
                                     {dose.route}
                                   </Badge>
                                 </div>
