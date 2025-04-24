@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,8 +8,8 @@ import { addDose, getDoses } from "../lib/db";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
-import { Card, CardHeader, CardContent } from "./ui/card";
-import { ADMINISTRATION_METHODS } from "../lib/constants";
+import { Card, CardHeader, CardContent, CardFooter } from "./ui/card";
+import { ADMINISTRATION_METHODS, UNITS } from "../lib/constants";
 import {
   Loader2,
   AlertCircle,
@@ -20,6 +20,22 @@ import {
   AlertTriangle,
   Activity,
   ChevronDown,
+  Pill,
+  Droplet,
+  Zap, 
+  ArrowRight,
+  Sparkles,
+  Bookmark,
+  CornerDownRight,
+  PlusCircle,
+  Calendar,
+  CheckCircle2,
+  XCircle,
+  Filter,
+  Medal,
+  Play,
+  Search,
+  Wind
 } from "lucide-react";
 import { useDoseContext } from "../contexts/DoseContext";
 import { Badge } from "./ui/badge";
@@ -28,6 +44,7 @@ import doseData from "../lib/dose-tiers.json";
 import { analyzeDoseTier, getTierBadgeVariant } from "../lib/dose-tiers.types";
 import { getSubstanceSafetyInfo } from "../lib/substance-safety";
 import substanceData from "../lib/substance-data.json";
+import { useIsMobile } from "../hooks/use-mobile";
 import {
   Alert,
   AlertDescription,
@@ -39,6 +56,19 @@ import {
   CollapsibleTrigger,
 } from "./ui/collapsible";
 import { DoseRangeVisual } from "./DoseRangeVisual";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 function normalizeSubstanceName(name: string): string {
   return name
@@ -76,7 +106,7 @@ export function tryGetTierAnalysis(
   method: string,
   dose: number,
   unit: string,
-  doseData: SubstanceData[],
+  doseData: any,
 ): { tier: string; analysis: string; ranges?: any } | null {
   try {
     return analyzeDoseTier(substance, method, dose, unit, doseData);
@@ -364,7 +394,10 @@ export function DoseForm() {
     }
   };
 
-  // Enhanced useEffect for smart suggestions
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  
+  // Enhanced useEffect for smart suggestions with better intelligence
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
     if (!doseString.trim()) {
@@ -427,12 +460,18 @@ export function DoseForm() {
       setTierAnalysis(null);
       setParseError(error);
     }
+    
+    // Command format handling (@action)
     if (format === "command") {
       if (words[0] === "@" && words.length === 1) {
         const methodSuggestions = Object.values(ADMINISTRATION_METHODS)
           .flat()
           .filter((r) => r.startsWith("@"))
-          .map((text) => ({ text, type: "common" as const }))
+          .map((text) => ({ 
+            text, 
+            type: "pattern" as const,
+            icon: <CornerDownRight className="w-4 h-4" />
+          }))
           .slice(0, 5);
         setSuggestions(methodSuggestions);
       } else if (words.length === 2) {
@@ -450,7 +489,7 @@ export function DoseForm() {
           });
         }
       } else if (words.length === 3 && lastWord.length > 1) {
-        // Smart substance suggestions
+        // Smart substance suggestions with improved indicators
         const allSubstances = Array.from(
           new Set([
             ...recentSubstances,
@@ -471,7 +510,7 @@ export function DoseForm() {
             const suggestionItem: SuggestionItem = {
               text: substance,
               type: "common",
-              icon: undefined,
+              icon: <Pill className="w-4 h-4" />,
             };
 
             if (recentSubstances.includes(substance)) {
@@ -499,12 +538,25 @@ export function DoseForm() {
           }
         }
       }
-    } else if (format === "standard") {
+    } 
+    // Standard format handling (amount unit substance route)
+    else if (format === "standard") {
       if (words.length === 1) {
+        // Suggesting units when typing amount
         if (isCompleteDoseUnit(lastWord)) {
           setParseError(null);
         } else if (isValidDoseUnitPrefix(lastWord)) {
-          setParseError(null);
+          // If they've typed a number, suggest units
+          if (lastWord.match(/^\d+\.?\d*$/)) {
+            const unitSuggestions = UNITS.map(unit => ({
+              text: lastWord + unit,
+              type: "pattern" as const,
+              icon: <Droplet className="w-4 h-4" />
+            }));
+            setSuggestions(unitSuggestions);
+          } else {
+            setParseError(null);
+          }
         } else if (lastWord.match(/^\d+\.?\d*[a-z]+$/i)) {
           setParseError({
             type: "unit",
@@ -514,7 +566,7 @@ export function DoseForm() {
           });
         }
       } else if (words.length === 2 && lastWord.length > 0) {
-        // Enhanced substance suggestions with history
+        // Enhanced substance suggestions with improved categorization
         const allSubstances = Array.from(
           new Set([
             ...recentSubstances,
@@ -535,60 +587,56 @@ export function DoseForm() {
             const suggestionItem: SuggestionItem = {
               text: substance,
               type: "common",
-              icon: undefined,
+              icon: <Pill className="w-4 h-4" />,
             };
 
             if (recentSubstances.includes(substance)) {
               suggestionItem.type = "recent";
-              suggestionItem.icon = <Clock className="w-4 h-4" />;
+              suggestionItem.icon = <Calendar className="w-4 h-4" />;
             } else if (frequentSubstances.includes(substance)) {
               suggestionItem.type = "frequent";
-              suggestionItem.icon = <Star className="w-4 h-4" />;
+              suggestionItem.icon = <Medal className="w-4 h-4" />;
             }
 
             return suggestionItem;
           });
 
         setSuggestions(matchedSubstances);
-      } else if (words.length === 3) {
-        const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
-          .flat()
-          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""))
-          .map((text) => ({ text, type: "common" as const }));
-
-        if (matchingRoutes.length > 0) {
-          setSuggestions(matchingRoutes);
-          setParseError(null);
-
-          if (matchingRoutes.some((r) => r.text === lastWord)) {
-            try {
-              const parsed = parseDoseString(doseString);
-              setPreviewParse(parsed);
-            } catch (error) {
-              setPreviewParse(null);
-            }
-          }
-        } else {
-          if (lastWord && lastWord.length > 0) {
-            setSuggestions([]);
-            setParseError({
-              type: "route",
-              message: "Route not recognized",
-              suggestion: "Use one of the standard administration routes",
-              example: "Common routes: oral, nasal, inhaled, injected",
+      } else if (words.length === 3 && lastWord.length > 0) {
+        // Improved route suggestions with icons
+        const routeGroups = Object.entries(ADMINISTRATION_METHODS);
+        let matchedRoutes: SuggestionItem[] = [];
+        
+        // Group routes by category for better organization
+        for (const [category, routes] of routeGroups) {
+          const matchingRoutes = routes
+            .filter(route => !route.startsWith('@') && route.includes(lastWord))
+            .map(route => {
+              let icon;
+              // Add appropriate icons based on route category
+              switch(category) {
+                case 'oral': icon = <Droplet className="w-4 h-4" />; break;
+                case 'intranasal': icon = <ArrowRight className="w-4 h-4" />; break;
+                case 'inhaled': icon = <Wind className="w-4 h-4" />; break;
+                case 'intravenous': icon = <Zap className="w-4 h-4" />; break;
+                default: icon = <Filter className="w-4 h-4" />;
+              }
+              
+              return {
+                text: route,
+                type: "pattern" as const,
+                icon
+              };
             });
-          } else {
-            const allRoutes = Object.values(ADMINISTRATION_METHODS)
-              .flat()
-              .filter((r) => !r.startsWith("@"))
-              .map((text) => ({ text, type: "common" as const }))
-              .slice(0, 5);
-            setSuggestions(allRoutes);
-            setParseError(null);
-          }
+            
+          matchedRoutes = [...matchedRoutes, ...matchingRoutes];
         }
-
-        if (matchingRoutes.some((r) => r.text === lastWord)) {
+        
+        setSuggestions(matchedRoutes.slice(0, 5));
+        
+        // Check for exact matches and handle route selection
+        const exactRouteMatch = matchedRoutes.find(r => r.text === lastWord);
+        if (exactRouteMatch) {
           try {
             const parsed = parseDoseString(doseString);
             setPreviewParse(parsed);
@@ -611,10 +659,28 @@ export function DoseForm() {
   }, [form.watch("doseString"), recentSubstances, frequentSubstances]);
 
   const applySuggestion = (suggestion: SuggestionItem) => {
-    const doseString = form.watch("doseString") || "";
-    const words = doseString.split(" ");
+    const currentValue = form.getValues("doseString");
+    const words = currentValue.trim().split(/\s+/);
+    
+    // Special handling for @action suggestions
+    if (suggestion.text.startsWith("@")) {
+      form.setValue("doseString", suggestion.text + " ");
+      inputRef.current?.focus();
+      return;
+    }
+    
+    // If the suggestion includes a unit (like "200mg"), replace the whole word
+    if (suggestion.text.match(/^\d+\.?\d*(mg|g|ug|ml)$/i)) {
+      words[0] = suggestion.text;
+      form.setValue("doseString", words.join(" ") + " ");
+      inputRef.current?.focus();
+      return;
+    }
+    
+    // Replace the last word with the suggestion
     words[words.length - 1] = suggestion.text;
-    form.setValue("doseString", words.join(" "));
+    form.setValue("doseString", words.join(" ") + " ");
+    inputRef.current?.focus();
   };
 
   const getTierBadgeVariant = (tier: string) => {
