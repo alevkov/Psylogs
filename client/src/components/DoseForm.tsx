@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useToast } from "../hooks/use-toast";
 import { Card, CardHeader, CardContent } from "./ui/card";
-import { ADMINISTRATION_METHODS, UNITS } from "../lib/constants";
+import { ADMINISTRATION_METHODS } from "../lib/constants";
 import {
   Loader2,
   AlertCircle,
@@ -20,7 +20,6 @@ import {
   AlertTriangle,
   Activity,
   ChevronDown,
-  Pill,
 } from "lucide-react";
 import { useDoseContext } from "../contexts/DoseContext";
 import { Badge } from "./ui/badge";
@@ -77,7 +76,7 @@ export function tryGetTierAnalysis(
   method: string,
   dose: number,
   unit: string,
-  doseData: any,
+  doseData: SubstanceData[],
 ): { tier: string; analysis: string; ranges?: any } | null {
   try {
     return analyzeDoseTier(substance, method, dose, unit, doseData);
@@ -315,6 +314,7 @@ export function DoseForm() {
           ? undefined
           : "Will be synced when you're back online",
         duration: 2000,
+        variant: "success",
       });
     } catch (error) {
       setSubmitStatus("error");
@@ -364,9 +364,7 @@ export function DoseForm() {
     }
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
-  
-  // Enhanced useEffect for smart suggestions with better intelligence
+  // Enhanced useEffect for smart suggestions
   useEffect(() => {
     const doseString = form.watch("doseString")?.toLowerCase() || "";
     if (!doseString.trim()) {
@@ -429,18 +427,12 @@ export function DoseForm() {
       setTierAnalysis(null);
       setParseError(error);
     }
-    
-    // Command format handling (@action)
     if (format === "command") {
       if (words[0] === "@" && words.length === 1) {
         const methodSuggestions = Object.values(ADMINISTRATION_METHODS)
           .flat()
           .filter((r) => r.startsWith("@"))
-          .map((text) => ({ 
-            text, 
-            type: "pattern" as const,
-            icon: <Info className="w-4 h-4" />
-          }))
+          .map((text) => ({ text, type: "common" as const }))
           .slice(0, 5);
         setSuggestions(methodSuggestions);
       } else if (words.length === 2) {
@@ -479,7 +471,7 @@ export function DoseForm() {
             const suggestionItem: SuggestionItem = {
               text: substance,
               type: "common",
-              icon: <Pill className="w-4 h-4" />,
+              icon: undefined,
             };
 
             if (recentSubstances.includes(substance)) {
@@ -507,25 +499,12 @@ export function DoseForm() {
           }
         }
       }
-    } 
-    // Standard format handling (amount unit substance route)
-    else if (format === "standard") {
+    } else if (format === "standard") {
       if (words.length === 1) {
-        // Suggesting units when typing amount
         if (isCompleteDoseUnit(lastWord)) {
           setParseError(null);
         } else if (isValidDoseUnitPrefix(lastWord)) {
-          // If they've typed a number, suggest units
-          if (lastWord.match(/^\d+\.?\d*$/)) {
-            const unitSuggestions = UNITS.map(unit => ({
-              text: lastWord + unit,
-              type: "pattern" as const,
-              icon: <Info className="w-4 h-4" />
-            }));
-            setSuggestions(unitSuggestions);
-          } else {
-            setParseError(null);
-          }
+          setParseError(null);
         } else if (lastWord.match(/^\d+\.?\d*[a-z]+$/i)) {
           setParseError({
             type: "unit",
@@ -535,7 +514,7 @@ export function DoseForm() {
           });
         }
       } else if (words.length === 2 && lastWord.length > 0) {
-        // Enhanced substance suggestions
+        // Enhanced substance suggestions with history
         const allSubstances = Array.from(
           new Set([
             ...recentSubstances,
@@ -556,7 +535,7 @@ export function DoseForm() {
             const suggestionItem: SuggestionItem = {
               text: substance,
               type: "common",
-              icon: <Pill className="w-4 h-4" />,
+              icon: undefined,
             };
 
             if (recentSubstances.includes(substance)) {
@@ -571,31 +550,45 @@ export function DoseForm() {
           });
 
         setSuggestions(matchedSubstances);
-      } else if (words.length === 3 && lastWord.length > 0) {
-        // Route suggestions
-        const routeGroups = Object.entries(ADMINISTRATION_METHODS);
-        let matchedRoutes: SuggestionItem[] = [];
-        
-        // Group routes by category
-        for (const [_, routes] of routeGroups) {
-          const matchingRoutes = routes
-            .filter(route => !route.startsWith('@') && route.includes(lastWord))
-            .map(route => {
-              return {
-                text: route,
-                type: "pattern" as const,
-                icon: <Info className="w-4 h-4" />
-              };
+      } else if (words.length === 3) {
+        const matchingRoutes = Object.values(ADMINISTRATION_METHODS)
+          .flat()
+          .filter((r) => !r.startsWith("@") && r.startsWith(lastWord || ""))
+          .map((text) => ({ text, type: "common" as const }));
+
+        if (matchingRoutes.length > 0) {
+          setSuggestions(matchingRoutes);
+          setParseError(null);
+
+          if (matchingRoutes.some((r) => r.text === lastWord)) {
+            try {
+              const parsed = parseDoseString(doseString);
+              setPreviewParse(parsed);
+            } catch (error) {
+              setPreviewParse(null);
+            }
+          }
+        } else {
+          if (lastWord && lastWord.length > 0) {
+            setSuggestions([]);
+            setParseError({
+              type: "route",
+              message: "Route not recognized",
+              suggestion: "Use one of the standard administration routes",
+              example: "Common routes: oral, nasal, inhaled, injected",
             });
-            
-          matchedRoutes = [...matchedRoutes, ...matchingRoutes];
+          } else {
+            const allRoutes = Object.values(ADMINISTRATION_METHODS)
+              .flat()
+              .filter((r) => !r.startsWith("@"))
+              .map((text) => ({ text, type: "common" as const }))
+              .slice(0, 5);
+            setSuggestions(allRoutes);
+            setParseError(null);
+          }
         }
-        
-        setSuggestions(matchedRoutes.slice(0, 5));
-        
-        // Check for exact matches and handle route selection
-        const exactRouteMatch = matchedRoutes.find(r => r.text === lastWord);
-        if (exactRouteMatch) {
+
+        if (matchingRoutes.some((r) => r.text === lastWord)) {
           try {
             const parsed = parseDoseString(doseString);
             setPreviewParse(parsed);
@@ -618,28 +611,27 @@ export function DoseForm() {
   }, [form.watch("doseString"), recentSubstances, frequentSubstances]);
 
   const applySuggestion = (suggestion: SuggestionItem) => {
-    const currentValue = form.getValues("doseString");
-    const words = currentValue.trim().split(/\s+/);
-    
-    // Special handling for @action suggestions
-    if (suggestion.text.startsWith("@")) {
-      form.setValue("doseString", suggestion.text + " ");
-      inputRef.current?.focus();
-      return;
-    }
-    
-    // If the suggestion includes a unit (like "200mg"), replace the whole word
-    if (suggestion.text.match(/^\d+\.?\d*(mg|g|ug|ml)$/i)) {
-      words[0] = suggestion.text;
-      form.setValue("doseString", words.join(" ") + " ");
-      inputRef.current?.focus();
-      return;
-    }
-    
-    // Replace the last word with the suggestion
+    const doseString = form.watch("doseString") || "";
+    const words = doseString.split(" ");
     words[words.length - 1] = suggestion.text;
-    form.setValue("doseString", words.join(" ") + " ");
-    inputRef.current?.focus();
+    form.setValue("doseString", words.join(" "));
+  };
+
+  const getTierBadgeVariant = (tier: string) => {
+    switch (tier) {
+      case "threshold":
+        return "secondary";
+      case "light":
+        return "outline";
+      case "common":
+        return "default";
+      case "strong":
+        return "warning";
+      case "heavy":
+        return "destructive";
+      default:
+        return "secondary";
+    }
   };
 
   return (
@@ -691,7 +683,6 @@ export function DoseForm() {
                     } h-12 sm:h-10 px-4`}
                     disabled={isSubmitting}
                     autoComplete="off"
-                    ref={inputRef}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {previewParse && (
