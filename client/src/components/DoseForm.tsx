@@ -683,7 +683,7 @@ export function DoseForm() {
     inputRef.current?.focus();
   };
 
-  const getTierBadgeVariant = (tier: string) => {
+  const getTierBadgeVariant = (tier: string): "default" | "destructive" | "secondary" | "outline" => {
     switch (tier) {
       case "threshold":
         return "secondary";
@@ -692,11 +692,36 @@ export function DoseForm() {
       case "common":
         return "default";
       case "strong":
-        return "warning";
+        return "outline"; // Changed from warning to avoid type error
       case "heavy":
         return "destructive";
       default:
         return "secondary";
+    }
+  };
+
+  // Get appropriate icon for route
+  const getRouteIcon = (route: string) => {
+    switch(route) {
+      case 'oral': return <Droplet className="h-4 w-4 text-blue-500" />;
+      case 'intranasal': return <ArrowRight className="h-4 w-4 text-indigo-500" />;
+      case 'inhaled': return <Wind className="h-4 w-4 text-sky-500" />;
+      case 'intravenous': return <Zap className="h-4 w-4 text-violet-500" />;
+      case 'intramuscular': return <Zap className="h-4 w-4 text-purple-500" />;
+      case 'rectal': return <Filter className="h-4 w-4 text-pink-500" />;
+      default: return <Pill className="h-4 w-4 text-emerald-500" />;
+    }
+  };
+
+  // Get icon and color for dose tier
+  const getTierIcon = (tier: string) => {
+    switch(tier) {
+      case 'threshold': return { icon: <Droplet className="h-4 w-4" />, color: 'text-blue-500' };
+      case 'light': return { icon: <Sparkles className="h-4 w-4" />, color: 'text-green-500' };
+      case 'common': return { icon: <CheckCircle2 className="h-4 w-4" />, color: 'text-emerald-500' };
+      case 'strong': return { icon: <AlertTriangle className="h-4 w-4" />, color: 'text-amber-500' };
+      case 'heavy': return { icon: <XCircle className="h-4 w-4" />, color: 'text-red-500' };
+      default: return { icon: <Info className="h-4 w-4" />, color: 'text-gray-500' };
     }
   };
 
@@ -705,9 +730,10 @@ export function DoseForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      className="mb-6"
     >
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
+      <Card className="w-full max-w-md mx-auto border shadow-sm">
+        <CardHeader className="pb-2">
           <motion.div
             className="flex items-center justify-between"
             initial={false}
@@ -717,328 +743,370 @@ export function DoseForm() {
               error: { x: [0, -10, 10, -10, 10, 0] },
             }}
           >
-            <h2 className="text-xl font-bold">Enter Dose</h2>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <PlusCircle className="h-5 w-5 text-primary" />
+              <span>Log Dose</span>
+            </h2>
+            
             {previewParse && (
               <div className="flex gap-2">
-                <Badge variant="outline">Valid Format</Badge>
+                <Badge variant="outline" className="bg-primary/5">
+                  <Check className="w-3 h-3 mr-1" /> Valid
+                </Badge>
                 {tierAnalysis && (
-                  <Badge variant={getTierBadgeVariant(tierAnalysis.tier)}>
-                    {tierAnalysis.tier.charAt(0).toUpperCase() +
-                      tierAnalysis.tier.slice(1)}{" "}
-                    Dose
-                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant={getTierBadgeVariant(tierAnalysis.tier)} className={`${getTierIcon(tierAnalysis.tier).color} bg-opacity-15`}>
+                          {getTierIcon(tierAnalysis.tier).icon}
+                          <span className="ml-1">{tierAnalysis.tier.charAt(0).toUpperCase() + tierAnalysis.tier.slice(1)}</span>
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">{tierAnalysis.analysis}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             )}
           </motion.div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="space-y-2">
-                <div className="relative">
+
+        <CardContent className="pt-0">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <div className="relative mt-2">
+                <div className="relative rounded-md shadow-sm">
                   <Input
-                    placeholder="e.g. 200mg caffeine oral"
+                    placeholder={isMobile ? "e.g. 200mg caffeine oral" : "Enter dose (e.g. 200mg caffeine oral or @drank 10mg substance)"}
                     {...form.register("doseString")}
-                    className={`w-full pr-10 transition-all ${
+                    className={`w-full transition-all pr-10 ${
                       previewParse
-                        ? "border-green-500"
+                        ? "border-green-500 focus-visible:ring-green-500"
                         : parseError
-                          ? "border-red-500"
+                          ? "border-red-500 focus-visible:ring-red-500"
                           : ""
-                    } h-12 sm:h-10 px-4`}
+                    } font-medium h-12 text-base px-4`}
                     disabled={isSubmitting}
                     autoComplete="off"
+                    ref={inputRef}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     {previewParse && (
-                      <Check className="w-4 h-4 text-green-500" />
+                      <Check className="w-5 h-5 text-green-500" />
                     )}
                     {parseError && (
-                      <AlertCircle className="w-4 h-4 text-destructive" />
+                      <AlertCircle className="w-5 h-5 text-destructive" />
+                    )}
+                    {!previewParse && !parseError && (
+                      <Search className="w-5 h-5 text-muted-foreground opacity-70" />
                     )}
                   </div>
                 </div>
-
-                <AnimatePresence mode="wait">
-                  {parseError && (
-                    <motion.div
-                      key="error"
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      className="bg-destructive/5 rounded-lg p-3 text-sm space-y-2"
+                
+                {/* Quick action buttons for common patterns */}
+                {!previewParse && !parseError && !suggestions.length && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      className="text-xs bg-primary/5"
+                      onClick={() => {
+                        form.setValue("doseString", "");
+                        setTimeout(() => inputRef.current?.focus(), 10);
+                      }}
                     >
-                      <div className="flex items-start gap-2">
-                        <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
-                        <div className="space-y-1 flex-grow">
-                          <p className="font-medium text-destructive">
-                            {parseError.message}
-                          </p>
-                          {parseError.suggestion && (
-                            <p className="text-muted-foreground">
-                              {parseError.suggestion}
-                            </p>
-                          )}
-                          {parseError.example && (
-                            <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
-                              {parseError.example}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {suggestions.length > 0 && !parseError && (
-                    <motion.div
-                      key="suggestions"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="flex flex-wrap gap-2"
+                      <Pill className="w-3 h-3 mr-1" /> Reset
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      className="text-xs bg-primary/5"
+                      onClick={() => {
+                        form.setValue("doseString", "@ate ");
+                        setTimeout(() => inputRef.current?.focus(), 10);
+                      }}
                     >
-                      {suggestions.map((suggestion) => (
-                        <Button
-                          key={suggestion.text}
-                          variant="outline"
-                          size="sm"
-                          type="button"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            applySuggestion(suggestion);
-                          }}
-                          className="hover:scale-105 transition-transform flex items-center gap-1"
-                        >
-                          {suggestion.icon}
-                          {suggestion.text}
-                        </Button>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  {previewParse && (
-                    <motion.div
-                      key="preview"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="bg-muted rounded-lg p-3 text-sm space-y-1"
+                      <Droplet className="w-3 h-3 mr-1" /> @ate
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline" 
+                      size="sm"
+                      className="text-xs bg-primary/5"
+                      onClick={() => {
+                        form.setValue("doseString", "@drank ");
+                        setTimeout(() => inputRef.current?.focus(), 10);
+                      }}
                     >
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Substance:</span>
-                        <span className="font-medium">
-                          {previewParse.substance}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Amount:</span>
-                        <span className="font-medium">
-                          {previewParse.amount}
-                          {previewParse.unit}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Route:</span>
-                        <span className="font-medium">{previewParse.route}</span>
-                      </div>
-                      {tierAnalysis ? (
-                        <div className="pt-2 mt-2 border-t border-border">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-muted-foreground">
-                              Dose Level:
-                            </span>
-                            <Badge
-                              variant={getTierBadgeVariant(tierAnalysis.tier)}
-                            >
-                              {tierAnalysis.tier.charAt(0).toUpperCase() +
-                                tierAnalysis.tier.slice(1)}
-                            </Badge>
-                          </div>
-                          {tierAnalysis.ranges && (
-                            <div className="text-xs space-y-1 pt-1">
-                              {tierAnalysis.ranges.threshold && (
-                                <div className="flex justify-between">
-                                  <span>Threshold:</span>
-                                  <span>
-                                    {tierAnalysis.ranges.threshold}
-                                    {previewParse.unit}
-                                  </span>
-                                </div>
-                              )}
-                              {tierAnalysis.ranges.light && (
-                                <div className="flex justify-between">
-                                  <span>Light:</span>
-                                  <span>
-                                    {tierAnalysis.ranges.light.lower}-
-                                    {tierAnalysis.ranges.light.upper}
-                                    {previewParse.unit}
-                                  </span>
-                                </div>
-                              )}
-                              {tierAnalysis.ranges.common && (
-                                <div className="flex justify-between">
-                                  <span>Common:</span>
-                                  <span>
-                                    {tierAnalysis.ranges.common.lower}-
-                                    {tierAnalysis.ranges.common.upper}
-                                    {previewParse.unit}
-                                  </span>
-                                </div>
-                              )}
-                              {tierAnalysis.ranges.strong && (
-                                <div className="flex justify-between">
-                                  <span>Strong:</span>
-                                  <span>
-                                    {tierAnalysis.ranges.strong.lower}-
-                                    {tierAnalysis.ranges.strong.upper}
-                                    {previewParse.unit}
-                                  </span>
-                                </div>
-                              )}
-                              {tierAnalysis.ranges.heavy && (
-                                <div className="flex justify-between">
-                                  <span>Heavy:</span>
-                                  <span>
-                                    ≥{tierAnalysis.ranges.heavy}
-                                    {previewParse.unit}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="pt-2 mt-2 border-t border-border">
-                          <Badge variant="secondary">Valid Format</Badge>
-                        </div>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <Droplet className="w-3 h-3 mr-1" /> @drank
+                    </Button>
+                    {recentSubstances.length > 0 && (
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs bg-primary/5"
+                        onClick={() => {
+                          const recent = recentSubstances[0];
+                          form.setValue("doseString", `mg ${recent} oral`);
+                          setTimeout(() => {
+                            inputRef.current?.focus();
+                            inputRef.current?.setSelectionRange(0, 0);
+                          }, 10);
+                        }}
+                      >
+                        <Clock className="w-3 h-3 mr-1" /> Recent
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {safetyInfo && previewParse && (
-                <Card className="mt-4">
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold">Safety Information</h3>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Dose Range Visual */}
+              <AnimatePresence mode="wait">
+                {parseError && (
+                  <motion.div
+                    key="error"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="bg-destructive/5 rounded-lg p-3 text-sm space-y-2 border border-destructive/10"
+                  >
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                      <div className="space-y-1 flex-grow">
+                        <p className="font-medium text-destructive">
+                          {parseError.message}
+                        </p>
+                        {parseError.suggestion && (
+                          <p className="text-muted-foreground">
+                            {parseError.suggestion}
+                          </p>
+                        )}
+                        {parseError.example && (
+                          <p className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                            {parseError.example}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {suggestions.length > 0 && !parseError && (
+                  <motion.div
+                    key="suggestions"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex flex-wrap gap-2 mt-2"
+                  >
+                    {suggestions.map((suggestion) => (
+                      <Button
+                        key={suggestion.text}
+                        variant="outline"
+                        size="sm"
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          applySuggestion(suggestion);
+                        }}
+                        className="hover:scale-105 transition-transform flex items-center gap-1 bg-primary/5"
+                      >
+                        {suggestion.icon}
+                        {suggestion.text}
+                      </Button>
+                    ))}
+                  </motion.div>
+                )}
+
+                {previewParse && (
+                  <motion.div
+                    key="preview"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-muted/30 border rounded-lg p-4 text-sm space-y-3 mt-3"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="bg-primary/10 rounded-full p-1.5">
+                        <Pill className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-medium text-base">{previewParse.substance}</h3>
+                        <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <Activity className="w-3.5 h-3.5" />
+                            {previewParse.amount}{previewParse.unit}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            {getRouteIcon(previewParse.route)}
+                            {previewParse.route}
+                          </span>
+                        </div>
+                      </div>
+                      {tierAnalysis && (
+                        <div className="flex flex-col items-end">
+                          <Badge 
+                            variant={getTierBadgeVariant(tierAnalysis.tier)}
+                            className={`${getTierIcon(tierAnalysis.tier).color}`}
+                          >
+                            {getTierIcon(tierAnalysis.tier).icon}
+                            <span className="ml-1">{tierAnalysis.tier}</span>
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                    
                     {tierAnalysis?.ranges && (
-                      <div className="space-y-2">
-                        <h4 className="font-medium">Dose Range</h4>
-                        <DoseRangeVisual
-                          ranges={tierAnalysis.ranges}
-                          currentDose={previewParse.amount}
-                          unit={previewParse.unit}
-                        />
+                      <div className="pt-1">
+                        <div className="space-y-2">
+                          <h4 className="text-xs font-medium text-muted-foreground">Dose Range</h4>
+                          <DoseRangeVisual
+                            ranges={tierAnalysis.ranges}
+                            currentDose={previewParse.amount}
+                            unit={previewParse.unit}
+                          />
+                        </div>
                       </div>
                     )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-                    {/* Dosage Guidance Section */}
+            {safetyInfo && previewParse && (
+              <Card className="mt-4 border shadow-sm">
+                <CardHeader className="py-3">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    Safety Information
+                  </h3>
+                </CardHeader>
+                <CardContent className="py-0 space-y-3">
+                  {/* Dosage Guidance Section */}
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full text-sm py-2 px-1 hover:bg-muted/50 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Info className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium">Dosage Guidance</span>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform ui-expanded:rotate-180 text-muted-foreground" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <Alert className="mt-2 bg-blue-50 dark:bg-blue-950/30 text-sm">
+                        <AlertDescription>{safetyInfo.dosageGuidance}</AlertDescription>
+                      </Alert>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Safety Warnings Section */}
+                  {safetyInfo.safetyWarnings.length > 0 && (
                     <Collapsible>
-                      <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <h4 className="font-medium">Dosage Guidance</h4>
-                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
+                      <CollapsibleTrigger className="flex items-center justify-between w-full text-sm py-2 px-1 hover:bg-muted/50 rounded-md">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                          <span className="font-medium">Safety Warnings</span>
+                        </div>
+                        <ChevronDown className="h-3.5 w-3.5 transition-transform ui-expanded:rotate-180 text-muted-foreground" />
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <Alert className="mt-2">
-                          <Info className="h-4 w-4" />
-                          <AlertDescription>
-                            {safetyInfo.dosageGuidance}
-                          </AlertDescription>
-                        </Alert>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    {/* Safety Warnings Section */}
-                    {safetyInfo.safetyWarnings.length > 0 && (
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full">
-                          <h4 className="font-medium">Safety Warnings</h4>
-                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="space-y-2 mt-2">
-                            {safetyInfo.safetyWarnings.map((warning, index) => (
-                              <Alert key={index} variant="destructive">
-                                <AlertTriangle className="h-4 w-4" />
-                                <AlertTitle>Warning</AlertTitle>
-                                <AlertDescription>{warning}</AlertDescription>
-                              </Alert>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-
-                    {/* Effects Section */}
-                    <Collapsible>
-                      <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <h4 className="font-medium">Effects</h4>
-                        <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {safetyInfo.effects.map((effect, index) => (
-                            <Badge key={index} variant="secondary">
-                              {effect}
-                            </Badge>
+                        <div className="space-y-2 mt-2">
+                          {safetyInfo.safetyWarnings.map((warning, index) => (
+                            <Alert key={index} variant="destructive" className="text-sm bg-red-50 dark:bg-red-950/30">
+                              <AlertDescription>{warning}</AlertDescription>
+                            </Alert>
                           ))}
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
+                  )}
 
-                    {/* Duration/Onset Section */}
-                    {(safetyInfo.duration || safetyInfo.onset) && (
-                      <Collapsible>
-                        <CollapsibleTrigger className="flex items-center justify-between w-full">
-                          <h4 className="font-medium">Timing Information</h4>
-                          <ChevronDown className="h-4 w-4 transition-transform ui-expanded:rotate-180" />
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <div className="flex gap-4 mt-2">
-                            {safetyInfo.onset && (
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4" />
-                                <span className="text-sm">{safetyInfo.onset}</span>
-                              </div>
-                            )}
-                            {safetyInfo.duration && (
-                              <div className="flex items-center gap-2">
-                                <Activity className="h-4 w-4" />
-                                <span className="text-sm">{safetyInfo.duration}</span>
-                              </div>
-                            )}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-                  </CardContent>
-                </Card>
+                  {/* Effects Section */}
+                  <Collapsible>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full text-sm py-2 px-1 hover:bg-muted/50 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-purple-500" />
+                        <span className="font-medium">Effects</span>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 transition-transform ui-expanded:rotate-180 text-muted-foreground" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="flex flex-wrap gap-2 mt-2 pb-1">
+                        {safetyInfo.effects.map((effect, index) => (
+                          <Badge key={index} variant="outline" className="bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300">
+                            {effect}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+
+                  {/* Duration/Onset Section */}
+                  {(safetyInfo.duration || safetyInfo.onset) && (
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full text-sm py-2 px-1 hover:bg-muted/50 rounded-md">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-orange-500" />
+                          <span className="font-medium">Timing Information</span>
+                        </div>
+                        <ChevronDown className="h-3.5 w-3.5 transition-transform ui-expanded:rotate-180 text-muted-foreground" />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="flex flex-wrap gap-4 mt-2 pb-1">
+                          {safetyInfo.onset && (
+                            <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 px-3 py-1.5 rounded-md">
+                              <Play className="h-4 w-4 text-orange-500" />
+                              <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                                Onset: {safetyInfo.onset}
+                              </span>
+                            </div>
+                          )}
+                          {safetyInfo.duration && (
+                            <div className="flex items-center gap-2 bg-green-50 dark:bg-green-950/30 px-3 py-1.5 rounded-md">
+                              <Activity className="h-4 w-4 text-green-500" />
+                              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                                Duration: {safetyInfo.duration}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting || !previewParse}
+              className={`w-full mt-4 h-12 text-base font-medium ${
+                !previewParse ? 'opacity-70' : ''
+              } transition-all duration-200 ${
+                submitStatus === 'success' ? 'bg-green-600 hover:bg-green-700' : ''
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Logging Dose...
+                </>
+              ) : submitStatus === "success" ? (
+                <>
+                  <CheckCircle2 className="mr-2 h-5 w-5" />
+                  Dose Logged Successfully
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="mr-2 h-5 w-5" />
+                  {previewParse ? 'Log Dose' : 'Enter Valid Dose'}
+                </>
               )}
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full mt-4 h-12 sm:h-10 text-base sm:text-sm"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging...
-                  </>
-                ) : submitStatus === "success" ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    Logged
-                  </>
-                ) : (
-                  "Log Dose"
-                )}
-              </Button>
-            </form>
-          </div>
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </motion.div>
