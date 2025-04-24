@@ -441,7 +441,16 @@ export function DoseHistory() {
     setSelectedDose(null);
   };
 
-  const handleUpdate = async (id: number, updates: Partial<Omit<DoseEntry, "id">>) => {
+  const handleUpdate = async (id: number, updates: Partial<{
+    substance: string;
+    amount: number;
+    unit: "mg" | "ug" | "ml";
+    route: string;
+    timestamp: string;
+    onsetAt?: string;
+    peakAt?: string;
+    offsetAt?: string;
+  }>) => {
     try {
       await updateDose(id, updates);
       setDoses((prev) =>
@@ -465,11 +474,11 @@ export function DoseHistory() {
     if (!dose.id) return;
     
     try {
-      const updates = {
+      const updates: Record<string, string> = {
         [`${type}At`]: value
       };
       
-      await updateDose(dose.id, updates);
+      await updateDose(dose.id, updates as any);
       setDoses(prev =>
         prev.map(d => d.id === dose.id ? { ...d, ...updates } : d)
       );
@@ -714,7 +723,10 @@ export function DoseHistory() {
                 height={isMobile ? 500 : 600}
                 width="100%"
                 itemCount={flattenedDoses.length}
-                itemSize={200} // Fixed size for simplicity
+                itemSize={(index) => {
+                  // Headers are smaller than dose cards
+                  return flattenedDoses[index].type === 'header' ? 40 : 200;
+                }}
                 itemData={{
                   items: flattenedDoses,
                   isDarkMode,
