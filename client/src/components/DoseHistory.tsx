@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getDoses, updateDose, deleteDose } from "../lib/db";
 import type { DoseEntry } from "../lib/constants";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
 import { useIsMobile } from "../hooks/use-mobile";
+import { FixedSizeList as List } from 'react-window';
 import {
   format,
   isToday,
@@ -156,6 +156,111 @@ function DurationVisualizer({ dose }: { dose: DoseEntry }) {
   );
 }
 
+// DoseCard component to render a single dose item
+function DoseCard({ 
+  dose, 
+  isDarkMode, 
+  onEdit, 
+  onDelete,
+  onTimestampUpdate,
+  getTimestampButtonState
+}: { 
+  dose: DoseEntry; 
+  isDarkMode: boolean;
+  onEdit: (dose: DoseEntry) => void;
+  onDelete: (dose: DoseEntry) => void;
+  onTimestampUpdate: (dose: DoseEntry, type: string, value: string) => Promise<void>;
+  getTimestampButtonState: (dose: DoseEntry, type: 'onset' | 'peak' | 'offset') => boolean;
+}) {
+  return (
+    <Card 
+      className="relative overflow-hidden shadow-sm hover:shadow transition-all rounded-xl border-0" 
+      style={{
+        backgroundColor: getSubstanceColor(dose.substance, isDarkMode),
+        transition: 'all 0.2s ease-in-out'
+      }}
+    >
+      <CardContent className="p-2 sm:p-3">
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <div className="p-1 sm:p-2">
+              <div className="font-medium text-sm sm:text-base px-2.5 py-1.5 mb-2 rounded bg-white/30 dark:bg-black/10 backdrop-blur-sm shadow-sm">
+                {dose.substance}
+              </div>
+              <div className="flex gap-1 mt-0.5">
+                <Badge variant="secondary" className="text-xs shadow-sm border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm">
+                  {dose.amount}
+                  {dose.unit}
+                </Badge>
+                <Badge variant="outline" className="text-xs py-0 border-0 shadow-sm bg-white/30 dark:bg-background/30 backdrop-blur-sm">
+                  {dose.route}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1 sm:gap-2">
+              <TimestampButton
+                dose={dose}
+                type="onset"
+                value={dose.onsetAt}
+                onUpdate={(type, value) => onTimestampUpdate(dose, type, value)}
+                disabled={getTimestampButtonState(dose, 'onset')}
+              />
+              <TimestampButton
+                dose={dose}
+                type="peak"
+                value={dose.peakAt}
+                onUpdate={(type, value) => onTimestampUpdate(dose, type, value)}
+                disabled={getTimestampButtonState(dose, 'peak')}
+              />
+              <TimestampButton
+                dose={dose}
+                type="offset"
+                value={dose.offsetAt}
+                onUpdate={(type, value) => onTimestampUpdate(dose, type, value)}
+                disabled={getTimestampButtonState(dose, 'offset')}
+              />
+            </div>
+
+            <DurationVisualizer dose={dose} />
+          </div>
+
+          <div className="flex flex-col items-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                  <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="text-xs sm:text-sm">
+                <DropdownMenuItem
+                  onClick={() => onEdit(dose)}
+                  className="text-xs sm:text-sm py-1 h-7 sm:h-8"
+                >
+                  <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive text-xs sm:text-sm py-1 h-7 sm:h-8"
+                  onClick={() => onDelete(dose)}
+                >
+                  <Trash className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <span className="text-xs text-muted-foreground mt-1">
+              {formatDistanceToNow(new Date(dose.timestamp), {
+                addSuffix: true,
+              })}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function TimestampButton({ 
   dose,
   type,
@@ -216,6 +321,52 @@ function TimestampButton({
     </Button>
   );
 }
+
+// Virtualized list row component
+interface VirtualItemData {
+  items: { type: 'header' | 'dose', content: string | DoseEntry, group: string }[];
+  isDarkMode: boolean;
+  handleEdit: (dose: DoseEntry) => void;
+  handleDelete: (dose: DoseEntry) => void;
+  handleTimestampUpdate: (dose: DoseEntry, type: string, value: string) => Promise<void>;
+  getTimestampButtonState: (dose: DoseEntry, type: 'onset' | 'peak' | 'offset') => boolean;
+}
+
+const VirtualizedDoseItem = React.memo(({ index, style, data }: { 
+  index: number; 
+  style: React.CSSProperties; 
+  data: VirtualItemData;
+}) => {
+  const item = data.items[index];
+  
+  if (item.type === 'header') {
+    return (
+      <div style={style} className="flex items-center gap-1 py-2">
+        <h3 className="font-semibold text-xs sm:text-sm text-muted-foreground">
+          {item.content as string}
+        </h3>
+      </div>
+    );
+  }
+  
+  const dose = item.content as DoseEntry;
+  
+  return (
+    <div style={{...style, paddingBottom: '8px'}}>
+      <DoseCard 
+        dose={dose}
+        isDarkMode={data.isDarkMode}
+        onEdit={data.handleEdit}
+        onDelete={data.handleDelete}
+        onTimestampUpdate={data.handleTimestampUpdate}
+        getTimestampButtonState={data.getTimestampButtonState}
+      />
+    </div>
+  );
+});
+
+// Add display name for debugging
+VirtualizedDoseItem.displayName = 'VirtualizedDoseItem';
 
 export function DoseHistory() {
   const [doses, setDoses] = useState<DoseEntry[]>([]);
@@ -290,7 +441,7 @@ export function DoseHistory() {
     setSelectedDose(null);
   };
 
-  const handleUpdate = async (id: number, updates: Partial<DoseEntry>) => {
+  const handleUpdate = async (id: number, updates: Partial<Omit<DoseEntry, "id">>) => {
     try {
       await updateDose(id, updates);
       setDoses((prev) =>
@@ -419,17 +570,22 @@ export function DoseHistory() {
     return groups;
   };
 
-  // Sort the filtered doses before grouping, newest first
-  const sortedAndFilteredDoses = filteredDoses
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  // Simplified data structures for virtualization
+  const sortedAndFilteredDoses = useMemo(() => {
+    return filteredDoses
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [filteredDoses]);
 
-  const groupedDoses = groupDoses(sortedAndFilteredDoses);
+  // Group doses
+  const groupedDoses = useMemo(() => {
+    return groupDoses(sortedAndFilteredDoses);
+  }, [sortedAndFilteredDoses, groupBy]);
 
   // Define the order for time-based groups
   const timeGroupOrder = ["Today", "Yesterday", "This Week", "Older"];
 
   // Get sorted group entries based on grouping type
-  const getSortedGroupEntries = () => {
+  const sortedGroupEntries = useMemo(() => {
     const entries = Object.entries(groupedDoses);
     if (groupBy === "time") {
       return entries.sort((a, b) => {
@@ -440,7 +596,24 @@ export function DoseHistory() {
     }
     // For substance and route grouping, sort alphabetically
     return entries.sort((a, b) => a[0].localeCompare(b[0]));
-  };
+  }, [groupedDoses, groupBy]);
+
+  // Flatten groups for virtualization
+  const flattenedDoses = useMemo(() => {
+    const result: { type: 'header' | 'dose', content: string | DoseEntry, group: string }[] = [];
+
+    sortedGroupEntries.forEach(([group, doses]) => {
+      // Add a header
+      result.push({ type: 'header', content: `${group} (${doses.length})`, group });
+      
+      // Add doses
+      doses.forEach(dose => {
+        result.push({ type: 'dose', content: dose, group });
+      });
+    });
+
+    return result;
+  }, [sortedGroupEntries]);
 
   if (loading) {
     return (
@@ -528,128 +701,39 @@ export function DoseHistory() {
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 w-full overflow-y-auto pr-2">
-          <AnimatePresence>
-            {getSortedGroupEntries().map(([group, groupDoses]) => (
-              <motion.div
-                key={group}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-2 sm:mb-3"
+        <div className="flex-1 min-h-0 w-full pr-2">
+          {flattenedDoses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full">
+              <p className="text-sm text-muted-foreground">No doses found</p>
+              <p className="text-xs text-muted-foreground mt-1">Try adjusting your filters</p>
+            </div>
+          ) : (
+            <div className="h-full">
+              <List
+                className="pr-1 no-scrollbar"
+                height={isMobile ? 500 : 600}
+                width="100%"
+                itemCount={flattenedDoses.length}
+                itemSize={200} // Fixed size for simplicity
+                itemData={{
+                  items: flattenedDoses,
+                  isDarkMode,
+                  handleEdit: (dose: DoseEntry) => {
+                    setSelectedDose(dose);
+                    setIsEditDialogOpen(true);
+                  },
+                  handleDelete: (dose: DoseEntry) => {
+                    setSelectedDose(dose);
+                    setIsDeleteDialogOpen(true);
+                  },
+                  handleTimestampUpdate,
+                  getTimestampButtonState
+                }}
               >
-                <div className="flex items-center gap-1 mb-1">
-                  <h3 className="font-semibold text-xs sm:text-sm text-muted-foreground">
-                    {group}
-                  </h3>
-                  <Badge variant="secondary" className="text-xs px-1">{groupDoses.length}</Badge>
-                </div>
-
-                <div className="space-y-1.5 sm:space-y-2">
-                  {groupDoses.map((dose, index) => (
-                    <motion.div
-                      key={dose.id || index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                    >
-                      <Card 
-                        className="relative overflow-hidden shadow-sm hover:shadow transition-all transform hover:translate-y-[-2px] rounded-xl border-0" 
-                        style={{
-                          backgroundColor: getSubstanceColor(dose.substance, isDarkMode),
-                          transition: 'all 0.2s ease-in-out'
-                        }}
-                      >
-                        <CardContent className="p-2 sm:p-3">
-                          <div className="flex justify-between items-start">
-                            <div className="space-y-2">
-                              <div className="p-1 sm:p-2">
-                                <div className="font-medium text-sm sm:text-base px-2.5 py-1.5 mb-2 rounded bg-white/30 dark:bg-black/10 backdrop-blur-sm shadow-sm">
-                                  {dose.substance}
-                                </div>
-                                <div className="flex gap-1 mt-0.5">
-                                  <Badge variant="secondary" className="text-xs shadow-sm border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm">
-                                    {dose.amount}
-                                    {dose.unit}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-xs py-0 border-0 shadow-sm bg-white/30 dark:bg-background/30 backdrop-blur-sm">
-                                    {dose.route}
-                                  </Badge>
-                                </div>
-                              </div>
-
-                              <div className="flex flex-wrap gap-1 sm:gap-2">
-                                <TimestampButton
-                                  dose={dose}
-                                  type="onset"
-                                  value={dose.onsetAt}
-                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
-                                  disabled={getTimestampButtonState(dose, 'onset')}
-                                />
-                                <TimestampButton
-                                  dose={dose}
-                                  type="peak"
-                                  value={dose.peakAt}
-                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
-                                  disabled={getTimestampButtonState(dose, 'peak')}
-                                />
-                                <TimestampButton
-                                  dose={dose}
-                                  type="offset"
-                                  value={dose.offsetAt}
-                                  onUpdate={(type, value) => handleTimestampUpdate(dose, type, value)}
-                                  disabled={getTimestampButtonState(dose, 'offset')}
-                                />
-                              </div>
-
-                              <DurationVisualizer dose={dose} />
-                            </div>
-
-                            <div className="flex flex-col items-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                    <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="text-xs sm:text-sm">
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedDose(dose);
-                                      setIsEditDialogOpen(true);
-                                    }}
-                                    className="text-xs sm:text-sm py-1 h-7 sm:h-8"
-                                  >
-                                    <Pencil className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-destructive text-xs sm:text-sm py-1 h-7 sm:h-8"
-                                    onClick={() => {
-                                      setSelectedDose(dose);
-                                      setIsDeleteDialogOpen(true);
-                                    }}
-                                  >
-                                    <Trash className="h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                              <span className="text-xs text-muted-foreground mt-1">
-                                {formatDistanceToNow(new Date(dose.timestamp), {
-                                  addSuffix: true,
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                {VirtualizedDoseItem}
+              </List>
+            </div>
+          )}
         </div>
       </CardContent>
 
