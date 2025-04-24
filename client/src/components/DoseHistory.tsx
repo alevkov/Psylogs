@@ -444,10 +444,10 @@ export function DoseHistory() {
 
   if (loading) {
     return (
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="w-full max-w-md mx-auto flex-1 shadow-md border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm rounded-xl">
         <CardContent className="p-4">
-          <div className="flex items-center justify-center h-[400px]">
-            <Loader2 className="w-6 h-6 animate-spin" />
+          <div className="flex items-center justify-center min-h-[300px]">
+            <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         </CardContent>
       </Card>
@@ -455,7 +455,7 @@ export function DoseHistory() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto h-full flex flex-col shadow-md border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm">
+    <Card className="w-full max-w-md mx-auto flex-1 flex flex-col shadow-md border-0 bg-white/50 dark:bg-background/50 backdrop-blur-sm rounded-xl">
       <CardContent className="p-3 sm:p-4 flex-1 flex flex-col">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">Recent Doses</h2>
@@ -528,7 +528,7 @@ export function DoseHistory() {
           </div>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0 w-full overflow-y-auto pr-2">
+        <div className="flex-1 min-h-0 w-full overflow-y-auto pr-2">
           <AnimatePresence>
             {getSortedGroupEntries().map(([group, groupDoses]) => (
               <motion.div
@@ -650,7 +650,7 @@ export function DoseHistory() {
               </motion.div>
             ))}
           </AnimatePresence>
-        </ScrollArea>
+        </div>
       </CardContent>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
