@@ -71,8 +71,10 @@ export async function addDose(dose: Omit<DoseEntry, "id" | "timestamp">) {
     if ("serviceWorker" in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        if ("sync" in registration) {
-          await registration.sync.register("sync-doses");
+        // Need to use type assertion because TypeScript doesn't recognize the sync property
+        const syncManager = 'sync' in registration ? (registration as any).sync : null;
+        if (syncManager) {
+          await syncManager.register("sync-doses");
         }
       } catch (err) {
         console.error("Background sync registration failed:", err);
@@ -248,7 +250,8 @@ export async function importDataFromTextFile(file: File): Promise<void> {
           route,
           timestamp
         };
-      } catch (error) {
+      } catch (err) {
+        const error = err as Error;
         throw new Error(`Error parsing line ${index + 1}: ${error.message}`);
       }
     });
@@ -278,16 +281,24 @@ const routeMap: Record<string, string> = {
   'VAPORIZED': 'inhaled',
 };
 
-interface PWJournalData {
-  experiences: Array<{
-    ingestions: Array<{
-      substanceName: string;
-      dose: number;
-      units: string;
-      administrationRoute: string;
-      time: number;
-    }>;
+interface PWJournalExperience {
+  title?: string;
+  text?: string;
+  ingestions?: Array<{
+    substanceName: string;
+    dose: number;
+    units: string;
+    administrationRoute: string;
+    time: number;
   }>;
+  timedNotes?: Array<{
+    note: string;
+    time: number;
+  }>;
+}
+
+interface PWJournalData {
+  experiences: Array<PWJournalExperience>;
 }
 
 export async function importPWJournalData(file: File) {
@@ -308,13 +319,35 @@ export async function importPWJournalData(file: File) {
       
       return experience.ingestions
         .filter(ing => ing && ing.dose > 0 && ing.substanceName && ing.time)
-        .map(ingestion => ({
-          substance: ingestion.substanceName.toLowerCase(),
-          amount: ingestion.units === 'g' ? ingestion.dose * 1000 : ingestion.dose,
-          unit: ingestion.units === 'g' ? 'mg' : ingestion.units as 'mg' | 'ug' | 'ml',
-          route: routeMap[ingestion.administrationRoute] || 'oral',
-          timestamp: new Date(ingestion.time).toISOString()
-        }));
+        .map(ingestion => {
+          // Normalize units to ensure they match our system
+          let unit = ingestion.units?.toLowerCase() || 'mg';
+          let amount = ingestion.dose;
+          
+          // Handle common unit conversions
+          if (unit === 'g') {
+            amount = amount * 1000;
+            unit = 'mg';
+          } else if (unit.includes('mg')) {
+            unit = 'mg';
+          } else if (unit.includes('ug') || unit.includes('µg') || unit.includes('mcg')) {
+            unit = 'ug';
+          } else if (unit.includes('ml') || unit.includes('cc')) {
+            unit = 'ml';
+          } else {
+            // For other units, default to mg
+            console.log(`Unknown unit '${ingestion.units}' for ${ingestion.substanceName}, defaulting to mg`);
+            unit = 'mg';
+          }
+          
+          return {
+            substance: ingestion.substanceName.toLowerCase(),
+            amount: amount,
+            unit: unit as 'mg' | 'ug' | 'ml',
+            route: routeMap[ingestion.administrationRoute] || 'oral',
+            timestamp: new Date(ingestion.time).toISOString()
+          };
+        });
     }).filter(dose =>
       dose.substance &&
       dose.amount > 0 &&
@@ -354,12 +387,22 @@ export async function importPWJournalData(file: File) {
       throw error;
     }
 
-  } catch (error) {
-    console.error('Error importing PW Journal data:', error);
-    throw new Error(
-      error instanceof Error
-        ? error.message
-        : 'Failed to import PW Journal data'
-    );
+  } catch (err) {
+    console.error('Error importing PW Journal data:', err);
+    
+    // Format a more helpful error message
+    let errorMessage = 'Failed to import PW Journal data';
+    
+    if (err instanceof Error) {
+      if (err.message.includes('experience.ingestions')) {
+        errorMessage = 'Journal file contains experiences without ingestion data. This has been fixed, please try again.';
+      } else if (err.message.includes('JSON')) {
+        errorMessage = 'Invalid JSON format in the journal file.';
+      } else {
+        errorMessage = err.message;
+      }
+    }
+    
+    throw new Error(errorMessage);
   }
 }
