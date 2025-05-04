@@ -2,8 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "../components/ui/tabs";
 import { DoseRangeVisual } from "../components/DoseRangeVisual";
+import { MultiRouteDoseChart } from "../components/MultiRouteDoseChart";
 import { SubstanceTimeline } from "../components/SubstanceTimeline";
 import { getSubstanceColor } from "../lib/color-utils";
 import { DurationCurve } from "../lib/timeline.types";
@@ -40,6 +46,12 @@ interface DoseRangesForVisual {
   heavy?: number;
 }
 
+interface RouteData {
+  route: string;
+  ranges: DoseRangesForVisual;
+  unit: string;
+}
+
 interface DurationData {
   total_duration: string;
   onset: string;
@@ -63,11 +75,12 @@ interface SubstanceData {
     };
     duration: DurationData;
     durations_parsed?: {
-      [key: string]: {  // Route as key (e.g., "oral", "insufflated")
+      [key: string]: {
+        // Route as key (e.g., "oral", "insufflated")
         drug: string;
         method: string;
         duration_curve: DurationCurve;
-      }
+      };
     };
     addiction_potential?: string;
     interactions?: {
@@ -92,24 +105,36 @@ export default function SubstanceDetailPage() {
   const { id } = useParams();
   const [substance, setSubstance] = useState<SubstanceData | null>(null);
   const [selectedRoute, setSelectedRoute] = useState<string>("");
-  const [doseRanges, setDoseRanges] = useState<DoseRangesForVisual | null>(null);
+  const [doseRanges, setDoseRanges] = useState<DoseRangesForVisual | null>(
+    null,
+  );
   const [unit, setUnit] = useState<string>("");
-  const [activeSection, setActiveSection] = useState<string>("summary");
-  const [durationCurve, setDurationCurve] = useState<DurationCurve | null>(null);
+  const [activeSection, setActiveSection] = useState<string>("dose");
+  const [durationCurve, setDurationCurve] = useState<DurationCurve | null>(
+    null,
+  );
+  const [allRouteData, setAllRouteData] = useState<RouteData[]>([]);
 
   // Load substance data
   useEffect(() => {
     if (id) {
       const articleId = parseInt(id);
-      const foundSubstance = articleData.find(article => article.id === articleId);
-      
+      const foundSubstance = articleData.find(
+        (article) => article.id === articleId,
+      );
+
       if (foundSubstance) {
         // Type assertion to help TypeScript understand the structure
         setSubstance(foundSubstance as unknown as SubstanceData);
-        
+
         // Set the default selected route to the first one
-        if (foundSubstance.drug_info.dosages.routes_of_administration_parsed.length > 0) {
-          const route = foundSubstance.drug_info.dosages.routes_of_administration_parsed[0].route;
+        if (
+          foundSubstance.drug_info.dosages.routes_of_administration_parsed
+            .length > 0
+        ) {
+          const route =
+            foundSubstance.drug_info.dosages.routes_of_administration_parsed[0]
+              .route;
           setSelectedRoute(route);
         }
       }
@@ -119,11 +144,57 @@ export default function SubstanceDetailPage() {
   // Update dose ranges when substance or route changes
   useEffect(() => {
     if (substance && selectedRoute) {
-      const route = substance.drug_info.dosages.routes_of_administration_parsed.find(r => r.route === selectedRoute);
-      
+      const route =
+        substance.drug_info.dosages.routes_of_administration_parsed.find(
+          (r) => r.route === selectedRoute,
+        );
+
       if (route) {
         setUnit(route.units);
-        
+
+        const ranges: DoseRangesForVisual = {};
+
+        if (route.dose_ranges.threshold) {
+          ranges.threshold = route.dose_ranges.threshold.min;
+        }
+
+        if (route.dose_ranges.light) {
+          ranges.light = {
+            lower: route.dose_ranges.light.min,
+            upper: route.dose_ranges.light.max || undefined,
+          };
+        }
+
+        if (route.dose_ranges.common) {
+          ranges.common = {
+            lower: route.dose_ranges.common.min,
+            upper: route.dose_ranges.common.max || undefined,
+          };
+        }
+
+        if (route.dose_ranges.strong) {
+          ranges.strong = {
+            lower: route.dose_ranges.strong.min,
+            upper: route.dose_ranges.strong.max || undefined,
+          };
+        }
+
+        if (route.dose_ranges.heavy) {
+          ranges.heavy = route.dose_ranges.heavy.min;
+        }
+
+        setDoseRanges(ranges);
+      }
+    }
+  }, [substance, selectedRoute]);
+
+  // Prepare data for MultiRouteDoseChart (all routes in one view)
+  useEffect(() => {
+    if (substance) {
+      const routesData: RouteData[] = [];
+      
+      // Process each route
+      substance.drug_info.dosages.routes_of_administration_parsed.forEach(route => {
         const ranges: DoseRangesForVisual = {};
         
         if (route.dose_ranges.threshold) {
@@ -133,21 +204,21 @@ export default function SubstanceDetailPage() {
         if (route.dose_ranges.light) {
           ranges.light = {
             lower: route.dose_ranges.light.min,
-            upper: route.dose_ranges.light.max || undefined
+            upper: route.dose_ranges.light.max || undefined,
           };
         }
         
         if (route.dose_ranges.common) {
           ranges.common = {
             lower: route.dose_ranges.common.min,
-            upper: route.dose_ranges.common.max || undefined
+            upper: route.dose_ranges.common.max || undefined,
           };
         }
         
         if (route.dose_ranges.strong) {
           ranges.strong = {
             lower: route.dose_ranges.strong.min,
-            upper: route.dose_ranges.strong.max || undefined
+            upper: route.dose_ranges.strong.max || undefined,
           };
         }
         
@@ -155,17 +226,23 @@ export default function SubstanceDetailPage() {
           ranges.heavy = route.dose_ranges.heavy.min;
         }
         
-        setDoseRanges(ranges);
-      }
+        routesData.push({
+          route: route.route,
+          ranges,
+          unit: route.units
+        });
+      });
+      
+      setAllRouteData(routesData);
     }
-  }, [substance, selectedRoute]);
+  }, [substance]);
 
   // Update duration curve when substance or route changes
   useEffect(() => {
     if (substance && selectedRoute && substance.drug_info.durations_parsed) {
       // Try to find the exact route
       let routeKey = selectedRoute;
-      
+
       // Handle any route mapping needed (e.g., "oral" vs "ingested")
       if (selectedRoute === "oral") {
         // Check if "ingested" exists instead
@@ -180,10 +257,10 @@ export default function SubstanceDetailPage() {
           routeKey = "intranasal";
         }
       }
-      
+
       // Get the duration curve for the selected route
       const routeData = substance.drug_info.durations_parsed[routeKey];
-      
+
       if (routeData && routeData.duration_curve) {
         setDurationCurve(routeData.duration_curve);
       } else {
@@ -199,30 +276,36 @@ export default function SubstanceDetailPage() {
   if (!substance) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-gray-500">Loading substance details...</div>
+        <div className="animate-pulse text-gray-500">
+          Loading substance details...
+        </div>
       </div>
     );
   }
 
   // Parse drug name utility function
-  const parseDrugName = (drugName: string): { mainName: string; alternatives: string | null } => {
+  const parseDrugName = (
+    drugName: string,
+  ): { mainName: string; alternatives: string | null } => {
     const match = drugName.match(/^(.*?)\s*\((.*?)\)$/);
-    
+
     if (match) {
       return {
         mainName: match[1].trim(),
-        alternatives: match[2].trim()
+        alternatives: match[2].trim(),
       };
     }
-    
+
     return {
       mainName: drugName,
-      alternatives: null
+      alternatives: null,
     };
   };
 
   // Extract main name and alternatives
-  const { mainName, alternatives } = parseDrugName(substance.drug_info.drug_name);
+  const { mainName, alternatives } = parseDrugName(
+    substance.drug_info.drug_name,
+  );
   const substanceColor = getSubstanceColor(substance.title);
 
   // Format dose values for display
@@ -234,85 +317,115 @@ export default function SubstanceDetailPage() {
   return (
     <div className="max-w-4xl mx-auto pb-10 px-4 sm:px-6">
       {/* Sticky Header with Back Button and Title */}
-      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 py-3 px-2 mb-6 rounded-b-lg shadow-md flex items-center">
-        <Link href="/substances">
-          <Button variant="ghost" className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded-full">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-          </Button>
+      <div className="sticky top-0 z-10 bg-white dark:bg-gray-900 shadow-sm flex items-center h-10 px-3">
+        <Link href="/substances" className="mr-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 text-blue-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
         </Link>
-        
-        <div className="flex flex-col ml-2">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">{mainName}</h1>
+
+        <div className="inline-flex items-center">
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            {mainName}
+          </span>
           {alternatives && (
-            <span className="text-gray-500 dark:text-gray-400 text-xs transition-opacity">
-              {alternatives.split(', ').join(' / ')}
+            <span className="text-gray-500 dark:text-gray-400 text-xs ml-2">
+              {alternatives}
             </span>
           )}
         </div>
-        
-        <div className="ml-auto flex gap-2">
-          <Button variant="outline" size="sm" className="text-blue-500 border-blue-200 hover:bg-blue-50 dark:border-blue-800 dark:hover:bg-blue-900/30">
-            Article
-          </Button>
-        </div>
+
+        {/* <button className="ml-auto text-blue-500 text-xs border border-blue-200 rounded px-3 py-0.5">
+          Article
+        </button> */}
       </div>
-      
+
       {/* Navigation tabs for different sections */}
-      <div className="mb-6 overflow-x-auto pb-2 flex">
+      <div className="mt-2 mb-6 overflow-x-auto pb-2 flex">
         <div className="flex space-x-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg w-full">
-          {["summary", "dose", "duration", "effects", "safety", "tolerance", "info"].map((section) => (
+          {[
+            "summary",
+            "dose",
+            "duration",
+            "effects",
+            "safety",
+            "tolerance",
+            "info",
+          ].map((section) => (
             <Button
               key={section}
               variant={activeSection === section ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveSection(section)}
-              className={`capitalize ${activeSection === section ? 'bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}
+              className={`capitalize ${activeSection === section ? "bg-white dark:bg-gray-700 shadow-sm text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-300"}`}
             >
               {section}
             </Button>
           ))}
         </div>
       </div>
-      
+
       {/* Content sections */}
       <div>
         {/* Summary Section */}
         {activeSection === "summary" && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Summary</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                Summary
+              </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
-                {substance.drug_info.notes || "No summary available for this substance."}
+                {substance.drug_info.notes ||
+                  "No summary available for this substance."}
               </p>
-              
+
               <div className="flex flex-wrap gap-2 mt-4">
                 {substance.drug_info.categories.map((category, idx) => (
-                  <Badge 
-                    key={idx} 
-                    variant="outline" 
-                    className="bg-opacity-10 text-sm px-3 py-1 border-2" 
-                    style={{ borderColor: `${substanceColor}40`, color: substanceColor }}
+                  <Badge
+                    key={idx}
+                    variant="outline"
+                    className="bg-opacity-10 text-sm px-3 py-1 border-2"
+                    style={{
+                      borderColor: `${substanceColor}40`,
+                      color: substanceColor,
+                    }}
                   >
                     {category}
                   </Badge>
                 ))}
               </div>
-              
-              {(substance.drug_info.chemical_class || substance.drug_info.psychoactive_class) && (
+
+              {(substance.drug_info.chemical_class ||
+                substance.drug_info.psychoactive_class) && (
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {substance.drug_info.chemical_class && (
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Chemical Class</h3>
-                      <p className="text-gray-900 dark:text-white">{substance.drug_info.chemical_class}</p>
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                        Chemical Class
+                      </h3>
+                      <p className="text-gray-900 dark:text-white">
+                        {substance.drug_info.chemical_class}
+                      </p>
                     </div>
                   )}
-                  
+
                   {substance.drug_info.psychoactive_class && (
                     <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Psychoactive Class</h3>
-                      <p className="text-gray-900 dark:text-white">{substance.drug_info.psychoactive_class}</p>
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                        Psychoactive Class
+                      </h3>
+                      <p className="text-gray-900 dark:text-white">
+                        {substance.drug_info.psychoactive_class}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -320,119 +433,113 @@ export default function SubstanceDetailPage() {
             </div>
           </div>
         )}
-        
+
         {/* Dosage Information Section */}
         {activeSection === "dose" && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Dosage Information</h2>
-                <Button variant="outline" size="sm" className="text-xs text-blue-500 border-blue-200 hover:border-blue-300">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Dosage Information
+                </h2>
+                <button
+                  className="ml-auto text-blue-500 text-xs border border-blue-200 rounded px-3 py-0.5 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
                   Disclaimer
-                </Button>
+                </button>
               </div>
-              
+
+              {allRouteData.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 mt-6 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-base font-medium text-blue-600 dark:text-blue-400">
+                      Comparative Dose Chart
+                    </h3>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      All routes
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <MultiRouteDoseChart
+                      routes={allRouteData}
+                      substance={substance.title}
+                      className="min-w-[600px]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
               {/* Route Selection */}
-              <Tabs 
-                value={selectedRoute} 
-                onValueChange={setSelectedRoute}
-                className="w-full"
-              >
-                <TabsList className="mb-6 w-full justify-start bg-gray-100 dark:bg-gray-700/50 p-1 rounded-lg">
-                  {substance.drug_info.dosages.routes_of_administration_parsed.map((route) => (
-                    <TabsTrigger 
-                      key={route.route} 
-                      value={route.route} 
-                      className="capitalize data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:shadow"
-                    >
-                      {route.route}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                
-                {substance.drug_info.dosages.routes_of_administration_parsed.map((route) => (
-                  <TabsContent key={route.route} value={route.route}>
-                    {doseRanges && (
-                      <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 mb-6">
-                        <div className="flex justify-between items-center mb-8">
-                          <div className="flex flex-col">
-                            <span className="text-sm text-gray-500 dark:text-gray-400">Dosage measured in</span>
-                            <span className="text-xl font-semibold text-gray-900 dark:text-white">{unit}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Dose Range Labels */}
-                        <div className="grid grid-cols-5 gap-2 mb-4">
-                          <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-blue-500">
-                              {formatDoseValue(doseRanges.threshold)}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Threshold</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-green-500">
-                              {doseRanges.light ? 
-                                `${formatDoseValue(doseRanges.light.lower)}${doseRanges.light.upper ? `-${formatDoseValue(doseRanges.light.upper)}` : ''}` : 
-                                "-"}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Light</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-yellow-500">
-                              {doseRanges.common ? 
-                                `${formatDoseValue(doseRanges.common.lower)}${doseRanges.common.upper ? `-${formatDoseValue(doseRanges.common.upper)}` : ''}` : 
-                                "-"}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Common</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-orange-500">
-                              {doseRanges.strong ? 
-                                `${formatDoseValue(doseRanges.strong.lower)}${doseRanges.strong.upper ? `-${formatDoseValue(doseRanges.strong.upper)}` : ''}` : 
-                                "-"}
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Strong</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-center">
-                            <span className="text-lg font-bold text-red-500">
-                              {formatDoseValue(doseRanges.heavy)}+
-                            </span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">Heavy</span>
-                          </div>
-                        </div>
-                        
-                        {/* Dose Range Visual */}
-                        <div className="h-24 mb-6">
-                          <DoseRangeVisual 
-                            ranges={doseRanges}
-                            currentDose={0}
-                            unit={unit}
-                          />
-                        </div>
-                      </div>
+              <div className="mt-8">
+                <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-3">
+                  Individual Route Details
+                </h3>
+                <Tabs
+                  value={selectedRoute}
+                  onValueChange={setSelectedRoute}
+                  className="w-full"
+                >
+                  <TabsList className="mb-6 w-full justify-start bg-gray-100 dark:bg-gray-700/50 p-1 rounded-lg overflow-x-auto">
+                    {substance.drug_info.dosages.routes_of_administration_parsed.map(
+                      (route) => (
+                        <TabsTrigger
+                          key={route.route}
+                          value={route.route}
+                          className="capitalize data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600 data-[state=active]:shadow"
+                        >
+                          {route.route}
+                        </TabsTrigger>
+                      ),
                     )}
-                  </TabsContent>
-                ))}
+                  </TabsList>
+
+                {substance.drug_info.dosages.routes_of_administration_parsed.map(
+                  (route) => (
+                    <TabsContent key={route.route} value={route.route}>
+                      {doseRanges && (
+                        <div className="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-6 mb-6">
+                          <div className="flex justify-between items-center mb-4">
+                            <div className="flex flex-col">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                Dosage measured in
+                              </span>
+                              <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                                {unit}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Individual route visualization */}
+                          <div className="my-6">
+                            <DoseRangeVisual
+                              ranges={doseRanges}
+                              currentDose={0}
+                              unit={unit}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </TabsContent>
+                  ),
+                )}
               </Tabs>
             </div>
           </div>
         )}
-        
+
         {/* Duration Section */}
         {activeSection === "duration" && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Duration</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+                Duration
+              </h2>
+
               {/* Timeline visualization using durations_parsed data */}
               {durationCurve && (
                 <div className="mb-8 bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4">
                   <div className="w-full overflow-hidden">
-                    <SubstanceTimeline 
+                    <SubstanceTimeline
                       substance={substance.title}
                       route={selectedRoute}
                       durationCurve={durationCurve}
@@ -441,52 +548,77 @@ export default function SubstanceDetailPage() {
                   </div>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Onset</h3>
-                  <p className="text-gray-900 dark:text-white font-medium">{substance.drug_info.duration.onset}</p>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    Onset
+                  </h3>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {substance.drug_info.duration.onset}
+                  </p>
                 </div>
-                
+
                 <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Peak</h3>
-                  <p className="text-gray-900 dark:text-white font-medium">{substance.drug_info.duration.peak}</p>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    Peak
+                  </h3>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {substance.drug_info.duration.peak}
+                  </p>
                 </div>
-                
+
                 <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Offset</h3>
-                  <p className="text-gray-900 dark:text-white font-medium">{substance.drug_info.duration.offset}</p>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    Offset
+                  </h3>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {substance.drug_info.duration.offset}
+                  </p>
                 </div>
-                
+
                 <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4 md:col-span-3">
-                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Total Duration</h3>
-                  <p className="text-gray-900 dark:text-white font-medium">{substance.drug_info.duration.total_duration}</p>
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    Total Duration
+                  </h3>
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    {substance.drug_info.duration.total_duration}
+                  </p>
                 </div>
-                
+
                 {substance.drug_info.duration.after_effects && (
                   <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4 md:col-span-3">
-                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">After Effects</h3>
-                    <p className="text-gray-900 dark:text-white font-medium">{substance.drug_info.duration.after_effects}</p>
+                    <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                      After Effects
+                    </h3>
+                    <p className="text-gray-900 dark:text-white font-medium">
+                      {substance.drug_info.duration.after_effects}
+                    </p>
                   </div>
                 )}
               </div>
             </div>
           </div>
         )}
-        
+
         {/* Effects Section */}
         {activeSection === "effects" && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Effects</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+                Effects
+              </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {substance.drug_info.subjective_effects?.map((effect, idx) => (
-                  <div key={idx} className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
+                  <div
+                    key={idx}
+                    className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4"
+                  >
                     <p className="text-gray-800 dark:text-gray-200">{effect}</p>
                   </div>
                 ))}
-                
+
                 {!substance.drug_info.subjective_effects?.length && (
                   <div className="col-span-2 text-gray-500 italic text-center py-10">
                     No effects information available.
@@ -496,134 +628,201 @@ export default function SubstanceDetailPage() {
             </div>
           </div>
         )}
-        
+
         {/* Safety Information */}
         {activeSection === "safety" && substance.drug_info.interactions && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Safety Information</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+                Safety Information
+              </h2>
+
               <div className="space-y-6">
                 {substance.drug_info.interactions.dangerous && (
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                    <h3 className="text-red-600 dark:text-red-400 font-bold text-lg mb-3">DANGEROUS INTERACTIONS</h3>
+                    <h3 className="text-red-600 dark:text-red-400 font-bold text-lg mb-3">
+                      DANGEROUS INTERACTIONS
+                    </h3>
                     <div className="flex flex-wrap gap-2">
-                      {substance.drug_info.interactions.dangerous.map((item, idx) => (
-                        <Badge key={idx} variant="destructive" className="text-sm py-1 px-3">
-                          {item}
-                        </Badge>
-                      ))}
+                      {substance.drug_info.interactions.dangerous.map(
+                        (item, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="destructive"
+                            className="text-sm py-1 px-3"
+                          >
+                            {item}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
-                
+
                 {substance.drug_info.interactions.unsafe && (
                   <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                    <h3 className="text-orange-600 dark:text-orange-400 font-bold text-lg mb-3">UNSAFE COMBINATIONS</h3>
+                    <h3 className="text-orange-600 dark:text-orange-400 font-bold text-lg mb-3">
+                      UNSAFE COMBINATIONS
+                    </h3>
                     <div className="flex flex-wrap gap-2">
-                      {substance.drug_info.interactions.unsafe.map((item, idx) => (
-                        <Badge key={idx} variant="outline" className="text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 text-sm py-1 px-3">
-                          {item}
-                        </Badge>
-                      ))}
+                      {substance.drug_info.interactions.unsafe.map(
+                        (item, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-700 text-sm py-1 px-3"
+                          >
+                            {item}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
-                
+
                 {substance.drug_info.interactions.caution && (
                   <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                    <h3 className="text-yellow-600 dark:text-yellow-400 font-bold text-lg mb-3">USE WITH CAUTION</h3>
+                    <h3 className="text-yellow-600 dark:text-yellow-400 font-bold text-lg mb-3">
+                      USE WITH CAUTION
+                    </h3>
                     <div className="flex flex-wrap gap-2">
-                      {substance.drug_info.interactions.caution.map((item, idx) => (
-                        <Badge key={idx} variant="outline" className="text-yellow-600 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700 text-sm py-1 px-3">
-                          {item}
-                        </Badge>
-                      ))}
+                      {substance.drug_info.interactions.caution.map(
+                        (item, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-yellow-600 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700 text-sm py-1 px-3"
+                          >
+                            {item}
+                          </Badge>
+                        ),
+                      )}
                     </div>
                   </div>
                 )}
-                
+
                 {substance.drug_info.addiction_potential && (
                   <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
-                    <h3 className="text-purple-600 dark:text-purple-400 font-bold text-lg mb-3">ADDICTION POTENTIAL</h3>
-                    <p className="text-gray-800 dark:text-gray-200">{substance.drug_info.addiction_potential}</p>
+                    <h3 className="text-purple-600 dark:text-purple-400 font-bold text-lg mb-3">
+                      ADDICTION POTENTIAL
+                    </h3>
+                    <p className="text-gray-800 dark:text-gray-200">
+                      {substance.drug_info.addiction_potential}
+                    </p>
                   </div>
                 )}
               </div>
             </div>
           </div>
         )}
-        
+
         {/* Tolerance */}
         {activeSection === "tolerance" && substance.drug_info.tolerance && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Tolerance & Recovery</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+                Tolerance & Recovery
+              </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {substance.drug_info.tolerance.full_tolerance && (
                   <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-2">Full Tolerance</h3>
-                    <p className="text-gray-700 dark:text-gray-300">{substance.drug_info.tolerance.full_tolerance}</p>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Full Tolerance
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {substance.drug_info.tolerance.full_tolerance}
+                    </p>
                   </div>
                 )}
-                
+
                 {substance.drug_info.tolerance.half_tolerance && (
                   <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-2">Half Tolerance</h3>
-                    <p className="text-gray-700 dark:text-gray-300">{substance.drug_info.tolerance.half_tolerance}</p>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Half Tolerance
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {substance.drug_info.tolerance.half_tolerance}
+                    </p>
                   </div>
                 )}
-                
+
                 {substance.drug_info.tolerance.zero_tolerance && (
                   <div className="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-4">
-                    <h3 className="text-lg font-semibold mb-2">Zero Tolerance</h3>
-                    <p className="text-gray-700 dark:text-gray-300">{substance.drug_info.tolerance.zero_tolerance}</p>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Zero Tolerance
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300">
+                      {substance.drug_info.tolerance.zero_tolerance}
+                    </p>
                   </div>
                 )}
               </div>
-              
-              {substance.drug_info.tolerance.cross_tolerances && substance.drug_info.tolerance.cross_tolerances.length > 0 && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <h3 className="text-blue-600 dark:text-blue-400 font-bold text-lg mb-3">CROSS TOLERANCES</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {substance.drug_info.tolerance.cross_tolerances.map((item, idx) => (
-                      <Badge key={idx} variant="outline" className="bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 text-sm py-1 px-3">
-                        {item}
-                      </Badge>
-                    ))}
+
+              {substance.drug_info.tolerance.cross_tolerances &&
+                substance.drug_info.tolerance.cross_tolerances.length > 0 && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <h3 className="text-blue-600 dark:text-blue-400 font-bold text-lg mb-3">
+                      CROSS TOLERANCES
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {substance.drug_info.tolerance.cross_tolerances.map(
+                        (item, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="bg-blue-100 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700 text-sm py-1 px-3"
+                          >
+                            {item}
+                          </Badge>
+                        ),
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </div>
         )}
-        
+
         {/* Additional Info */}
         {activeSection === "info" && (
           <div className="rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-md">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Additional Information</h2>
-              
+              <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+                Additional Information
+              </h2>
+
               <div className="grid grid-cols-1 gap-4">
                 {substance.drug_info.chemical_class && (
                   <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Chemical Class</span>
-                    <span className="text-gray-900 dark:text-white">{substance.drug_info.chemical_class}</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      Chemical Class
+                    </span>
+                    <span className="text-gray-900 dark:text-white">
+                      {substance.drug_info.chemical_class}
+                    </span>
                   </div>
                 )}
-                
+
                 {substance.drug_info.psychoactive_class && (
                   <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Psychoactive Class</span>
-                    <span className="text-gray-900 dark:text-white">{substance.drug_info.psychoactive_class}</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      Psychoactive Class
+                    </span>
+                    <span className="text-gray-900 dark:text-white">
+                      {substance.drug_info.psychoactive_class}
+                    </span>
                   </div>
                 )}
-                
+
                 {substance.drug_info.half_life && (
                   <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">Half Life</span>
-                    <span className="text-gray-900 dark:text-white">{substance.drug_info.half_life}</span>
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      Half Life
+                    </span>
+                    <span className="text-gray-900 dark:text-white">
+                      {substance.drug_info.half_life}
+                    </span>
                   </div>
                 )}
               </div>

@@ -20,110 +20,227 @@ interface DoseRangeVisualProps {
   unit: string;
 }
 
+// Helper function to format dose values
+const formatDoseValue = (value: number | undefined): string => {
+  if (value === undefined) return "";
+  if (value >= 1000) return (value / 1000).toFixed(1) + "g";
+  if (Number.isInteger(value)) return value.toString();
+  return value.toFixed(1);
+};
+
 export function DoseRangeVisual({
   ranges,
   currentDose,
   unit,
 }: DoseRangeVisualProps) {
-  // Calculate the maximum value for scaling, extending 20% beyond heavy threshold
-  const heavyValue = ranges.heavy !== undefined ? ranges.heavy : 0;
-  const maxValue = heavyValue * 1.2;
+  // Only continue if we have valid ranges
+  if (!ranges || Object.keys(ranges).length === 0) {
+    return <div className="text-muted-foreground text-sm">No dose data available</div>;
+  }
 
-  // Calculate percentage positions for the ranges
-  const getPosition = (value: number) => (value / maxValue) * 100;
+  // Extract the dose boundary values in order
+  const thresholdValue = ranges.threshold;
+  const lightLower = ranges.light?.lower;
+  const commonLower = ranges.common?.lower;
+  const strongLower = ranges.strong?.lower;
+  const heavyValue = ranges.heavy;
 
-  // Get range style with color and position
-  const getRangeStyle = (start: number, end: number, color: string) => ({
-    left: `${getPosition(start)}%`,
-    width: `${getPosition(end - start)}%`,
-    backgroundColor: color,
-  });
+  // Calculate proportional widths based on actual values
+  const calculateProportionalWidths = () => {
+    // Default to equal widths if we're missing values
+    if (!thresholdValue || !lightLower || !commonLower || !strongLower || !heavyValue) {
+      return {
+        thresholdWidth: '25%',
+        lightWidth: '25%',
+        commonWidth: '25%',
+        strongWidth: '25%'
+      };
+    }
 
-  // Update the dose position calculation to cap at slightly before heavy threshold
-  const dosePosition = Math.min(
-    getPosition(
-      currentDose >= heavyValue
-        ? heavyValue * 0.99 // Cap at 99% of heavy threshold
-        : currentDose,
-    ),
-    100,
-  );
-
+    // Calculate the total range to normalize the widths
+    const totalRange = heavyValue;
+    
+    // Calculate each segment's width as a percentage of the total range
+    const thresholdWidth = (lightLower - thresholdValue) / totalRange * 100;
+    const lightWidth = (commonLower - lightLower) / totalRange * 100;
+    const commonWidth = (strongLower - commonLower) / totalRange * 100;
+    const strongWidth = (heavyValue - strongLower) / totalRange * 100;
+    
+    return {
+      thresholdWidth: `${thresholdWidth}%`,
+      lightWidth: `${lightWidth}%`,
+      commonWidth: `${commonWidth}%`,
+      strongWidth: `${strongWidth}%`
+    };
+  };
+  
+  // Calculate the positions for the boundary numbers
+  const calculateNumberPositions = () => {
+    if (!thresholdValue || !lightLower || !commonLower || !strongLower || !heavyValue) {
+      return {
+        lightPos: '25%',
+        commonPos: '50%',
+        strongPos: '75%'
+      };
+    }
+    
+    const totalRange = heavyValue;
+    
+    // Position numbers exactly at the boundaries
+    return {
+      lightPos: `${lightLower / totalRange * 100}%`,
+      commonPos: `${commonLower / totalRange * 100}%`,
+      strongPos: `${strongLower / totalRange * 100}%`
+    };
+  };
+  
+  // Handle the scenario where values might be too close to each other
+  const adjustTextPositions = (positions: {lightPos: string, commonPos: string, strongPos: string}) => {
+    // Convert the percentages to numbers
+    const lightPosNum = parseFloat(positions.lightPos);
+    const commonPosNum = parseFloat(positions.commonPos);
+    const strongPosNum = parseFloat(positions.strongPos);
+    
+    // Check if the positions are too close (less than 10% apart)
+    const adjusted = { ...positions };
+    
+    // Apply adjustments to text positions if needed
+    if (commonPosNum - lightPosNum < 10) {
+      adjusted.lightPos = `${lightPosNum - 3}%`;
+      adjusted.commonPos = `${commonPosNum + 3}%`;
+    }
+    
+    if (strongPosNum - commonPosNum < 10) {
+      adjusted.commonPos = `${commonPosNum - 3}%`;
+      adjusted.strongPos = `${strongPosNum + 3}%`;
+    }
+    
+    return adjusted;
+  };
+  
+  const widths = calculateProportionalWidths();
+  // Calculate and adjust positions to prevent overlapping text 
+  const positions = adjustTextPositions(calculateNumberPositions());
+  
   return (
-    <div className="w-full">
-      {/* Range visualization bar with indicator */}
-      <div className="relative h-4 bg-muted rounded-md overflow-hidden">
-        {/* Light range */}
-        {ranges.light && (
-          <div
-            className="absolute h-full opacity-40"
-            style={getRangeStyle(
-              ranges.threshold || 0,
-              ranges.light.upper || 0,
-              "hsl(142, 76%, 36%)", // Emerald green
-            )}
-          />
-        )}
-
-        {/* Common range */}
-        {ranges.common && (
-          <div
-            className="absolute h-full opacity-40"
-            style={getRangeStyle(
-              ranges.common.lower || 0,
-              ranges.common.upper || 0,
-              "hsl(142, 71%, 45%)", // Lighter emerald
-            )}
-          />
-        )}
-
-        {/* Strong range */}
-        {ranges.strong && (
-          <div
-            className="absolute h-full opacity-40"
-            style={getRangeStyle(
-              ranges.strong.lower || 0,
-              ranges.strong.upper || 0,
-              "hsl(48, 96%, 53%)", // Bright yellow
-            )}
-          />
-        )}
-
-        {/* Heavy range */}
-        {ranges.heavy && (
-          <div
-            className="absolute h-full opacity-40"
-            style={getRangeStyle(
-              ranges.heavy,
-              maxValue,
-              "hsl(0, 84%, 60%)", // Vibrant red
-            )}
-          />
-        )}
-
-        {/* Current dose indicator */}
-        <div
-          className={cn(
-            "absolute w-0.5 h-full transition-all duration-300",
-            currentDose >= heavyValue && heavyValue > 0
-              ? "bg-red-500 animate-pulse"
-              : "bg-foreground",
-          )}
-          style={{
-            left: `${dosePosition}%`,
-            zIndex: 10, // Ensure indicator is always visible
+    <div className="w-full mt-8">
+      {/* Dose boundary numbers at the top */}
+      <div className="flex relative h-8 mb-4">
+        {/* Threshold */}
+        <div className="absolute left-0" style={{ color: "rgb(22, 163, 74)" }}>
+          <span className="font-bold text-base inline-block">{formatDoseValue(thresholdValue)}</span>
+        </div>
+        
+        {/* Light */}
+        <div className="absolute" style={{ 
+          color: "rgb(34, 197, 94)", 
+          left: positions.lightPos,
+          transform: "translateX(-50%)" 
+        }}>
+          <span className="font-bold text-base inline-block">{formatDoseValue(lightLower)}</span>
+        </div>
+        
+        {/* Common */}
+        <div className="absolute" style={{ 
+          color: "rgb(56, 189, 248)", 
+          left: positions.commonPos,
+          transform: "translateX(-50%)" 
+        }}>
+          <span className="font-bold text-base inline-block">{formatDoseValue(commonLower)}</span>
+        </div>
+        
+        {/* Strong */}
+        <div className="absolute" style={{ 
+          color: "rgb(250, 204, 21)", 
+          left: positions.strongPos,
+          transform: "translateX(-50%)" 
+        }}>
+          <span className="font-bold text-base inline-block">{formatDoseValue(strongLower)}</span>
+        </div>
+        
+        {/* Heavy */}
+        <div className="absolute right-0" style={{ color: "rgb(239, 68, 68)" }}>
+          <span className="font-bold text-base inline-block">{formatDoseValue(heavyValue)}+</span>
+        </div>
+      </div>
+      
+      {/* Colored dose bar - aligned with numbers */}
+      <div className="h-8 w-full flex overflow-hidden rounded">
+        {/* Threshold to Light */}
+        <div 
+          className="h-full" 
+          style={{ 
+            width: widths.thresholdWidth, 
+            backgroundColor: "rgb(22, 163, 74)"
           }}
-        />
+        ></div>
+        
+        {/* Light to Common */}
+        <div 
+          className="h-full" 
+          style={{ 
+            width: widths.lightWidth, 
+            backgroundColor: "rgb(34, 197, 94)"
+          }}
+        ></div>
+        
+        {/* Common to Strong */}
+        <div 
+          className="h-full" 
+          style={{ 
+            width: widths.commonWidth, 
+            backgroundColor: "rgb(56, 189, 248)"
+          }}
+        ></div>
+        
+        {/* Strong to Heavy */}
+        <div 
+          className="h-full" 
+          style={{ 
+            width: widths.strongWidth, 
+            backgroundColor: "rgb(250, 204, 21)"
+          }}
+        ></div>
+        
+        {/* Extra small red section for heavy+ */}
+        <div 
+          className="h-full" 
+          style={{ 
+            width: '3%', 
+            backgroundColor: "rgb(239, 68, 68)"
+          }}
+        ></div>
       </div>
-
-      {/* Labels - tiny and more compact */}
-      <div className="flex justify-between text-[9px] text-muted-foreground mt-0.5 px-1">
-        <span>Threshold</span>
-        <span>Light</span>
-        <span>Common</span>
-        <span>Strong</span>
-        <span>Heavy</span>
+      
+      {/* Evenly spaced fixed labels */}
+      <div className="flex text-xs text-gray-500 dark:text-gray-400 mt-4 px-2">
+        <div style={{ width: '20%' }} className="text-left">
+          <span>Threshold</span>
+        </div>
+        <div style={{ width: '20%' }} className="text-center">
+          <span>Light</span>
+        </div>
+        <div style={{ width: '20%' }} className="text-center">
+          <span>Common</span>
+        </div>
+        <div style={{ width: '20%' }} className="text-center">
+          <span>Strong</span>
+        </div>
+        <div style={{ width: '20%' }} className="text-right">
+          <span>Heavy</span>
+        </div>
       </div>
+      
+      {/* Current dose indicator - only show if currentDose is > 0 */}
+      {currentDose > 0 && (
+        <div className="relative mt-3">
+          <div className="text-center text-xs">
+            <span className="text-blue-600 dark:text-blue-400 font-semibold">
+              Current dose: {formatDoseValue(currentDose)} {unit}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
