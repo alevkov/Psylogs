@@ -1,32 +1,23 @@
 import { DoseEntry } from "./constants";
 import {
   eachDayOfInterval,
-  eachWeekOfInterval,
-  eachMonthOfInterval,
   startOfDay,
-  startOfWeek,
-  format,
   getDay,
   getWeek,
-  startOfMonth,
-  addWeeks,
-  addMonths,
   differenceInHours,
   differenceInDays,
-  isSameDay,
   subMonths,
-  subDays,
 } from "date-fns";
 import regression from "regression";
 
-// Substance interaction thresholds (in hours)
+
 export const INTERACTION_THRESHOLDS: Record<string, number> = {
   default: 24,
   high_risk: 12,
   critical: 6,
 };
 
-// Effect duration estimates (in hours)
+
 export const EFFECT_DURATIONS: Record<string, number> = {
   default: 4,
   short: 2,
@@ -43,8 +34,8 @@ interface TimeCorrelation {
 
 interface UsagePattern {
   substance: string;
-  periodicity: number; // Average days between doses
-  consistency: number; // 0-1 score of how consistent the pattern is
+  periodicity: number; 
+  consistency: number; 
   trend: "increasing" | "decreasing" | "stable";
 }
 
@@ -76,7 +67,7 @@ export function calculateTimeCorrelations(
 ): TimeCorrelation[] {
   const substanceDays = new Map<string, Set<string>>();
 
-  // Group doses by substance and day
+
   doses.forEach((dose) => {
     const day = startOfDay(new Date(dose.timestamp)).toISOString();
     if (!substanceDays.has(dose.substance)) {
@@ -88,7 +79,7 @@ export function calculateTimeCorrelations(
   const correlations: TimeCorrelation[] = [];
   const substances = Array.from(substanceDays.keys());
 
-  // Calculate correlations between each pair of substances
+
   for (let i = 0; i < substances.length; i++) {
     for (let j = i + 1; j < substances.length; j++) {
       const substance1 = substances[i];
@@ -96,11 +87,11 @@ export function calculateTimeCorrelations(
       const days1 = Array.from(substanceDays.get(substance1) || []);
       const days2 = Array.from(substanceDays.get(substance2) || []);
 
-      // Find common days
-      const commonDays = days1.filter((day) => days2.includes(day)).length;
+
+      const commonDays = days1.filter((day) => days2.indexOf(day) !== -1).length;
       const totalDays = new Set([...days1, ...days2]).size;
 
-      // Calculate correlation coefficient
+
       const correlation = commonDays / Math.sqrt(days1.length * days2.length);
 
       correlations.push({
@@ -131,15 +122,15 @@ export interface EnhancedUsagePattern {
     };
   };
   changeMetrics: {
-    doseSizeTrend: number; // Positive means increasing
-    frequencyTrend: number; // Positive means more frequent
+    doseSizeTrend: number; 
+    frequencyTrend: number; 
     weekOverWeekChange: number;
     monthOverMonthChange: number;
   };
   variationMetrics: {
-    doseConsistency: number; // 0-1, how consistent are dose sizes
-    timingConsistency: number; // 0-1, how consistent is timing
-    routeConsistency: number; // 0-1, how consistent is ROA
+    doseConsistency: number; 
+    timingConsistency: number; 
+    routeConsistency: number; 
   };
 }
 
@@ -148,7 +139,7 @@ export function analyzePersonalPatterns(
 ): EnhancedUsagePattern[] {
   const substanceDoses = new Map<string, DoseEntry[]>();
 
-  // Group doses by substance
+
   doses.forEach((dose) => {
     if (!substanceDoses.has(dose.substance)) {
       substanceDoses.set(dose.substance, []);
@@ -162,42 +153,58 @@ export function analyzePersonalPatterns(
         new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
 
-    // Calculate time between doses
+
     const timeBetweenDoses = sortedDoses
-      .slice(1)
+      .slice(0, -1)
       .map((dose, i) =>
         differenceInHours(
-          new Date(sortedDoses[i].timestamp),
           new Date(dose.timestamp),
+          new Date(sortedDoses[i + 1].timestamp),
         ),
       );
 
-    // Calculate dose amounts statistics
+
     const amounts = sortedDoses.map((d) => d.amount);
     const avgAmount =
       amounts.reduce((sum, amt) => sum + amt, 0) / amounts.length;
 
-    // Calculate consecutive days
-    let consecutiveDays = 0;
-    let currentStreak = 0;
-    let currentDate = startOfDay(new Date(sortedDoses[0].timestamp));
 
-    sortedDoses.forEach((dose) => {
-      if (
-        isSameDay(currentDate, new Date(dose.timestamp)) ||
-        differenceInDays(currentDate, new Date(dose.timestamp)) === 1
-      ) {
-        currentStreak++;
-        currentDate = startOfDay(new Date(dose.timestamp));
-      } else {
-        consecutiveDays = Math.max(consecutiveDays, currentStreak);
+    let consecutiveDays = 0;
+    let currentStreak = 1;
+    let previousDate = null;
+
+
+    const chronologicalDoses = [...sortedDoses].reverse();
+
+    chronologicalDoses.forEach((dose, index) => {
+      const doseDate = startOfDay(new Date(dose.timestamp));
+
+      if (index === 0) {
+
+        previousDate = doseDate;
         currentStreak = 1;
-        currentDate = startOfDay(new Date(dose.timestamp));
+      } else {
+        const dayDiff = differenceInDays(doseDate, previousDate);
+
+        if (dayDiff === 1 || dayDiff === 0) {
+
+          if (dayDiff === 1) {
+            currentStreak++;
+          }
+          previousDate = doseDate;
+        } else {
+
+          consecutiveDays = Math.max(consecutiveDays, currentStreak);
+          currentStreak = 1;
+          previousDate = doseDate;
+        }
       }
     });
+
+
     consecutiveDays = Math.max(consecutiveDays, currentStreak);
 
-    // Find most common time of day
+
     const hourCounts = new Map<number, number>();
     sortedDoses.forEach((dose) => {
       const hour = new Date(dose.timestamp).getHours();
@@ -207,7 +214,7 @@ export function analyzePersonalPatterns(
       (a, b) => b[1] - a[1],
     )[0][0];
 
-    // Calculate route preferences
+
     const routeCounts = new Map<string, number>();
     sortedDoses.forEach((dose) => {
       routeCounts.set(dose.route, (routeCounts.get(dose.route) || 0) + 1);
@@ -216,7 +223,7 @@ export function analyzePersonalPatterns(
       (a, b) => b[1] - a[1],
     )[0][0];
 
-    // Calculate trends
+
     const recentDoses = sortedDoses.slice(0, Math.min(10, sortedDoses.length));
     const olderDoses = sortedDoses.slice(Math.min(10, sortedDoses.length));
 
@@ -228,7 +235,7 @@ export function analyzePersonalPatterns(
 
     const doseSizeTrend = olderAvg ? (recentAvg - olderAvg) / olderAvg : 0;
 
-    // Calculate week over week and month over month changes
+
     const now = new Date();
     const lastWeekDoses = sortedDoses.filter(
       (d) => differenceInDays(now, new Date(d.timestamp)) <= 7,
@@ -254,7 +261,7 @@ export function analyzePersonalPatterns(
       ? (lastMonthDoses - previousMonthDoses) / previousMonthDoses
       : 0;
 
-    // Calculate frequency trend
+
     const recentFrequency = recentDoses.length
       ? differenceInDays(
           now,
@@ -271,7 +278,7 @@ export function analyzePersonalPatterns(
       ? (recentFrequency - olderFrequency) / olderFrequency
       : 0;
 
-    // Calculate consistency scores
+
     const doseConsistency = 1 - standardDeviation(amounts) / (avgAmount || 1);
     const timeConsistency =
       timeBetweenDoses.length > 0
@@ -311,7 +318,7 @@ export function analyzePersonalPatterns(
   });
 }
 
-// Helper functions
+
 function average(numbers: number[]): number {
   return numbers.length
     ? numbers.reduce((sum, n) => sum + n, 0) / numbers.length
@@ -324,7 +331,7 @@ function standardDeviation(numbers: number[]): number {
   return Math.sqrt(average(squareDiffs));
 }
 
-// Update the Stats interface
+
 export interface Stats {
   timeCorrelations: ReturnType<typeof calculateTimeCorrelations>;
   usagePatterns: ReturnType<typeof analyzeUsagePatterns>;
@@ -352,7 +359,7 @@ export function analyzeUsagePatterns(doses: DoseEntry[]): UsagePattern[] {
   const patterns: UsagePattern[] = [];
   const substanceDoses = new Map<string, DoseEntry[]>();
 
-  // Group doses by substance
+
   doses.forEach((dose) => {
     if (!substanceDoses.has(dose.substance)) {
       substanceDoses.set(dose.substance, []);
@@ -363,13 +370,13 @@ export function analyzeUsagePatterns(doses: DoseEntry[]): UsagePattern[] {
   substanceDoses.forEach((substanceDoses, substance) => {
     if (substanceDoses.length < 2) return;
 
-    // Sort doses by timestamp
+
     const sortedDoses = substanceDoses.sort(
       (a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
 
-    // Calculate time gaps between doses
+
     const gaps = [];
     for (let i = 1; i < sortedDoses.length; i++) {
       gaps.push(
@@ -380,7 +387,7 @@ export function analyzeUsagePatterns(doses: DoseEntry[]): UsagePattern[] {
       );
     }
 
-    // Calculate average gap and consistency using coefficient of variation
+
     const avgGap = gaps.reduce((sum, gap) => sum + gap, 0) / gaps.length;
     const variance =
       gaps.reduce((sum, gap) => sum + Math.pow(gap - avgGap, 2), 0) /
@@ -389,7 +396,7 @@ export function analyzeUsagePatterns(doses: DoseEntry[]): UsagePattern[] {
     const coefficientOfVariation = stdDev / avgGap;
     const consistency = Math.max(0, Math.min(1, 1 - coefficientOfVariation));
 
-    // Calculate trend using linear regression
+
     const trendData = sortedDoses.map((dose, index) => [index, dose.amount]);
     const trendResult = regression.linear(trendData);
     const trend =
@@ -417,7 +424,7 @@ export function generateUsageForecast(
   const forecasts: UsageForecast[] = [];
   const substanceDoses = new Map<string, DoseEntry[]>();
 
-  // Group doses by substance
+
   doses.forEach((dose) => {
     if (!substanceDoses.has(dose.substance)) {
       substanceDoses.set(dose.substance, []);
@@ -428,7 +435,7 @@ export function generateUsageForecast(
   substanceDoses.forEach((substanceDoses, substance) => {
     if (substanceDoses.length < 5) return;
 
-    // Prepare data for regression, normalizing timestamps to days since first dose
+
     const sortedDoses = substanceDoses.sort(
       (a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
@@ -437,27 +444,27 @@ export function generateUsageForecast(
 
     const data = sortedDoses.map((dose) => [
       (new Date(dose.timestamp).getTime() - firstDoseTime) /
-        (24 * 60 * 60 * 1000), // Convert to days
+        (24 * 60 * 60 * 1000), 
       dose.amount,
     ]);
 
-    // Perform linear regression
+
     const result = regression.linear(data);
 
-    // Calculate prediction interval for confidence
+
     const n = data.length;
     const sumX = data.reduce((sum, [x]) => sum + x, 0);
     const sumXSquared = data.reduce((sum, [x]) => sum + x * x, 0);
     const xBar = sumX / n;
 
-    // Calculate standard error of regression
+
     const yHat = data.map(([x]) => result.equation[0] * x + result.equation[1]);
     const residuals = data.map(([x, y], i) => y - yHat[i]);
     const standardError = Math.sqrt(
       residuals.reduce((sum, r) => sum + r * r, 0) / (n - 2),
     );
 
-    // Generate predictions
+
     const predictedDoses = [];
     const lastDoseDay = data[data.length - 1][0];
 
@@ -466,20 +473,21 @@ export function generateUsageForecast(
       const predictedAmount =
         result.equation[0] * futureDays + result.equation[1];
 
-      // Calculate prediction interval and confidence
+
       const leverage =
         1 / n +
         Math.pow(futureDays - xBar, 2) / (sumXSquared - n * xBar * xBar);
       const predictionInterval = 1.96 * standardError * Math.sqrt(1 + leverage);
-      const confidence = Math.max(
+
+      const confidence = predictedAmount <= 0 ? 0 : Math.max(
         0,
-        Math.min(1, 1 - predictionInterval / predictedAmount),
+        Math.min(1, 1 - predictionInterval / Math.abs(predictedAmount)),
       );
 
       predictedDoses.push({
         date: new Date(firstDoseTime + futureDays * 24 * 60 * 60 * 1000),
         amount: Math.max(0, predictedAmount),
-        confidence: isNaN(confidence) ? 0.5 : confidence, // Fallback for edge cases
+        confidence: isNaN(confidence) ? 0.5 : confidence, 
       });
     }
 
@@ -499,7 +507,7 @@ export function analyzeSubstanceInteractions(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 
-  // Track substance combinations
+
   const combinations = new Map<string, { count: number; minGap: number }>();
 
   for (let i = 0; i < recentDoses.length; i++) {
@@ -529,7 +537,7 @@ export function analyzeSubstanceInteractions(
     }
   }
 
-  // Convert combinations to interactions
+
   combinations.forEach((data, substancePair) => {
     const substances = substancePair.split("_");
     let riskLevel: SubstanceInteraction["riskLevel"] = "low";
@@ -551,7 +559,7 @@ export function analyzeSubstanceInteractions(
   });
 
   return interactions.sort((a, b) => {
-    // Sort by risk level first, then frequency
+
     const riskLevels = { critical: 3, high: 2, moderate: 1, low: 0 };
     return (
       riskLevels[b.riskLevel] - riskLevels[a.riskLevel] ||
@@ -563,28 +571,29 @@ export function analyzeSubstanceInteractions(
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export function generateCalendarData(doses: DoseEntry[]) {
-  const startDate = subMonths(new Date(), 12); // Last 12 months
+  const startDate = subMonths(new Date(), 12); 
   const endDate = new Date();
 
-  // Create a map to store doses per day
+
   const dosesByDay = new Map<string, number>();
 
-  // Count doses for each day
+
   doses.forEach((dose) => {
     const date = startOfDay(new Date(dose.timestamp));
     const key = date.toISOString();
     dosesByDay.set(key, (dosesByDay.get(key) || 0) + 1);
   });
 
-  // Generate calendar data points
+
   const calendarData: CalendarDataPoint[] = [];
   let currentDate = startDate;
 
-  while (currentDate <= endDate) {
-    const date = startOfDay(currentDate);
+
+  eachDayOfInterval({ start: startDate, end: endDate }).forEach(date => {
+    const dateKey = startOfDay(date).toISOString();
     const week = getWeek(date);
     const weekday = WEEKDAYS[getDay(date)];
-    const doses = dosesByDay.get(date.toISOString()) || 0;
+    const doses = dosesByDay.get(dateKey) || 0;
 
     calendarData.push({
       week,
@@ -592,9 +601,7 @@ export function generateCalendarData(doses: DoseEntry[]) {
       date,
       doses,
     });
-
-    currentDate = addWeeks(currentDate, 1);
-  }
+  });
 
   return calendarData;
 }
@@ -610,10 +617,10 @@ export function calculateRecoveryPeriods(doses: DoseEntry[]) {
     const duration =
       EFFECT_DURATIONS[dose.substance] || EFFECT_DURATIONS.default;
 
-    // Extend recovery period if doses overlap
+
     const newRecovery = Math.max(
       prevRecovery,
-      duration * (dose.amount / 100), // Scale by dose amount
+      duration * (dose.amount / 100), 
     );
 
     substanceRecovery.set(dose.substance, newRecovery);

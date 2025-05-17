@@ -28,7 +28,7 @@ const utcToLocalDatetimeLocal = (utcIsoString: string | null | undefined): strin
 const localToUtcIsoString = (localDatetime: string): string => {
   if (!localDatetime) return '';
   console.log('Converting local datetime:', localDatetime);
-  
+
   // For datetime-local input, we need to handle it specially
   // The value from input is in format YYYY-MM-DDThh:mm without timezone info
   // Create a new date object treating this as local time
@@ -37,14 +37,14 @@ const localToUtcIsoString = (localDatetime: string): string => {
     // This is a datetime-local format
     const [year, month, day] = datePart.split('-').map(Number);
     const [hours, minutes] = timePart.split(':').map(Number);
-    
+
     // Create date using local components, so it will be correctly converted to UTC
     const localDate = new Date(year, month - 1, day, hours, minutes);
     const isoString = localDate.toISOString();
     console.log('Converted to ISO:', isoString);
     return isoString;
   }
-  
+
   // Fallback for other formats - direct conversion
   const date = new Date(localDatetime);
   const isoString = date.toISOString();
@@ -52,13 +52,13 @@ const localToUtcIsoString = (localDatetime: string): string => {
   return isoString;
 };
 
-export default function EditDoseDialog({ 
-  dose, 
-  open, 
+export default function EditDoseDialog({
+  dose,
+  open,
   onOpenChange,
-  onSave 
-}: { 
-  dose: { 
+  onSave
+}: {
+  dose: {
     id: number;
     substance: string;
     amount: number;
@@ -68,6 +68,7 @@ export default function EditDoseDialog({
     onsetAt?: string;
     peakAt?: string;
     offsetAt?: string;
+    notes?: { id?: string; timestamp: string; text: string; }[];
   };
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -98,7 +99,7 @@ export default function EditDoseDialog({
       offsetAt: dose.offsetAt || '',
     });
   }, [dose]);
-  
+
   const [errors, setErrors] = useState<{
     timestamp?: string;
     onsetAt?: string;
@@ -115,15 +116,15 @@ export default function EditDoseDialog({
   ) => {
     const newErrors: typeof errors = {};
     const creationTime = new Date(creation);
-    
+
     if (!creation) {
       newErrors.timestamp = "Creation time is required";
     }
-    
+
     if (onset && new Date(onset) < creationTime) {
       newErrors.onsetAt = "Onset time cannot be before dose time";
     }
-    
+
     if (peak) {
       if (!onset) {
         newErrors.peakAt = "Must set onset time before peak";
@@ -131,7 +132,7 @@ export default function EditDoseDialog({
         newErrors.peakAt = "Peak time must be after onset";
       }
     }
-    
+
     if (offset) {
       if (!peak) {
         newErrors.offsetAt = "Must set peak time before offset";
@@ -139,7 +140,7 @@ export default function EditDoseDialog({
         newErrors.offsetAt = "Offset time must be after peak";
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -150,7 +151,7 @@ export default function EditDoseDialog({
     try {
       // For debugging
       console.log('Form timestamp before conversion:', formData.timestamp);
-      
+
       // Convert local datetime format to UTC ISO string, handle the case with already converted string
       let timestampUtc;
       // Check if timestamp is already in ISO format (contains 'T' and 'Z', ISO timezone indicator)
@@ -161,7 +162,7 @@ export default function EditDoseDialog({
         timestampUtc = localToUtcIsoString(formData.timestamp);
         console.log('Converted timestamp to UTC:', timestampUtc);
       }
-      
+
       const onsetTime = formData.onsetAt ? localToUtcIsoString(formData.onsetAt) : undefined;
       const peakTime = formData.peakAt ? localToUtcIsoString(formData.peakAt) : undefined;
       const offsetTime = formData.offsetAt ? localToUtcIsoString(formData.offsetAt) : undefined;
@@ -190,12 +191,12 @@ export default function EditDoseDialog({
         peakAt: peakTime,
         offsetAt: offsetTime,
       };
-      
+
       // Remove undefined timestamps
       if (!updates.onsetAt) delete updates.onsetAt;
       if (!updates.peakAt) delete updates.peakAt;
       if (!updates.offsetAt) delete updates.offsetAt;
-      
+
       console.log('Saving updates:', updates);
       await onSave(dose.id, updates);
       onOpenChange(false);
@@ -294,7 +295,14 @@ export default function EditDoseDialog({
           {/* Timestamps section */}
           <div className="space-y-4 p-2 bg-muted/10 rounded-md">
             <h3 className="font-medium text-sm">Timestamps</h3>
-            
+
+            {/* Show note count if there are notes */}
+            {dose.notes && dose.notes.length > 0 && (
+              <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded flex items-center">
+                <span className="mr-1">📝</span> This dose has {dose.notes.length} note{dose.notes.length !== 1 ? 's' : ''}. You can view and manage notes from the dose history view.
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-sm text-muted-foreground flex justify-between">
                 <span>Creation Time</span>

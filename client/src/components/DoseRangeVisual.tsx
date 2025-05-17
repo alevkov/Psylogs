@@ -123,12 +123,12 @@ export function DoseRangeVisual({
   const positions = adjustTextPositions(calculateNumberPositions());
   
   return (
-    <div className="w-full mt-8">
+    <div className="w-full mt-4">
       {/* Dose boundary numbers at the top */}
-      <div className="flex relative h-8 mb-4">
+      <div className="flex relative h-6 mb-2">
         {/* Threshold */}
         <div className="absolute left-0" style={{ color: "rgb(22, 163, 74)" }}>
-          <span className="font-bold text-base inline-block">{formatDoseValue(thresholdValue)}</span>
+          <span className="font-bold text-xs inline-block">{formatDoseValue(thresholdValue)}</span>
         </div>
         
         {/* Light */}
@@ -137,7 +137,7 @@ export function DoseRangeVisual({
           left: positions.lightPos,
           transform: "translateX(-50%)" 
         }}>
-          <span className="font-bold text-base inline-block">{formatDoseValue(lightLower)}</span>
+          <span className="font-bold text-xs inline-block">{formatDoseValue(lightLower)}</span>
         </div>
         
         {/* Common */}
@@ -146,7 +146,7 @@ export function DoseRangeVisual({
           left: positions.commonPos,
           transform: "translateX(-50%)" 
         }}>
-          <span className="font-bold text-base inline-block">{formatDoseValue(commonLower)}</span>
+          <span className="font-bold text-xs inline-block">{formatDoseValue(commonLower)}</span>
         </div>
         
         {/* Strong */}
@@ -155,17 +155,17 @@ export function DoseRangeVisual({
           left: positions.strongPos,
           transform: "translateX(-50%)" 
         }}>
-          <span className="font-bold text-base inline-block">{formatDoseValue(strongLower)}</span>
+          <span className="font-bold text-xs inline-block">{formatDoseValue(strongLower)}</span>
         </div>
         
         {/* Heavy */}
         <div className="absolute right-0" style={{ color: "rgb(239, 68, 68)" }}>
-          <span className="font-bold text-base inline-block">{formatDoseValue(heavyValue)}+</span>
+          <span className="font-bold text-xs inline-block">{formatDoseValue(heavyValue)}+</span>
         </div>
       </div>
       
       {/* Colored dose bar - aligned with numbers */}
-      <div className="h-8 w-full flex overflow-hidden rounded">
+      <div className="h-5 w-full flex overflow-hidden rounded">
         {/* Threshold to Light */}
         <div 
           className="h-full" 
@@ -213,7 +213,7 @@ export function DoseRangeVisual({
       </div>
       
       {/* Evenly spaced fixed labels */}
-      <div className="flex text-xs text-gray-500 dark:text-gray-400 mt-4 px-2">
+      <div className="flex text-[10px] text-gray-500 dark:text-gray-400 mt-2 px-1">
         <div style={{ width: '20%' }} className="text-left">
           <span>Threshold</span>
         </div>
@@ -233,8 +233,8 @@ export function DoseRangeVisual({
       
       {/* Current dose indicator - only show if currentDose is > 0 */}
       {currentDose > 0 && (
-        <div className="relative mt-3">
-          <div className="text-center text-xs">
+        <div className="relative mt-2">
+          <div className="text-center text-[10px]">
             <span className="text-blue-600 dark:text-blue-400 font-semibold">
               Current dose: {formatDoseValue(currentDose)} {unit}
             </span>

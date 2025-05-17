@@ -4,7 +4,6 @@ import { Switch, Route, Link } from "wouter";
 import "./index.css";
 import { SWRConfig } from "swr";
 import { fetcher } from "./lib/fetcher";
-import { ConnectionStatus } from "./components/ConnectionStatus";
 import { DoseProvider } from "./contexts/DoseContext";
 import { Toaster } from "./components/ui/toaster";
 import { Home, Activity, History, Pill, Settings } from "lucide-react";
@@ -33,7 +32,7 @@ initializeDarkMode();
 
 function Layout({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-  
+
   return (
     <div className="app-base">
       <div className="min-h-screen bg-background">
@@ -42,10 +41,26 @@ function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex h-16 items-center justify-center">
               <div className="flex items-center w-full justify-between gap-1">
                 <NavItem href="/" icon={<Home size={16} />} label="Home" />
-                <NavItem href="/active" icon={<Activity size={16} />} label="Active" />
-                <NavItem href="/history" icon={<History size={16} />} label="History" />
-                <NavItem href="/substances" icon={<Pill size={16} />} label="Substances" />
-                <NavItem href="/settings" icon={<Settings size={16} />} label="Settings" />
+                <NavItem
+                  href="/active"
+                  icon={<Activity size={16} />}
+                  label="Active"
+                />
+                <NavItem
+                  href="/history"
+                  icon={<History size={16} />}
+                  label="History"
+                />
+                <NavItem
+                  href="/substances"
+                  icon={<Pill size={16} />}
+                  label="Substances"
+                />
+                <NavItem
+                  href="/settings"
+                  icon={<Settings size={16} />}
+                  label="Settings"
+                />
               </div>
             </div>
           </div>
@@ -58,22 +73,24 @@ function Layout({ children }: { children: React.ReactNode }) {
 }
 
 // Navigation item component with icon and responsive text
-function NavItem({ 
-  href, 
-  icon, 
-  label 
-}: { 
-  href: string; 
-  icon: React.ReactNode; 
-  label: string 
+function NavItem({
+  href,
+  icon,
+  label,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
 }) {
   const isMobile = useIsMobile();
-  
+
   return (
     <Link href={href}>
       <div className="flex flex-col items-center justify-center hover:text-primary transition-colors cursor-pointer py-1 px-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md">
         <span className="text-gray-600 dark:text-gray-300">{icon}</span>
-        <span className={`${isMobile ? 'text-[10px]' : 'text-xs'} transition-all`}>
+        <span
+          className={`${isMobile ? "text-[10px]" : "text-xs"} transition-all`}
+        >
           {label}
         </span>
       </div>

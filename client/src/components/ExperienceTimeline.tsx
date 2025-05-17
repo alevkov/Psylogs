@@ -10,30 +10,20 @@ import { useDoseContext } from "../contexts/DoseContext";
 import { useInView } from "react-intersection-observer";
 import { getSubstanceColor, getContrastTextColor } from "../lib/color-utils";
 
-// Import timeline data - new format with ISO durations
-import durationCurvesData from "../lib/duration_curves.json";
-import { 
-  TimelineData as NewTimelineData, 
-  determinePhase, 
-  getPhaseTime, 
-  getTotalDuration,
-  DurationCurve
-} from "../lib/timeline.types";
+// Import articles refined data as the single source of truth
+import articlesRefined from "../lib/articles_refined.json";
 
-// For backward compatibility with old timeline data format
-import oldTimelineData from "../lib/dose_tiers_with_timelines.json";
+// Import helper types and functions
+import {
+  TimelineData as NewTimelineData,
+  determinePhase,
+  getPhaseTime,
+  getTotalDuration,
+  DurationCurve,
+} from "../lib/timeline.types";
 
 // Type alias for easier transition
 type TimelineData = NewTimelineData;
-
-interface OldTimelineData {
-  drug: string;
-  method: string;
-  dose_ranges: string;
-  onset: number;
-  peak: number;
-  offset: number;
-}
 
 interface ExperienceTimelineProps {
   className?: string;
@@ -70,123 +60,140 @@ export function ExperienceTimeline({
     startTime: Date;
     currentTime: Date;
   } | null>(null);
+  function parseSubstanceNames(drugName: string): {
+    mainName: string;
+    alternativeNames: string[];
+  } {
+    // Default values
+    let mainName = drugName;
+    let alternativeNames: string[] = [];
 
-  // Helper function to find timeline data for a substance and route
+    // Check if there are parentheses in the name
+    const parenMatch = drugName.match(/^(.*?)\s*\((.*?)\)$/);
+
+    if (parenMatch) {
+      // Extract the main name (part before parentheses)
+      mainName = parenMatch[1].trim();
+
+      // Extract alternative names from inside parentheses
+      const altNamesString = parenMatch[2];
+      alternativeNames = altNamesString.split(", ").map((name) => name.trim());
+    }
+
+    return { mainName, alternativeNames };
+  }
+  // Helper function to find timeline data for a substance and route from articles_refined
   const findTimelineData = useCallback(
     (substance: string, route: string): TimelineData | null => {
       const normalizedSubstance = substance.toLowerCase().trim();
       const normalizedRoute = route.toLowerCase().trim();
 
-      // First look in the new duration curves data
-      const exactMatch = durationCurvesData.find(
-        (item) =>
-          item.drug.toLowerCase() === normalizedSubstance &&
-          item.method.toLowerCase() === normalizedRoute,
-      );
+      // Find the substance in articles_refined data with name matching
+      const substanceData = articlesRefined.find((item) => {
+        if (!item.drug_info?.drug_name) return false;
 
-      if (exactMatch) return exactMatch;
+        const drugName = item.drug_info.drug_name;
+        const { mainName, alternativeNames } = parseSubstanceNames(drugName);
 
-      // If no exact match, look for substance with any route
-      const anyRouteMatch = durationCurvesData.find(
-        (item) => item.drug.toLowerCase() === normalizedSubstance,
-      );
+        // Check if the entered substance matches main name or any alternative name (case-insensitive)
+        if (mainName.toLowerCase() === normalizedSubstance) return true;
+        return alternativeNames.some(
+          (alt) => alt.toLowerCase() === normalizedSubstance,
+        );
+      });
+      if (!substanceData || !substanceData.drug_info?.durations_parsed) {
+        return null;
+      }
 
-      if (anyRouteMatch) return anyRouteMatch;
+      // Check if the specific route exists in the durations_parsed
+      if (substanceData.drug_info.durations_parsed[normalizedRoute]) {
+        const routeData =
+          substanceData.drug_info.durations_parsed[normalizedRoute];
 
-      // If not found in the new data, fallback to old data format
-      console.log(`No curve data found for ${substance}/${route}. Falling back to basic data.`);
-      
-      // Check old timeline data
-      const oldExactMatch = oldTimelineData.find(
-        (item) =>
-          item.drug.toLowerCase() === normalizedSubstance &&
-          item.method.toLowerCase() === normalizedRoute,
-      ) as OldTimelineData | undefined;
-
-      if (oldExactMatch) {
-        // Convert old format to new format
+        // Extract timeline data from the new format
         return {
-          drug: oldExactMatch.drug,
-          method: oldExactMatch.method,
+          drug: substanceData.drug_info.drug_name,
+          method: normalizedRoute,
           duration_curve: {
-            reference: "Legacy data",
-            units: "hours",
-            total_duration: {
-              min: oldExactMatch.offset,
-              max: oldExactMatch.offset * 1.33,
-              iso: [`PT${oldExactMatch.offset}H`, `PT${Math.ceil(oldExactMatch.offset * 1.33)}H`]
+            reference: routeData.duration_curve.reference || "Unknown",
+            units: routeData.duration_curve.units || "hours",
+            total_duration: routeData.duration_curve.total_duration || {
+              min: 0,
+              max: 0,
+              iso: ["PT0H"],
             },
-            onset: {
+            onset: routeData.duration_curve.onset || {
               start: 0,
-              end: oldExactMatch.onset,
+              end: 0,
               iso_start: ["PT0H"],
-              iso_end: [`PT${oldExactMatch.onset}H`]
+              iso_end: ["PT0H"],
             },
-            peak: {
-              start: oldExactMatch.onset,
-              end: oldExactMatch.peak,
-              iso_start: [`PT${oldExactMatch.onset}H`],
-              iso_end: [`PT${oldExactMatch.peak}H`]
+            peak: routeData.duration_curve.peak || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
             },
-            offset: {
-              start: oldExactMatch.peak,
-              end: oldExactMatch.offset,
-              iso_start: [`PT${oldExactMatch.peak}H`],
-              iso_end: [`PT${oldExactMatch.offset}H`]
+            offset: routeData.duration_curve.offset || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
             },
-            after_effects: {
-              start: oldExactMatch.offset,
-              end: oldExactMatch.offset * 1.33,
-              iso_start: [`PT${oldExactMatch.offset}H`],
-              iso_end: [`PT${Math.ceil(oldExactMatch.offset * 1.33)}H`]
-            }
-          }
+            after_effects: routeData.duration_curve.after_effects || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
+            },
+          },
         };
       }
 
-      // If no exact match in old data, look for substance with any route
-      const oldAnyRouteMatch = oldTimelineData.find(
-        (item) => item.drug.toLowerCase() === normalizedSubstance,
-      ) as OldTimelineData | undefined;
-      
-      if (oldAnyRouteMatch) {
-        // Convert old format to new format
+      // If specific route not found, try to find any route for this substance as fallback
+      const availableRoutes = Object.keys(
+        substanceData.drug_info.durations_parsed,
+      );
+      if (availableRoutes.length > 0) {
+        const firstRoute = availableRoutes[0];
+        const routeData = substanceData.drug_info.durations_parsed[firstRoute];
+
         return {
-          drug: oldAnyRouteMatch.drug,
-          method: oldAnyRouteMatch.method,
+          drug: substanceData.drug_info.drug_name,
+          method: firstRoute,
           duration_curve: {
-            reference: "Legacy data",
-            units: "hours",
-            total_duration: {
-              min: oldAnyRouteMatch.offset,
-              max: oldAnyRouteMatch.offset * 1.33,
-              iso: [`PT${oldAnyRouteMatch.offset}H`, `PT${Math.ceil(oldAnyRouteMatch.offset * 1.33)}H`]
+            reference: routeData.duration_curve.reference || "Unknown",
+            units: routeData.duration_curve.units || "hours",
+            total_duration: routeData.duration_curve.total_duration || {
+              min: 0,
+              max: 0,
+              iso: ["PT0H"],
             },
-            onset: {
+            onset: routeData.duration_curve.onset || {
               start: 0,
-              end: oldAnyRouteMatch.onset,
+              end: 0,
               iso_start: ["PT0H"],
-              iso_end: [`PT${oldAnyRouteMatch.onset}H`]
+              iso_end: ["PT0H"],
             },
-            peak: {
-              start: oldAnyRouteMatch.onset,
-              end: oldAnyRouteMatch.peak,
-              iso_start: [`PT${oldAnyRouteMatch.onset}H`],
-              iso_end: [`PT${oldAnyRouteMatch.peak}H`]
+            peak: routeData.duration_curve.peak || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
             },
-            offset: {
-              start: oldAnyRouteMatch.peak,
-              end: oldAnyRouteMatch.offset,
-              iso_start: [`PT${oldAnyRouteMatch.peak}H`],
-              iso_end: [`PT${oldAnyRouteMatch.offset}H`]
+            offset: routeData.duration_curve.offset || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
             },
-            after_effects: {
-              start: oldAnyRouteMatch.offset,
-              end: oldAnyRouteMatch.offset * 1.33,
-              iso_start: [`PT${oldAnyRouteMatch.offset}H`],
-              iso_end: [`PT${Math.ceil(oldAnyRouteMatch.offset * 1.33)}H`]
-            }
-          }
+            after_effects: routeData.duration_curve.after_effects || {
+              start: 0,
+              end: 0,
+              iso_start: ["PT0H"],
+              iso_end: ["PT0H"],
+            },
+          },
         };
       }
 
@@ -227,17 +234,20 @@ export function ExperienceTimeline({
           setActiveExperience(null);
           return;
         }
-        
+
         // Get the duration curve data
         const durationCurve = timelineDrug.duration_curve;
-        
+
         // Calculate total duration in milliseconds (using max duration plus a grace period)
         const totalDurationHours = durationCurve.total_duration.max * 1.33;
         const totalDurationMs = totalDurationHours * 3600000;
         const doseTime = new Date(specificDose.timestamp);
 
         // Skip if not in active timeframe and not in standalone mode
-        if (!standalone && now.getTime() - doseTime.getTime() > totalDurationMs) {
+        if (
+          !standalone &&
+          now.getTime() - doseTime.getTime() > totalDurationMs
+        ) {
           setActiveExperience(null);
           return;
         }
@@ -249,7 +259,7 @@ export function ExperienceTimeline({
         // Determine which phase we're in
         const phase = determinePhase(elapsedTimeHours, durationCurve);
         let timeRemaining = "";
-        
+
         // Calculate time remaining based on current phase
         if (phase === "onset") {
           timeRemaining = formatDistance(
@@ -272,7 +282,9 @@ export function ExperienceTimeline({
         } else if (phase === "after") {
           timeRemaining = formatDistance(
             now,
-            new Date(doseTime.getTime() + durationCurve.after_effects.end * 3600000),
+            new Date(
+              doseTime.getTime() + durationCurve.after_effects.end * 3600000,
+            ),
             { addSuffix: false },
           );
         } else {
@@ -302,7 +314,8 @@ export function ExperienceTimeline({
           if (!timelineDrug) return false;
 
           // Calculate total duration including grace period
-          const totalDurationHours = timelineDrug.duration_curve.total_duration.max * 1.33;
+          const totalDurationHours =
+            timelineDrug.duration_curve.total_duration.max * 1.33;
           const totalDurationMs = totalDurationHours * 3600000;
 
           // Check if dose is within active timeframe
@@ -332,7 +345,7 @@ export function ExperienceTimeline({
 
       // Get the duration curve data
       const durationCurve = timelineDrug.duration_curve;
-      
+
       // Calculate current progress
       const doseTime = new Date(mostRecentDose.timestamp);
       const elapsedTimeHours =
@@ -341,7 +354,7 @@ export function ExperienceTimeline({
       // Determine which phase we're in
       const phase = determinePhase(elapsedTimeHours, durationCurve);
       let timeRemaining = "";
-      
+
       // Calculate time remaining based on current phase
       if (phase === "onset") {
         timeRemaining = formatDistance(
@@ -364,7 +377,9 @@ export function ExperienceTimeline({
       } else if (phase === "after") {
         timeRemaining = formatDistance(
           now,
-          new Date(doseTime.getTime() + durationCurve.after_effects.end * 3600000),
+          new Date(
+            doseTime.getTime() + durationCurve.after_effects.end * 3600000,
+          ),
           { addSuffix: false },
         );
       } else {
@@ -395,13 +410,13 @@ export function ExperienceTimeline({
     ): Point[] => {
       const points: Point[] = [];
       const durationCurve = timeline.duration_curve;
-      
+
       // Safeguard against invalid duration curves
       if (!durationCurve) {
         console.warn("Invalid duration curve data", timeline);
         return [];
       }
-      
+
       // Get phase boundaries with safeguards against undefined values
       const onsetStart = durationCurve.onset?.start || 0;
       const onsetEnd = durationCurve.onset?.end || 0;
@@ -411,68 +426,68 @@ export function ExperienceTimeline({
       const offsetEnd = durationCurve.offset?.end || 0;
       const afterStart = durationCurve.after_effects?.start || 0;
       const afterEffectsEnd = durationCurve.after_effects?.end || 0;
-      
+
       // Safeguard: totalDurationHours must be positive
       if (totalDurationHours <= 0) {
         console.warn("Invalid total duration:", totalDurationHours);
         return [];
       }
-      
+
       // Use a cubic bezier function for smooth curves
       const cubicEaseIn = (t: number): number => {
         return t * t * t;
       };
-      
+
       const cubicEaseOut = (t: number): number => {
         return 1 - Math.pow(1 - t, 3);
       };
-      
+
       // Add critical points at transition boundaries for exact rendering
       // Use small offsets for precision, but avoid extremely small values that might cause issues
       const epsilon = Math.max(0.001, totalDurationHours * 0.0001); // Adaptive epsilon based on duration
       const criticalPoints = [
-        onsetStart, 
-        onsetEnd, 
-        Math.max(0, peakStart - epsilon), 
-        peakStart, 
+        onsetStart,
+        onsetEnd,
+        Math.max(0, peakStart - epsilon),
+        peakStart,
         peakStart + epsilon,
-        peakEnd, 
-        offsetStart, 
-        offsetEnd, 
-        afterStart, 
-        afterEffectsEnd
+        peakEnd,
+        offsetStart,
+        offsetEnd,
+        afterStart,
+        afterEffectsEnd,
       ];
-      
+
       // First add evenly spaced points
       for (let i = 0; i <= pointCount; i++) {
         const x = (i / pointCount) * totalDurationHours;
         points.push({ x, y: 0 }); // Will calculate y values later
       }
-      
+
       // Add exact boundary points for precision at transitions
-      criticalPoints.forEach(x => {
+      criticalPoints.forEach((x) => {
         if (x >= 0 && x <= totalDurationHours && !isNaN(x)) {
           points.push({ x, y: 0 });
         }
       });
-      
+
       // Sort points by x value and remove any duplicates
       points.sort((a, b) => a.x - b.x);
-      
+
       // Remove duplicates (points within very small distance of each other)
       const deduplicatedPoints: Point[] = [];
       let lastX = -Infinity;
-      
+
       for (const point of points) {
         if (point.x - lastX > epsilon / 10) {
           deduplicatedPoints.push(point);
           lastX = point.x;
         }
       }
-      
+
       // Use the deduplicated points
       const finalPoints = deduplicatedPoints;
-      
+
       // Calculate y values for each point
       for (let i = 0; i < finalPoints.length; i++) {
         const x = finalPoints[i].x;
@@ -490,12 +505,12 @@ export function ExperienceTimeline({
           // Calculate the fraction of the way we are through the gap
           const gapDuration = Math.max(0.001, peakStart - onsetEnd); // Safeguard against division by zero
           const gapProgress = (x - onsetEnd) / gapDuration;
-          
+
           // Linear progression from onset end (50) to just before peak (95)
           // This creates a straight line that rises continuously to the peak
-          y = 50 + (gapProgress * 45);
+          y = 50 + gapProgress * 45;
         } else if (x >= peakStart && x <= peakEnd) {
-          // Peak phase: immediate jump to maximum intensity 
+          // Peak phase: immediate jump to maximum intensity
           // No transition at all - instant rise to maximum at peak start
           y = 100;
         } else if (x > peakEnd && x < offsetStart) {
@@ -519,9 +534,9 @@ export function ExperienceTimeline({
           // After effects: straight line from 30 to 0
           const afterDuration = Math.max(0.001, afterEffectsEnd - afterStart); // Safeguard against division by zero
           const afterProgress = (x - afterStart) / afterDuration;
-          y = 30 - (afterProgress * 30);
+          y = 30 - afterProgress * 30;
         }
-        
+
         // Set the y value for this point
         finalPoints[i].y = y;
       }
@@ -618,10 +633,12 @@ export function ExperienceTimeline({
       ctx.lineTo(offsetStartX, height - paddingY);
       ctx.stroke();
       ctx.fillText("Offset", offsetStartX - 14, paddingY - 4);
-      
+
       // After effects line (start of after-effects phase)
       ctx.beginPath();
-      const afterEffectsStartX = getXPosition(durationCurve.after_effects.start);
+      const afterEffectsStartX = getXPosition(
+        durationCurve.after_effects.start,
+      );
       ctx.moveTo(afterEffectsStartX, paddingY);
       ctx.lineTo(afterEffectsStartX, height - paddingY);
       ctx.stroke();
@@ -631,33 +648,42 @@ export function ExperienceTimeline({
 
       // Use Dutch fields colors based on substance name
       const isDarkMode = document.documentElement.classList.contains("dark");
-      const substanceColor = getSubstanceColor(activeExperience.dose.substance, isDarkMode);
-      
+      const substanceColor = getSubstanceColor(
+        activeExperience.dose.substance,
+        isDarkMode,
+      );
+
       // Convert the rgba to a usable format for the curve
       const rgbaMatch = substanceColor.match(/rgba\((\d+),\s*(\d+),\s*(\d+)/);
-      let r = 139, g = 92, b = 246; // Default fallback
-      
+      let r = 139,
+        g = 92,
+        b = 246; // Default fallback
+
       if (rgbaMatch) {
         r = parseInt(rgbaMatch[1], 10);
         g = parseInt(rgbaMatch[2], 10);
         b = parseInt(rgbaMatch[3], 10);
       }
-      
+
       // Draw main curve (onset, peak, offset) and after-effects separately
-      
+
       // Draw main curve (onset through offset phases)
       ctx.beginPath();
       ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`; // Use the extracted RGB values
       ctx.lineWidth = 2;
       ctx.setLineDash([]); // Solid line for main curve
-      
+
       points.forEach((point, index) => {
         const x = paddingX + (point.x / totalDurationHours) * graphWidth;
         const y = height - paddingY - (point.y / 100) * graphHeight;
-        
+
         // Only include points up to after-effects start in this curve segment
         if (point.x <= durationCurve.after_effects.start) {
-          if (index === 0 || (index > 0 && points[index-1].x <= durationCurve.after_effects.start)) {
+          if (
+            index === 0 ||
+            (index > 0 &&
+              points[index - 1].x <= durationCurve.after_effects.start)
+          ) {
             if (index === 0) {
               ctx.moveTo(x, y);
             } else {
@@ -666,22 +692,22 @@ export function ExperienceTimeline({
           }
         }
       });
-      
+
       ctx.stroke();
-      
+
       // Draw after-effects as a dotted line
       ctx.beginPath();
       ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`; // Use the extracted RGB values
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 3]); // Dotted line pattern
-      
-      // Find the first point for after-effects 
+
+      // Find the first point for after-effects
       let isFirstAfterPoint = true;
-      
+
       points.forEach((point, index) => {
         const x = paddingX + (point.x / totalDurationHours) * graphWidth;
         const y = height - paddingY - (point.y / 100) * graphHeight;
-        
+
         // Only include after-effects points
         if (point.x >= durationCurve.after_effects.start) {
           if (isFirstAfterPoint) {
@@ -692,35 +718,35 @@ export function ExperienceTimeline({
           }
         }
       });
-      
+
       ctx.stroke();
       ctx.setLineDash([]); // Reset to solid line for other elements
 
       // Fill the area under the curve
       // We need to create a fill path that connects both line segments
       ctx.beginPath();
-      
+
       // Start at the beginning of the curve
-      let firstPoint = points.find(p => p.x === 0);
+      let firstPoint = points.find((p) => p.x === 0);
       let firstX = paddingX;
       let firstY = height - paddingY;
       if (firstPoint) {
         firstY = height - paddingY - (firstPoint.y / 100) * graphHeight;
       }
       ctx.moveTo(firstX, firstY);
-      
+
       // Add all points along the path
-      points.forEach(point => {
+      points.forEach((point) => {
         const x = paddingX + (point.x / totalDurationHours) * graphWidth;
         const y = height - paddingY - (point.y / 100) * graphHeight;
         ctx.lineTo(x, y);
       });
-      
+
       // Close the path back to the x-axis
       ctx.lineTo(paddingX + graphWidth, height - paddingY);
       ctx.lineTo(paddingX, height - paddingY);
       ctx.closePath();
-      
+
       // Fill with semi-transparent color
       ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.15)`; // Match curve color with low opacity
       ctx.fill();
@@ -750,7 +776,7 @@ export function ExperienceTimeline({
         // Draw position marker using a contrasting color from Dutch palette
         // For the marker, use a color different from the curve color
         const markerColor = "#ffa300"; // Dutch fields bright orange
-        
+
         ctx.beginPath();
         ctx.arc(currentX, currentY, 5, 0, Math.PI * 2);
         ctx.fillStyle = markerColor;
@@ -785,7 +811,10 @@ export function ExperienceTimeline({
     const rect = canvas.getBoundingClientRect();
 
     // Only resize if dimensions have changed (prevents unnecessary clearing)
-    if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+    if (
+      canvas.width !== rect.width * dpr ||
+      canvas.height !== rect.height * dpr
+    ) {
       // Set canvas size accounting for device pixel ratio
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
@@ -802,13 +831,13 @@ export function ExperienceTimeline({
     }
 
     const { timeline, elapsedTimeHours } = activeExperience;
-    
+
     // Safeguard against missing or invalid timeline data
     if (!timeline?.duration_curve?.after_effects?.end) {
       console.warn("Invalid timeline data in ExperienceTimeline:", timeline);
       return;
     }
-    
+
     const totalDurationHours = timeline.duration_curve.after_effects.end; // Use the end of after-effects as total duration
 
     // Generate curve points
@@ -829,50 +858,62 @@ export function ExperienceTimeline({
   useEffect(() => {
     // Debounce function to prevent excessive redraws during resize
     let resizeTimeout: number | null = null;
-    
+
     const handleResize = () => {
       // Clear any existing timeout
       if (resizeTimeout) {
         window.clearTimeout(resizeTimeout);
       }
-      
+
       // Set a new timeout to debounce the resize handler
       resizeTimeout = window.setTimeout(() => {
         if (activeExperience && canvasRef.current) {
           const canvas = canvasRef.current;
           const context = canvas.getContext("2d");
           if (!context) return;
-          
+
           // Get high-DPI canvas
           const dpr = window.devicePixelRatio || 1;
           const rect = canvas.getBoundingClientRect();
-          
+
           // Only resize if dimensions have actually changed
-          if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
+          if (
+            canvas.width !== rect.width * dpr ||
+            canvas.height !== rect.height * dpr
+          ) {
             // Set canvas size accounting for device pixel ratio
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
-            
+
             // Scale context to device
             context.scale(dpr, dpr);
-            
+
             // Set display size
             canvas.style.width = `${rect.width}px`;
             canvas.style.height = `${rect.height}px`;
-            
+
             // Safeguard against missing timeline data
-            if (!activeExperience.timeline?.duration_curve?.after_effects?.end) {
-              console.warn("Invalid timeline data on resize:", activeExperience.timeline);
+            if (
+              !activeExperience.timeline?.duration_curve?.after_effects?.end
+            ) {
+              console.warn(
+                "Invalid timeline data on resize:",
+                activeExperience.timeline,
+              );
               return;
             }
-            
+
             const { timeline, elapsedTimeHours } = activeExperience;
-            const totalDurationHours = timeline.duration_curve.after_effects.end;
-            
+            const totalDurationHours =
+              timeline.duration_curve.after_effects.end;
+
             try {
               // Generate curve points
-              const points = generateIntensityCurve(timeline, totalDurationHours);
-              
+              const points = generateIntensityCurve(
+                timeline,
+                totalDurationHours,
+              );
+
               // Draw the timeline
               drawTimelineCurve(
                 context,
@@ -889,9 +930,9 @@ export function ExperienceTimeline({
         }
       }, 100); // 100ms debounce
     };
-    
+
     window.addEventListener("resize", handleResize);
-    
+
     // Clean up event listener and any pending timeout
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -948,19 +989,26 @@ export function ExperienceTimeline({
       ref={inViewRef} // Attach the intersection observer ref
     >
       <Card>
-        <CardHeader 
-          className="rounded-t-lg px-3 py-1.5 flex flex-row items-center" 
-          style={{ 
+        <CardHeader
+          className="rounded-t-lg px-3 py-1.5 flex flex-row items-center"
+          style={{
             backgroundColor: substanceColor,
-            color: textColor
+            color: textColor,
           }}
         >
           <CardTitle className="flex-1 text-md flex items-center text-base">
             <span style={{ color: textColor }}>{dose.substance}</span>
-            <span className="text-xs font-normal ml-2" style={{ color: `${textColor}99` }}>
-              {dose.amount}{dose.unit} {dose.route}
+            <span
+              className="text-xs font-normal ml-2"
+              style={{ color: `${textColor}99` }}
+            >
+              {dose.amount}
+              {dose.unit} {dose.route}
             </span>
-            <Badge variant={getPhaseBadgeVariant()} className="ml-auto text-[10px] py-0 px-2">
+            <Badge
+              variant={getPhaseBadgeVariant()}
+              className="ml-auto text-[10px] py-0 px-2"
+            >
               {phase === "onset"
                 ? "Coming up"
                 : phase === "peak"

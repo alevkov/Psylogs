@@ -1,4 +1,6 @@
 import { z } from "zod";
+import articleData from "../lib/articles_refined.json";
+import { parseDrugName } from "./utils";
 
 export interface DoseTier {
   Light: string;
@@ -186,6 +188,43 @@ export function normalizeSubstanceName(name: string): string {
   } catch (error) {
     console.warn(`Error normalizing substance name ${name}:`, error);
     return '';
+  }
+}
+
+// Find substance ID from article data by name
+export function findSubstanceId(name: string): number | null {
+  try {
+    if (!name || name.length < 3) return null;
+    
+    const normalizedInput = normalizeSubstanceName(name);
+    if (!normalizedInput) return null;
+    
+    // Search in articleData for a matching substance
+    const match = articleData.find((article: any) => {
+      if (!article.drug_info?.drug_name) return false;
+      
+      const drugName = article.drug_info.drug_name;
+      const { mainName, alternatives } = parseDrugName(drugName);
+      
+      // Check main name
+      if (normalizeSubstanceName(mainName) === normalizedInput) {
+        return true;
+      }
+      
+      // Check alternatives
+      if (alternatives) {
+        return alternatives.split(', ').some((alt: string) => 
+          normalizeSubstanceName(alt) === normalizedInput
+        );
+      }
+      
+      return false;
+    });
+    
+    return match ? match.id : null;
+  } catch (error) {
+    console.warn('Error finding substance ID:', error);
+    return null;
   }
 }
 

@@ -27,6 +27,12 @@ export const ROUTE_ALIASES = Object.entries(ADMINISTRATION_METHODS).reduce(
 
 export const UNITS = ["mg", "g", "ug", "ml"] as const;
 
+export interface Note {
+  id?: string;
+  timestamp: string;
+  text: string;
+}
+
 export interface DoseEntry {
   id?: number;
   substance: string;
@@ -37,4 +43,13 @@ export interface DoseEntry {
   onsetAt?: string;
   peakAt?: string;
   offsetAt?: string;
+  notes?: Note[];
+}
+
+export interface GeneralNote {
+  id?: string;
+  timestamp: string;
+  text: string;
+  title: string;
+  experienceId?: string; // Optional reference to the source experience
 }

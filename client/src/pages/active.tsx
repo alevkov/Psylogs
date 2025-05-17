@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ExperienceTimeline } from "../components/ExperienceTimeline";
 import { MultiExperienceTimeline } from "../components/MultiExperienceTimeline";
 import { getAllDosesForStats } from "../lib/db";
 import { DoseEntry } from "../lib/constants";
-import timelineData from "../lib/dose_tiers_with_timelines.json";
+import articlesRefined from "../lib/articles_refined.json";
 import {
   Card,
   CardContent,
@@ -20,11 +20,18 @@ import { useInView } from "react-intersection-observer";
 interface TimelineData {
   drug: string;
   method: string;
-  dose_ranges: string;
-  onset: number;
-  peak: number;
-  offset: number;
+  onset: number; // In hours
+  peak: number; // In hours
+  offset: number; // In hours
 }
+
+/**
+ * Parses a drug name string into main name and alternative names
+ * Format: "Main Name (Alternative1, Alternative2, ...)"
+ *
+ * @param drugName The full drug name string
+ * @returns Object containing the main name and array of alternative names
+ */
 
 export default function ActivePage() {
   const isMobile = useIsMobile();
@@ -39,6 +46,93 @@ export default function ActivePage() {
     triggerOnce: false, // Keep observing for visibility changes
   });
 
+  const parseSubstanceNames = (
+    drugName: string,
+  ): {
+    mainName: string;
+    alternativeNames: string[];
+  } => {
+    // Default values
+    let mainName = drugName;
+    let alternativeNames: string[] = [];
+
+    // Check if there are parentheses in the name
+    const parenMatch = drugName.match(/^(.*?)\s*\((.*?)\)$/);
+
+    if (parenMatch) {
+      // Extract the main name (part before parentheses)
+      mainName = parenMatch[1].trim();
+
+      // Extract alternative names from inside parentheses
+      const altNamesString = parenMatch[2];
+      alternativeNames = altNamesString.split(", ").map((name) => name.trim());
+    }
+
+    return { mainName, alternativeNames };
+  };
+
+  // This can be either with useCallback or as a regular function, depending on your component's needs
+  const findTimelineData = useCallback(
+    (substance: string, route: string): TimelineData | null => {
+      const normalizedSubstance = substance.toLowerCase().trim();
+      const normalizedRoute = route.toLowerCase().trim();
+
+      // Find the substance in articles_refined data with name matching
+      const substanceData = articlesRefined.find((item) => {
+        if (!item.drug_info?.drug_name) return false;
+
+        const drugName = item.drug_info.drug_name;
+        const { mainName, alternativeNames } = parseSubstanceNames(drugName);
+
+        // Check if the entered substance matches main name (case-insensitive)
+        if (mainName.toLowerCase() === normalizedSubstance) return true;
+
+        // Check if the entered substance matches any alternative name (case-insensitive)
+        return alternativeNames.some(
+          (alt) => alt.toLowerCase() === normalizedSubstance,
+        );
+      });
+
+      if (!substanceData || !substanceData.drug_info?.durations_parsed) {
+        return null;
+      }
+
+      // Check if the specific route exists in the durations_parsed
+      if (substanceData.drug_info.durations_parsed[normalizedRoute]) {
+        const routeData =
+          substanceData.drug_info.durations_parsed[normalizedRoute];
+
+        // Extract timeline data from the new format
+        return {
+          drug: substanceData.drug_info.drug_name,
+          method: normalizedRoute,
+          onset: routeData.duration_curve?.onset?.start || 0,
+          peak: routeData.duration_curve?.peak?.start || 0,
+          offset: routeData.duration_curve?.offset?.end || 0, // Use end time for offset to get total duration
+        };
+      }
+
+      // If route not found, try to find any route for this substance as fallback
+      const availableRoutes = Object.keys(
+        substanceData.drug_info.durations_parsed,
+      );
+      if (availableRoutes.length > 0) {
+        const firstRoute = availableRoutes[0];
+        const routeData = substanceData.drug_info.durations_parsed[firstRoute];
+
+        return {
+          drug: substanceData.drug_info.drug_name,
+          method: firstRoute,
+          onset: routeData.duration_curve?.onset?.start || 0,
+          peak: routeData.duration_curve?.peak?.start || 0,
+          offset: routeData.duration_curve?.offset?.end || 0,
+        };
+      }
+
+      return null;
+    },
+    [],
+  );
   // Function to load active doses
   const loadActiveDoses = async () => {
     setLoading(true);
@@ -81,8 +175,6 @@ export default function ActivePage() {
     setLoading(false);
   };
 
-  // We no longer need a manual refresh function since we're using visibility detection
-
   // Load doses when first opening the page or when data changes
   useEffect(() => {
     loadActiveDoses();
@@ -95,31 +187,6 @@ export default function ActivePage() {
       loadActiveDoses();
     }
   }, [inView]); // This will trigger whenever inView changes from false to true
-
-  // Helper function to find timeline data for a substance and route
-  const findTimelineData = (
-    substance: string,
-    route: string,
-  ): TimelineData | null => {
-    const normalizedSubstance = substance.toLowerCase().trim();
-    const normalizedRoute = route.toLowerCase().trim();
-
-    // Look for an exact match
-    const exactMatch = timelineData.find(
-      (item) =>
-        item.drug.toLowerCase() === normalizedSubstance &&
-        item.method.toLowerCase() === normalizedRoute,
-    );
-
-    if (exactMatch) return exactMatch;
-
-    // If no exact match, look for substance with any route
-    const anyRouteMatch = timelineData.find(
-      (item) => item.drug.toLowerCase() === normalizedSubstance,
-    );
-
-    return anyRouteMatch || null;
-  };
 
   return (
     <motion.div
@@ -152,7 +219,6 @@ export default function ActivePage() {
             <MultiExperienceTimeline className="mb-4" />
 
             {/* Individual timelines shown below */}
-
             {activeDoses.map((dose) => (
               <ExperienceTimeline
                 key={dose.id}
